@@ -15,7 +15,7 @@ Office.onReady(() => {
 });
 
 function classifyEmail(emailText) {
-  fetch("https://sortify-backend.onrender.com/classify", {
+  fetch("https://sortify-y7ru.onrender.com/classify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: emailText })
