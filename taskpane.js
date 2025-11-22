@@ -1,15 +1,12 @@
 Office.onReady(() => {
-  // Hide sideload message and show app body
   document.getElementById("sideload-msg").style.display = "none";
   document.getElementById("app-body").style.display = "block";
 
-  // Read the email body
   const item = Office.context.mailbox.item;
   if (item) {
     item.body.getAsync(Office.CoercionType.Text, (result) => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
-        const emailBody = result.value;
-        classifyEmail(emailBody);
+        classifyEmail(result.value);
       } else {
         document.getElementById("result").innerText = "Failed to read email body.";
       }
@@ -24,9 +21,7 @@ function classifyEmail(emailText) {
     body: JSON.stringify({ text: emailText })
   })
   .then(res => res.json())
-  .then(data => {
-    showResult(data);
-  })
+  .then(data => showResult(data))
   .catch(err => {
     document.getElementById("result").innerText = "Error contacting backend.";
     console.error(err);
