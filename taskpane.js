@@ -6,6 +6,7 @@ Office.onReady(() => {
   if (item) {
     item.body.getAsync(Office.CoercionType.Text, (result) => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
+        console.log("Email body:", result.value); // Confirm email content
         classifyEmail(result.value);
       } else {
         document.getElementById("result").innerText = "Failed to read email body.";
@@ -15,6 +16,8 @@ Office.onReady(() => {
 });
 
 function classifyEmail(emailText) {
+  document.getElementById("result").innerText = "Classifying email...";
+
   fetch("https://sortify-y7ru.onrender.com/classify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -24,11 +27,16 @@ function classifyEmail(emailText) {
   .then(data => showResult(data))
   .catch(err => {
     document.getElementById("result").innerText = "Error contacting backend.";
-    console.error(err);
+    console.error("Fetch error:", err);
   });
 }
 
 function showResult(data) {
+  if (!data || !data.score || !data.label) {
+    document.getElementById("result").innerText = "Invalid response from backend.";
+    return;
+  }
+
   document.getElementById("result").innerHTML =
     `<h3>Phishing Score: ${data.score}</h3><p>${data.label}</p>`;
 }
