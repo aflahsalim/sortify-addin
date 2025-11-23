@@ -20,6 +20,9 @@
 </head>
 
 <body class="ms-font-m ms-welcome ms-Fabric">
+    <!-- sideload message placeholder -->
+    <div id="sideload-msg" style="display: none;"></div>
+
     <header class="ms-welcome__header ms-bgColor-neutralLighter">
         <img width="90" height="90" src="assets/logo-filled.png" alt="Sortify" title="Sortify" />
         <h1 class="ms-font-su">Sortify Email Classifier</h1>
@@ -28,6 +31,8 @@
     <main id="app-body" class="ms-welcome__main">
         <h2 class="ms-font-xl">Email Classification Result</h2>
         <div id="result" class="ms-font-l">Loading email content...</div>
+        <!-- Optional: manual test button -->
+        <button onclick="testBackend()">Test Backend</button>
     </main>
 </body>
 
