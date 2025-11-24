@@ -33,9 +33,30 @@ html, body {
   gap: 8px;
 }
 
+.logo-container {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 8px 12px;
+  box-shadow: 0 0 8px rgba(0, 255, 148, 0.2);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.logo-container:hover {
+  box-shadow: 0 0 12px rgba(0, 255, 148, 0.4);
+  transform: scale(1.02);
+}
+
 .logo-img {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 255, 148, 0.3);
 }
 
 .app-title {
