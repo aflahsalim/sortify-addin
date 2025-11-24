@@ -87,7 +87,7 @@ function setStatus(message) {
   const badge = document.querySelector('.status-badge');
   if (badge) {
     badge.innerText = message;
-    badge.classList.remove("status-safe", "status-spam");
+    badge.classList.remove("status-safe", "status-spam", "status-loading");
     badge.classList.add("status-loading");
   }
 }
