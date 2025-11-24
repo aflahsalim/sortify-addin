@@ -1,5 +1,3 @@
-/* global Office, document */
-
 Office.onReady(() => {
   const item = Office.context.mailbox.item;
   if (!item) {
@@ -64,3 +62,14 @@ function showResult(data) {
   circle.style.strokeDashoffset = offset;
 
   // Update score text
+  document.querySelector('.score-value').innerText = `${scorePercent}%`;
+
+  // Update badge
+  const badge = document.querySelector('.status-badge');
+  if (isSpam) {
+    badge.innerText = "SPAM DETECTED";
+    badge.classList.add("status-spam");
+    badge.classList.remove("status-safe", "status-loading");
+  } else {
+    badge.innerText = "SAFE";
+    badge.classList.add("status-safe");
