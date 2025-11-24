@@ -4,7 +4,6 @@
   --text-secondary: #a0a0a0;
   --accent-color: #00FF94;
   --danger-color: #FF4B4B;
-  --warning-color: #FFB020;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --font-family: 'Inter', sans-serif;
@@ -111,37 +110,8 @@ html, body {
   border: 1px solid rgba(0, 255, 148, 0.3);
 }
 
-.analysis-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
+.status-loading {
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
-  text-transform: uppercase;
-}
-
-.details-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.detail-item {
-  display: flex;
-  gap: 12px;
-}
-
-.detail-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.detail-value {
-  font-size: 14px;
-  font-weight: 500;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
 }
