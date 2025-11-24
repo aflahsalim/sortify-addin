@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sortify Task Pane Add-in</title>
+  <title>Sortify Add-in</title>
 
   <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <link href="taskpane.css" rel="stylesheet" type="text/css" />
@@ -16,7 +16,6 @@
     <header class="app-header">
       <div class="logo-container">
         <img src="Logo.jpeg" alt="Sortify Logo" class="logo-img" id="app-logo">
-        <h1 class="app-title">Sortify Email Classifier</h1>
       </div>
     </header>
 
@@ -58,6 +57,13 @@
           <div class="detail-content">
             <span class="detail-label">Content Check</span>
             <span class="detail-value" id="keywords">--</span>
+          </div>
+        </li>
+        <li class="detail-item">
+          <span class="detail-icon">📎</span>
+          <div class="detail-content">
+            <span class="detail-label">Attachment Found</span>
+            <span class="detail-value" id="attachment">--</span>
           </div>
         </li>
       </ul>
