@@ -1,3 +1,5 @@
+/* global Office, document */
+
 Office.onReady(() => {
   const item = Office.context.mailbox.item;
   if (!item) {
@@ -66,10 +68,26 @@ function showResult(data) {
 
   // Update badge
   const badge = document.querySelector('.status-badge');
+  badge.classList.remove("status-safe", "status-spam", "status-loading");
   if (isSpam) {
     badge.innerText = "SPAM DETECTED";
     badge.classList.add("status-spam");
-    badge.classList.remove("status-safe", "status-loading");
   } else {
     badge.innerText = "SAFE";
     badge.classList.add("status-safe");
+  }
+
+  // Update analysis details
+  document.getElementById("sender").innerText = data.sender || "--";
+  document.getElementById("links").innerText = data.links || "--";
+  document.getElementById("keywords").innerText = data.content || "--";
+}
+
+function setStatus(message) {
+  const badge = document.querySelector('.status-badge');
+  if (badge) {
+    badge.innerText = message;
+    badge.classList.remove("status-safe", "status-spam");
+    badge.classList.add("status-loading");
+  }
+}
