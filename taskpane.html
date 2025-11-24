@@ -13,16 +13,15 @@
 
 <body>
   <div class="container">
-    <header class="app-header">
-      <!-- Logo removed as requested -->
-    </header>
-
     <section class="score-section glass-card">
       <div class="dial-gauge">
         <svg viewBox="0 0 200 100" class="gauge-svg">
+          <!-- Background arc -->
           <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#333" stroke-width="20" />
+          <!-- Risk arc -->
           <path id="risk-arc" d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#00FF94" stroke-width="20" stroke-linecap="round" />
-          <line id="needle" x1="100" y1="100" x2="100" y2="20" stroke="#ccc" stroke-width="4" transform="rotate(0 100 100)" />
+          <!-- Needle -->
+          <line id="needle" x1="100" y1="100" x2="100" y2="20" stroke="#ccc" stroke-width="4" transform="rotate(-90 100 100)" />
         </svg>
         <div class="risk-label">
           <div class="score-label">Phishing Risk</div>
