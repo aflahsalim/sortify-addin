@@ -2,9 +2,10 @@
   --bg-color: #121212;
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
-  --accent-color: #00FF94;
-  --danger-color: #FF4B4B;
-  --warning-color: #FFD700;
+  --accent-color: #00FF94;   /* ham / safe */
+  --danger-color: #FF4B4B;   /* phishing */
+  --warning-color: #FFA500;  /* spam */
+  --support-color: #00BFFF;  /* support */
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --font-family: 'Inter', sans-serif;
@@ -82,22 +83,29 @@ html, body {
   min-width: 120px;
 }
 
-.status-spam {
+/* === Badge Styles for Each Label === */
+.status-spam { /* phishing emails */
   background: rgba(255, 75, 75, 0.15);
   color: var(--danger-color);
   border: 1px solid rgba(255, 75, 75, 0.3);
 }
 
-.status-safe {
+.status-medium { /* spam emails */
+  background: rgba(255, 165, 0, 0.15);
+  color: var(--warning-color);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.status-support { /* support emails */
+  background: rgba(0, 191, 255, 0.15);
+  color: var(--support-color);
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.status-safe { /* ham / safe emails */
   background: rgba(0, 255, 148, 0.15);
   color: var(--accent-color);
   border: 1px solid rgba(0, 255, 148, 0.3);
-}
-
-.status-medium {
-  background: rgba(255, 215, 0, 0.15);
-  color: var(--warning-color);
-  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .status-loading {
