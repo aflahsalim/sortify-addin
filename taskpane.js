@@ -15,7 +15,6 @@ Office.onReady(() => {
         Array.isArray(item.attachments) && item.attachments.length > 0;
 
       if (!emailText.trim()) {
-        // Even if body text is empty, we still show attachment info in the UI
         setStatus("Email has no readable body text.");
         showResult({
           score: 0,
@@ -51,7 +50,6 @@ function classifyEmail(emailText, hasAttachment) {
       return res.json();
     })
     .then((data) => {
-      // Ensure attachment shows even if backend doesn’t return it
       if (typeof data.attachment === "undefined") {
         data.attachment = hasAttachment ? "Yes" : "No";
       }
@@ -70,31 +68,48 @@ function showResult(data) {
   }
 
   const rawScore = Number(data.score) || 0;
-  const label = String(data.label).toLowerCase();
-  const isSpam = label === "phishing" || label === "spam";
-  const scorePercent = isSpam ? Math.round(rawScore * 100) : Math.round((1 - rawScore) * 100);
+  let riskLevel = "Low";
+  let gaugeColor = "#00FF94"; // green
+  let needleAngle = -90; // left
 
-  // Animate gauge safely
-  const circle = document.querySelector('.progress-ring__circle');
-  if (circle && circle.r && circle.r.baseVal) {
-    const radius = circle.r.baseVal.value;
-    const circumference = radius * 2 * Math.PI;
-    circle.style.strokeDasharray = `${circumference} ${circumference}`;
-    const offset = circumference - (scorePercent / 100) * circumference;
-    circle.style.strokeDashoffset = offset;
+  if (rawScore >= 0.7) {
+    riskLevel = "High";
+    gaugeColor = "#FF4B4B";
+    needleAngle = 90;
+  } else if (rawScore >= 0.4) {
+    riskLevel = "Medium";
+    gaugeColor = "#FFD700";
+    needleAngle = 0;
   }
 
-  // Update score text
+  // Animate needle
+  const needle = document.getElementById("needle");
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
+  }
+
+  // Update arc color
+  const arc = document.getElementById("risk-arc");
+  if (arc) {
+    arc.setAttribute("stroke", gaugeColor);
+  }
+
+  // Update risk label
   const scoreEl = document.querySelector('.score-value');
-  if (scoreEl) scoreEl.innerText = `${scorePercent}%`;
+  if (scoreEl) {
+    scoreEl.innerText = riskLevel;
+  }
 
   // Update badge
   const badge = document.querySelector('.status-badge');
   if (badge) {
-    badge.classList.remove("status-safe", "status-spam", "status-loading");
-    if (isSpam) {
-      badge.innerText = "SPAM DETECTED";
+    badge.classList.remove("status-safe", "status-spam", "status-loading", "status-medium");
+    if (riskLevel === "High") {
+      badge.innerText = "RISK DETECTED";
       badge.classList.add("status-spam");
+    } else if (riskLevel === "Medium") {
+      badge.innerText = "POTENTIAL RISK";
+      badge.classList.add("status-medium");
     } else {
       badge.innerText = "SAFE";
       badge.classList.add("status-safe");
@@ -102,22 +117,17 @@ function showResult(data) {
   }
 
   // Update analysis details
-  const senderEl = document.getElementById("sender");
-  const linksEl = document.getElementById("links");
-  const contentEl = document.getElementById("keywords");
-  const attachmentEl = document.getElementById("attachment");
-
-  if (senderEl) senderEl.innerText = data.sender || "--";
-  if (linksEl) linksEl.innerText = data.links || "--";
-  if (contentEl) contentEl.innerText = data.content || "--";
-  if (attachmentEl) attachmentEl.innerText = data.attachment || "--";
+  document.getElementById("sender").innerText = data.sender || "--";
+  document.getElementById("links").innerText = data.links || "--";
+  document.getElementById("keywords").innerText = data.content || "--";
+  document.getElementById("attachment").innerText = data.attachment || "--";
 }
 
 function setStatus(message) {
   const badge = document.querySelector('.status-badge');
   if (badge) {
     badge.innerText = message;
-    badge.classList.remove("status-safe", "status-spam", "status-loading");
+    badge.classList.remove("status-safe", "status-spam", "status-medium");
     badge.classList.add("status-loading");
   }
 }
