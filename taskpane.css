@@ -20,26 +20,26 @@ html, body {
 }
 
 .container {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .app-header {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .logo-img {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 }
 
 .app-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
 }
 
@@ -48,11 +48,11 @@ html, body {
   backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .gauge-container {
@@ -62,6 +62,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 8px;
 }
 
 .progress-ring__circle {
@@ -76,10 +77,11 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 2px;
 }
 
 .score-value {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
 }
 
@@ -96,6 +98,7 @@ html, body {
   padding: 6px 12px;
   border-radius: 20px;
   text-transform: uppercase;
+  margin-top: 4px;
 }
 
 .status-spam {
@@ -114,4 +117,54 @@ html, body {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
   border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.analysis-section {
+  padding-top: 8px;
+}
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+@media (max-width: 400px) {
+  .app-title {
+    font-size: 15px;
+  }
+  .score-value {
+    font-size: 22px;
+  }
+  .detail-label, .detail-value {
+    font-size: 12px;
+  }
 }
