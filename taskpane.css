@@ -27,10 +27,6 @@ html, body {
   gap: 20px;
 }
 
-.app-header {
-  display: none;
-}
-
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(10px);
@@ -47,7 +43,8 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 16px; /* spacing between gauge and label */
+  margin-top: 4px;
 }
 
 .gauge-svg {
@@ -57,6 +54,9 @@ html, body {
 
 .risk-label {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .score-label {
