@@ -14,10 +14,11 @@ Office.onReady(() => {
       const hasAttachment =
         Array.isArray(item.attachments) && item.attachments.length > 0;
 
+      // Even if body text is empty, still show attachment info and a Low risk by default
       if (!emailText.trim()) {
         setStatus("Email has no readable body text.");
         showResult({
-          score: 0,
+          score: 0, // treat empty as low risk
           label: "safe",
           sender: "--",
           links: "--",
@@ -40,7 +41,10 @@ function classifyEmail(emailText, hasAttachment) {
   fetch("https://sortify-y7ru.onrender.com/classify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: emailText, attachment: hasAttachment ? "Yes" : "No" })
+    body: JSON.stringify({
+      text: emailText,
+      attachment: hasAttachment ? "Yes" : "No",
+    }),
   })
     .then(async (res) => {
       if (!res.ok) {
@@ -50,12 +54,13 @@ function classifyEmail(emailText, hasAttachment) {
       return res.json();
     })
     .then((data) => {
+      // Ensure attachment is present in UI even if backend doesn't return it
       if (typeof data.attachment === "undefined") {
         data.attachment = hasAttachment ? "Yes" : "No";
       }
       showResult(data);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error("Fetch error:", err);
       setStatus("Error contacting backend.");
     });
@@ -67,22 +72,23 @@ function showResult(data) {
     return;
   }
 
+  // Determine risk level from score (0–1). No percentages shown.
   const rawScore = Number(data.score) || 0;
   let riskLevel = "Low";
   let gaugeColor = "#00FF94"; // green
-  let needleAngle = -90; // left
+  let needleAngle = -90; // left (Low risk)
 
   if (rawScore >= 0.7) {
     riskLevel = "High";
-    gaugeColor = "#FF4B4B";
-    needleAngle = 90;
+    gaugeColor = "#FF4B4B"; // red
+    needleAngle = 90; // right
   } else if (rawScore >= 0.4) {
     riskLevel = "Medium";
-    gaugeColor = "#FFD700";
-    needleAngle = 0;
+    gaugeColor = "#FFD700"; // yellow
+    needleAngle = 0; // center
   }
 
-  // Animate needle
+  // Update needle rotation
   const needle = document.getElementById("needle");
   if (needle) {
     needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
@@ -94,14 +100,14 @@ function showResult(data) {
     arc.setAttribute("stroke", gaugeColor);
   }
 
-  // Update risk label
-  const scoreEl = document.querySelector('.score-value');
+  // Update risk label (no percentage, just Low/Medium/High)
+  const scoreEl = document.querySelector(".score-value");
   if (scoreEl) {
     scoreEl.innerText = riskLevel;
   }
 
-  // Update badge
-  const badge = document.querySelector('.status-badge');
+  // Update badge to match risk
+  const badge = document.querySelector(".status-badge");
   if (badge) {
     badge.classList.remove("status-safe", "status-spam", "status-loading", "status-medium");
     if (riskLevel === "High") {
@@ -117,14 +123,19 @@ function showResult(data) {
   }
 
   // Update analysis details
-  document.getElementById("sender").innerText = data.sender || "--";
-  document.getElementById("links").innerText = data.links || "--";
-  document.getElementById("keywords").innerText = data.content || "--";
-  document.getElementById("attachment").innerText = data.attachment || "--";
+  const senderEl = document.getElementById("sender");
+  const linksEl = document.getElementById("links");
+  const contentEl = document.getElementById("keywords");
+  const attachmentEl = document.getElementById("attachment");
+
+  if (senderEl) senderEl.innerText = data.sender || "--";
+  if (linksEl) linksEl.innerText = data.links || "--";
+  if (contentEl) contentEl.innerText = data.content || "--";
+  if (attachmentEl) attachmentEl.innerText = data.attachment || "--";
 }
 
 function setStatus(message) {
-  const badge = document.querySelector('.status-badge');
+  const badge = document.querySelector(".status-badge");
   if (badge) {
     badge.innerText = message;
     badge.classList.remove("status-safe", "status-spam", "status-medium");
