@@ -1,77 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sortify Task Pane Add-in</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sortify Task Pane Add-in</title>
 
-    <!-- Office JavaScript API -->
-    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <!-- Office JavaScript API -->
+  <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
-    <!-- Custom styles -->
-    <link href="taskpane.css" rel="stylesheet" type="text/css" />
-    <!-- Your logic -->
-    <script src="taskpane.js"></script>
+  <!-- Custom styles -->
+  <link href="taskpane.css" rel="stylesheet" type="text/css" />
+  <script src="taskpane.js"></script>
 </head>
 
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="logo-container">
-                <img src="assets/logo-filled.png" alt="Sortify Logo" class="logo-img" id="app-logo">
-                <h1 class="app-title">Sortify Email Classifier</h1>
-            </div>
-        </header>
+  <div class="container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-container">
+        <img src="assets/logo-filled.png" alt="Sortify Logo" class="logo-img" id="app-logo">
+        <h1 class="app-title">Sortify Email Classifier</h1>
+      </div>
+    </header>
 
-        <!-- Score Section -->
-        <section class="score-section glass-card">
-            <div class="gauge-container">
-                <svg class="progress-ring" width="120" height="120">
-                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                    <circle class="progress-ring__circle" stroke="#00FF94" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                </svg>
-                <div class="score-text">
-                    <span class="score-value">--%</span>
-                    <span class="score-label">Phishing Score</span>
-                </div>
-            </div>
-            <div class="classification-result">
-                <span class="status-badge">Loading...</span>
-            </div>
-        </section>
+    <!-- Score Section -->
+    <section class="score-section glass-card">
+      <div class="gauge-container">
+        <svg class="progress-ring" width="120" height="120">
+          <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+          <circle class="progress-ring__circle" stroke="#00FF94" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+        </svg>
+        <div class="score-text">
+          <span class="score-value">--%</span>
+          <span class="score-label">Phishing Score</span>
+        </div>
+      </div>
+      <div class="classification-result">
+        <span class="status-badge">Loading...</span>
+      </div>
+    </section>
 
-        <!-- Analysis Details -->
-        <section class="analysis-section">
-            <h2 class="section-title">Analysis Details</h2>
-            <ul class="details-list">
-                <li class="detail-item">
-                    <span class="detail-icon">⚠️</span>
-                    <div class="detail-content">
-                        <span class="detail-label">Sender Reputation</span>
-                        <span class="detail-value" id="sender">--</span>
-                    </div>
-                </li>
-                <li class="detail-item">
-                    <span class="detail-icon">🔗</span>
-                    <div class="detail-content">
-                        <span class="detail-label">Link Analysis</span>
-                        <span class="detail-value" id="links">--</span>
-                    </div>
-                </li>
-                <li class="detail-item">
-                    <span class="detail-icon">📝</span>
-                    <div class="detail-content">
-                        <span class="detail-label">Content Check</span>
-                        <span class="detail-value" id="keywords">--</span>
-                    </div>
-                </li>
-            </ul>
-        </section>
+    <!-- Analysis Details -->
+    <section class="analysis-section">
+      <h2 class="section-title">Analysis Details</h2>
+      <ul class="details-list">
+        <li class="detail-item">
+          <span class="detail-icon">⚠️</span>
+          <div class="detail-content">
+            <span class="detail-label">Sender Reputation</span>
+            <span class="detail-value" id="sender">--</span>
+          </div>
+        </li>
+        <li class="detail-item">
+          <span class="detail-icon">🔗</span>
+          <div class="detail-content">
+            <span class="detail-label">Link Analysis</span>
+            <span class="detail-value" id="links">--</span>
+          </div>
+        </li>
+        <li class="detail-item">
+          <span class="detail-icon">📝</span>
+          <div class="detail-content">
+            <span class="detail-label">Content Check</span>
+            <span class="detail-value" id="keywords">--</span>
+          </div>
+        </li>
+      </ul>
+    </section>
 
-        <!-- Optional: manual test button -->
-        <button onclick="testBackend()">Test Backend</button>
-    </div>
+    <!-- Optional: manual test button -->
+    <button onclick="testBackend()">Test Backend</button>
+  </div>
 </body>
 </html>
