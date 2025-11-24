@@ -67,6 +67,8 @@
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
                 <Label resid="GroupLabel"/>
+
+                <!-- ✅ Button 1: Open Sortify taskpane -->
                 <Control xsi:type="Button" id="msgReadOpenPaneButton">
                   <Label resid="TaskpaneButton.Label"/>
                   <Supertip>
@@ -82,11 +84,13 @@
                     <SourceLocation resid="Taskpane.Url"/>
                   </Action>
                 </Control>
-                <Control xsi:type="Button" id="ActionButton">
-                  <Label resid="ActionButton.Label"/>
+
+                <!-- ✅ Button 2: Send email to support team -->
+                <Control xsi:type="Button" id="SendToSupportButton">
+                  <Label resid="SupportButton.Label"/>
                   <Supertip>
-                    <Title resid="ActionButton.Label"/>
-                    <Description resid="ActionButton.Tooltip"/>
+                    <Title resid="SupportButton.Label"/>
+                    <Description resid="SupportButton.Tooltip"/>
                   </Supertip>
                   <Icon>
                     <bt:Image size="16" resid="Icon.16x16"/>
@@ -94,9 +98,10 @@
                     <bt:Image size="80" resid="Icon.80x80"/>
                   </Icon>
                   <Action xsi:type="ExecuteFunction">
-                    <FunctionName>action</FunctionName>
+                    <FunctionName>sendToSupport</FunctionName>
                   </Action>
                 </Control>
+
               </Group>
             </OfficeTab>
           </ExtensionPoint>
@@ -117,11 +122,11 @@
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Sortify Add-in"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Classify Email"/>
-        <bt:String id="ActionButton.Label" DefaultValue="Run Classification"/>
+        <bt:String id="SupportButton.Label" DefaultValue="Send to Support"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Analyze this email for phishing risk."/>
-        <bt:String id="ActionButton.Tooltip" DefaultValue="Send the email body to Sortify backend."/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open Sortify and classify this email for phishing risk."/>
+        <bt:String id="SupportButton.Tooltip" DefaultValue="Forward this email to our support team for manual verification."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
