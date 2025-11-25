@@ -56,7 +56,6 @@
       </bt:Sets>
     </Requirements>
 
-    <!-- ✅ Enable taskpane pinning -->
     <SupportsPinning>true</SupportsPinning>
 
     <Hosts>
@@ -68,11 +67,11 @@
               <Group id="msgReadGroup">
                 <Label resid="GroupLabel"/>
 
-                <!-- ✅ Button 1: Open Sortify taskpane -->
+                <!-- Button 1: Open Sortify taskpane -->
                 <Control xsi:type="Button" id="msgReadOpenPaneButton">
                   <Label resid="TaskpaneButton.Label"/>
                   <Supertip>
-                    <Title resid="TaskpaneButton.Label"/>
+                    <Title resid="TaskpaneButton.Title"/>
                     <Description resid="TaskpaneButton.Tooltip"/>
                   </Supertip>
                   <Icon>
@@ -85,11 +84,11 @@
                   </Action>
                 </Control>
 
-                <!-- ✅ Button 2: Send email to support team -->
+                <!-- Button 2: Send email to support team -->
                 <Control xsi:type="Button" id="SendToSupportButton">
                   <Label resid="SupportButton.Label"/>
                   <Supertip>
-                    <Title resid="SupportButton.Label"/>
+                    <Title resid="SupportButton.Title"/>
                     <Description resid="SupportButton.Tooltip"/>
                   </Supertip>
                   <Icon>
@@ -122,7 +121,9 @@
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Sortify Add-in"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Classify Email"/>
+        <bt:String id="TaskpaneButton.Title" DefaultValue="Classify Email"/>
         <bt:String id="SupportButton.Label" DefaultValue="Send to Support"/>
+        <bt:String id="SupportButton.Title" DefaultValue="Send to Support"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open Sortify and classify this email for phishing risk."/>
