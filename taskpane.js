@@ -79,7 +79,7 @@ function showResult(data) {
   } else if (label === "spam") {
     gaugeColor = "#FFA500";
     needleAngle = 45;
-    badgeText = "SPAM";
+    badgeText = "RISK";
   } else if (label === "support") {
     gaugeColor = "#00BFFF";
     needleAngle = 0;
@@ -103,7 +103,7 @@ function showResult(data) {
   // Update risk label
   const scoreEl = document.querySelector(".score-value");
   if (scoreEl) {
-    scoreEl.innerText = label.toUpperCase();
+    scoreEl.innerText = label === "spam" ? "RISK" : label.toUpperCase();
   }
 
   // Update badge
