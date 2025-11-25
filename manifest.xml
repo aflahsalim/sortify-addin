@@ -5,14 +5,14 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
-  <Id>c5f819cd-8f58-4a03-bfd8-188e1b5f7ead</Id>
+  <Id>55b2e773-6fa3-4578-8156-2babeb638887</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>Sortify</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Sortify"/>
   <Description DefaultValue="Classify emails for phishing risk."/>
-  <IconUrl DefaultValue="https://sortify-addin.onrender.com/assets/icon-64.png"/>
-  <HighResolutionIconUrl DefaultValue="https://sortify-addin.onrender.com/assets/icon-128.png"/>
+  <IconUrl DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+  <HighResolutionIconUrl DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
   <SupportUrl DefaultValue="https://sortify-addin.onrender.com/help"/>
 
   <AppDomains>
@@ -67,7 +67,6 @@
               <Group id="msgReadGroup">
                 <Label resid="GroupLabel"/>
 
-                <!-- Button 1: Open Sortify taskpane -->
                 <Control xsi:type="Button" id="msgReadOpenPaneButton">
                   <Label resid="TaskpaneButton.Label"/>
                   <Supertip>
@@ -84,7 +83,6 @@
                   </Action>
                 </Control>
 
-                <!-- Button 2: Send email to support team -->
                 <Control xsi:type="Button" id="SendToSupportButton">
                   <Label resid="SupportButton.Label"/>
                   <Supertip>
@@ -110,9 +108,9 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://sortify-addin.onrender.com/assets/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://sortify-addin.onrender.com/assets/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://sortify-addin.onrender.com/assets/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://sortify-addin.onrender.com/commands.html"/>
