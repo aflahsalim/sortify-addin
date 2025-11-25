@@ -56,11 +56,10 @@
       </bt:Sets>
     </Requirements>
 
-    <SupportsPinning>true</SupportsPinning>
-
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
+          <SupportsPinning>true</SupportsPinning>
           <FunctionFile resid="Commands.Url"/>
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
