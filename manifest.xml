@@ -47,8 +47,8 @@
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
 
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1"
-                    xsi:type="VersionOverridesV1_1">
+  <!-- Corrected VersionOverrides with namespace prefix -->
+  <mailappor:VersionOverrides xsi:type="VersionOverridesV1_1">
 
     <Requirements>
       <bt:Sets DefaultMinVersion="1.3">
@@ -127,5 +127,5 @@
         <bt:String id="SupportButton.Tooltip" DefaultValue="Forward this email to our support team for manual verification."/>
       </bt:LongStrings>
     </Resources>
-  </VersionOverrides>
+  </mailappor:VersionOverrides>
 </OfficeApp>
