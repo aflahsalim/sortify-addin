@@ -47,7 +47,6 @@
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
 
-  <!-- Stable VersionOverrides V1_0 -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
                     xsi:type="VersionOverridesV1_0">
 
@@ -66,6 +65,7 @@
               <Group id="msgReadGroup">
                 <Label resid="GroupLabel"/>
 
+                <!-- Classify Email Button -->
                 <Control xsi:type="Button" id="msgReadOpenPaneButton">
                   <Label resid="TaskpaneButton.Label"/>
                   <Supertip>
@@ -73,15 +73,16 @@
                     <Description resid="TaskpaneButton.Tooltip"/>
                   </Supertip>
                   <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
+                    <bt:Image size="16" resid="ClassifyIcon.16x16"/>
+                    <bt:Image size="32" resid="ClassifyIcon.32x32"/>
+                    <bt:Image size="80" resid="ClassifyIcon.80x80"/>
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
                     <SourceLocation resid="Taskpane.Url"/>
                   </Action>
                 </Control>
 
+                <!-- Send to Support Button -->
                 <Control xsi:type="Button" id="SendToSupportButton">
                   <Label resid="SupportButton.Label"/>
                   <Supertip>
@@ -89,9 +90,9 @@
                     <Description resid="SupportButton.Tooltip"/>
                   </Supertip>
                   <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
+                    <bt:Image size="16" resid="SupportIcon.16x16"/>
+                    <bt:Image size="32" resid="SupportIcon.32x32"/>
+                    <bt:Image size="80" resid="SupportIcon.80x80"/>
                   </Icon>
                   <Action xsi:type="ExecuteFunction">
                     <FunctionName>sendToSupport</FunctionName>
@@ -107,14 +108,22 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+        <!-- Classify Email Icon -->
+        <bt:Image id="ClassifyIcon.16x16" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+        <bt:Image id="ClassifyIcon.32x32" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+        <bt:Image id="ClassifyIcon.80x80" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Logo.png"/>
+
+        <!-- Send to Support Icon -->
+        <bt:Image id="SupportIcon.16x16" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Support%20Logo.png"/>
+        <bt:Image id="SupportIcon.32x32" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Support%20Logo.png"/>
+        <bt:Image id="SupportIcon.80x80" DefaultValue="https://raw.githubusercontent.com/aflahsalim/sortify-addin/main/Support%20Logo.png"/>
       </bt:Images>
+
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://sortify-addin.onrender.com/commands.html"/>
         <bt:Url id="Taskpane.Url" DefaultValue="https://sortify-addin.onrender.com/taskpane.html"/>
       </bt:Urls>
+
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Sortify Add-in"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Classify Email"/>
@@ -122,6 +131,7 @@
         <bt:String id="SupportButton.Label" DefaultValue="Send to Support"/>
         <bt:String id="SupportButton.Title" DefaultValue="Send to Support"/>
       </bt:ShortStrings>
+
       <bt:LongStrings>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open Sortify and classify this email for phishing risk."/>
         <bt:String id="SupportButton.Tooltip" DefaultValue="Forward this email to our support team for manual verification."/>
