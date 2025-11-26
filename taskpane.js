@@ -19,6 +19,8 @@ Office.onReady(() => {
         showResult({
           score: 0,
           label: "ham",
+          display: "Ham (Safe)",
+          color: "green",
           sender: "--",
           links: "--",
           content: "No content",
@@ -68,27 +70,19 @@ function showResult(data) {
   const label = data.label || "unknown";
   const score = Number(data.score) || 0;
 
-  let gaugeColor = "#00FF94"; // default green
-  let needleAngle = -90;
-  let badgeText = "SAFE";
+  // Use backend-provided display + color
+  const gaugeColor = data.color || "#00FF94";
+  const badgeText = data.display || label.toUpperCase();
 
-  if (label === "phishing") {
-    gaugeColor = "#FF4B4B";
-    needleAngle = 90;
-    badgeText = "PHISHING DETECTED";
-  } else if (label === "spam") {
-    gaugeColor = "#FFA500";
-    needleAngle = 45;
-    badgeText = "RISK";
-  } else if (label === "support") {
-    gaugeColor = "#00BFFF";
-    needleAngle = 0;
-    badgeText = "SUPPORT EMAIL";
-  } else if (label === "ham") {
-    gaugeColor = "#00FF94";
-    needleAngle = -90;
-    badgeText = "SAFE";
-  }
+  // Map needle angle by label
+  const angleMap = {
+    phishing: 90,
+    spam: 45,
+    support: 0,
+    ham: -90,
+    unknown: -90,
+  };
+  const needleAngle = angleMap[label] ?? -90;
 
   // Update gauge
   const needle = document.getElementById("needle");
@@ -103,7 +97,7 @@ function showResult(data) {
   // Update risk label
   const scoreEl = document.querySelector(".score-value");
   if (scoreEl) {
-    scoreEl.innerText = label === "spam" ? "RISK" : label.toUpperCase();
+    scoreEl.innerText = badgeText;
   }
 
   // Update badge
@@ -115,6 +109,12 @@ function showResult(data) {
     else if (label === "spam") badge.classList.add("status-medium");
     else if (label === "support") badge.classList.add("status-support");
     else badge.classList.add("status-safe");
+  }
+
+  // Show confidence score
+  const confidenceEl = document.getElementById("confidence");
+  if (confidenceEl) {
+    confidenceEl.innerText = `Confidence: ${score}`;
   }
 
   // Update analysis details
