@@ -2,6 +2,7 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides"
            xsi:type="MailApp">
 
   <Id>55b2e773-6fa3-4578-8156-2babeb638887</Id>
@@ -46,9 +47,9 @@
 
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
 
-  <!-- Corrected VersionOverrides with inline namespace -->
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1"
-                    xsi:type="VersionOverridesV1_1">
+  <!-- Stable VersionOverrides V1_0 -->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
+                    xsi:type="VersionOverridesV1_0">
 
     <Requirements>
       <bt:Sets DefaultMinVersion="1.3">
@@ -59,7 +60,6 @@
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
-          <SupportsPinning>true</SupportsPinning>
           <FunctionFile resid="Commands.Url"/>
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
