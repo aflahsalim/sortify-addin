@@ -1,12 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <meta charset="UTF-8" />
+  <title>Send to Sortify Support</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2a2a3d);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 32px;
+      width: 360px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      text-align: center;
+    }
+
+    .modal h2 {
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .modal p {
+      font-size: 14px;
+      margin-bottom: 24px;
+      color: #ccc;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .buttons a, .buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .buttons a {
+      background: #00c2ff;
+      color: #000;
+    }
+
+    .buttons a:hover {
+      background: #00a0d1;
+    }
+
+    .buttons button {
+      background: #444;
+      color: #fff;
+    }
+
+    .buttons button:hover {
+      background: #666;
+    }
+  </style>
 </head>
 <body>
-  <h3>Send to Sortify Support?</h3>
-  <p>Do you want to forward this email to the Sortify support team for analysis?</p>
-  <button onclick="Office.context.ui.messageParent('yes')">Yes</button>
-  <button onclick="Office.context.ui.messageParent('no')">No</button>
+  <div class="modal">
+    <h2>Send to Sortify Support?</h2>
+    <p>Do you want to forward this email to the Sortify support team for analysis?</p>
+    <div class="buttons">
+      <a id="sendBtn" href="#">Yes</a>
+      <button onclick="window.close()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Replace with actual email content if available
+    const subject = encodeURIComponent("Phishing Review Request");
+    const body = encodeURIComponent(
+      `Hi Sortify Support,\n\nPlease review the following email for phishing risk:\n\n---\nFrom: [sender]\nSubject: [subject]\n\n[Email content here]\n\nThanks,\nSortify User`
+    );
+
+    sendBtn.href = `mailto:support@sortify.com?subject=${subject}&body=${body}`;
+  </script>
 </body>
 </html>
