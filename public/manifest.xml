@@ -6,7 +6,7 @@
            xsi:type="MailApp">
 
   <Id>55b2e773-6fa3-4578-8156-2babeb638887</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.1</Version>
   <ProviderName>Sortify</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Sortify"/>
@@ -108,15 +108,15 @@
 
     <Resources>
       <bt:Images>
-        <!-- Classify Email Icon -->
-        <bt:Image id="ClassifyIcon.16x16" DefaultValue="https://sortify-addin.onrender.com/Logo.png"/>
-        <bt:Image id="ClassifyIcon.32x32" DefaultValue="https://sortify-addin.onrender.com/Logo.png"/>
-        <bt:Image id="ClassifyIcon.80x80" DefaultValue="https://sortify-addin.onrender.com/Logo.png"/>
+        <!-- Classify Email Icons -->
+        <bt:Image id="ClassifyIcon.16x16" DefaultValue="https://sortify-addin.onrender.com/icon/Logo%2016.png"/>
+        <bt:Image id="ClassifyIcon.32x32" DefaultValue="https://sortify-addin.onrender.com/icon/Logo%2032.png"/>
+        <bt:Image id="ClassifyIcon.80x80" DefaultValue="https://sortify-addin.onrender.com/icon/Logo%2080.png"/>
 
-        <!-- Send to Support Icon -->
-        <bt:Image id="SupportIcon.16x16" DefaultValue="https://sortify-addin.onrender.com/Support%20Logo.png"/>
-        <bt:Image id="SupportIcon.32x32" DefaultValue="https://sortify-addin.onrender.com/Support%20Logo.png"/>
-        <bt:Image id="SupportIcon.80x80" DefaultValue="https://sortify-addin.onrender.com/Support%20Logo.png"/>
+        <!-- Send to Support Icons -->
+        <bt:Image id="SupportIcon.16x16" DefaultValue="https://sortify-addin.onrender.com/icon/Support%20Logo%2016.png"/>
+        <bt:Image id="SupportIcon.32x32" DefaultValue="https://sortify-addin.onrender.com/icon/Support%20Logo%2032.png"/>
+        <bt:Image id="SupportIcon.80x80" DefaultValue="https://sortify-addin.onrender.com/icon/Support%20Logo%2080.png"/>
       </bt:Images>
 
       <bt:Urls>
