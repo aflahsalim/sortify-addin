@@ -41,31 +41,30 @@
       justify-content: space-between;
     }
 
-    .buttons a, .buttons button {
+    .buttons button {
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      text-decoration: none;
       transition: background 0.3s;
     }
 
-    .buttons a {
+    .buttons button:first-child {
       background: #00c2ff;
       color: #000;
     }
 
-    .buttons a:hover {
+    .buttons button:first-child:hover {
       background: #00a0d1;
     }
 
-    .buttons button {
+    .buttons button:last-child {
       background: #444;
       color: #fff;
     }
 
-    .buttons button:hover {
+    .buttons button:last-child:hover {
       background: #666;
     }
   </style>
@@ -75,21 +74,9 @@
     <h2>Send to Sortify Support?</h2>
     <p>Do you want to forward this email to the Sortify support team for analysis?</p>
     <div class="buttons">
-      <a id="sendBtn" href="#">Yes</a>
-      <button onclick="window.close()">Cancel</button>
+      <button onclick="Office.context.ui.messageParent('yes')">Yes</button>
+      <button onclick="Office.context.ui.messageParent('no')">Cancel</button>
     </div>
   </div>
-
-  <script>
-    const sendBtn = document.getElementById('sendBtn');
-
-    // Replace with actual email content if available
-    const subject = encodeURIComponent("Phishing Review Request");
-    const body = encodeURIComponent(
-      `Hi Sortify Support,\n\nPlease review the following email for phishing risk:\n\n---\nFrom: [sender]\nSubject: [subject]\n\n[Email content here]\n\nThanks,\nSortify User`
-    );
-
-    sendBtn.href = `mailto:support@sortify.com?subject=${subject}&body=${body}`;
-  </script>
 </body>
 </html>
