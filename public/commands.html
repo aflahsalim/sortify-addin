@@ -2,33 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Sortify Add-in</title>
+  <title>Sortify Commands</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <script src="taskpane.js"></script>
-  <link rel="stylesheet" href="taskpane.css" />
+  <script src="commands.js"></script>
 </head>
 <body>
-  <div id="classification-result">
-    <!-- Status badge -->
-    <div class="status-badge status-loading">Loading...</div>
-
-    <!-- Gauge -->
-    <div id="classification-gauge">
-      <svg width="200" height="200">
-        <line id="needle" x1="100" y1="100" x2="100" y2="20" stroke="black" />
-        <path id="risk-arc" d="M20,100 A80,80 0 0,1 180,100" stroke="green" fill="none" />
-      </svg>
-    </div>
-
-    <!-- Risk label + confidence -->
-    <div class="score-value">Awaiting classification...</div>
-    <div id="confidence"></div>
-
-    <!-- Analysis details -->
-    <div><strong>Sender:</strong> <span id="sender">--</span></div>
-    <div><strong>Links:</strong> <span id="links">--</span></div>
-    <div><strong>Keywords:</strong> <span id="keywords">--</span></div>
-    <div><strong>Attachment:</strong> <span id="attachment">--</span></div>
-  </div>
 </body>
 </html>
