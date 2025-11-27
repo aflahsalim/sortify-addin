@@ -10,18 +10,12 @@ function sendToSupport(event) {
     return;
   }
 
-  // Get subject
   const subject = item.subject || "Email for Support Review";
 
-  // Get body text
-  item.body.getAsync(Office.CoercionType.Text, (result) => {
+  item.body.getAsync(Office.CoercionType.Html, (result) => {
     if (result.status === Office.AsyncResultStatus.Succeeded) {
       const emailBody = result.value || "";
 
-      // Collect attachments if any
-      const attachments = item.attachments || [];
-
-      // Show confirmation popup
       Office.context.ui.displayDialogAsync(
         "https://sortify-addin.onrender.com/confirm.html",
         { height: 30, width: 40, displayInIframe: true },
@@ -30,7 +24,6 @@ function sendToSupport(event) {
 
           dialog.addEventHandler(Office.EventType.DialogMessageReceived, (message) => {
             if (typeof message.message === "string" && message.message.toLowerCase() === "yes") {
-              // Build new email form
               Office.context.mailbox.displayNewMessageForm({
                 toRecipients: ["aflahsalim.bca@outlook.com"],
                 subject: "Sortify Verification Request: " + subject,
@@ -40,15 +33,11 @@ function sendToSupport(event) {
                   <hr>
                   <p><strong>Original Subject:</strong> ${subject}</p>
                   <p><strong>Original Body:</strong></p>
-                  <pre>${emailBody}</pre>
+                  ${emailBody}
                   <hr>
+                  <p><em>If needed, please forward the original email as an attachment for full context.</em></p>
                   <p>Thanks,<br/>Sortify User</p>
-                `,
-                attachments: attachments.map(att => ({
-                  type: "file",
-                  name: att.name,
-                  url: att.url
-                }))
+                `
               });
             }
             dialog.close();
