@@ -35,7 +35,6 @@ function sendToSupport(event) {
                   <p><strong>Original Body:</strong></p>
                   ${emailBody}
                   <hr>
-                  <p><em>If needed, please forward the original email as an attachment for full context.</em></p>
                   <p>Thanks,<br/>Sortify User</p>
                 `
               });
