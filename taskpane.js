@@ -108,14 +108,16 @@ function showResult(data) {
     g1 = palette.gray; g2 = "#8a8f94"; g3 = "#b0b5bb";
   }
 
+  // Update gradient stops
   ["grad-stop-1", "grad-stop-2", "grad-stop-3"].forEach((id, i) => {
     const stop = document.getElementById(id);
     if (stop) stop.setAttribute("stop-color", [g1, g2, g3][i]);
   });
 
-  // Animate arc fill
+  // Force gradient refresh (in case it's not rendering)
   const arc = document.getElementById("risk-arc");
   if (arc) {
+    arc.setAttribute("stroke", "url(#arcGradient)");
     const maxArc = 283;
     arc.style.strokeDashoffset = maxArc - (score * maxArc);
   }
