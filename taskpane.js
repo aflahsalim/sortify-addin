@@ -1,6 +1,9 @@
 /* global Office, document */
 
 Office.onReady(() => {
+  // Ensure initial arc/needle state ready for animation
+  initializeGaugeVisuals();
+
   const item = Office.context?.mailbox?.item;
   if (!item) {
     setStatus("No email item available.");
@@ -54,10 +57,23 @@ function classifyEmail(emailText, hasAttachment) {
       return res.json();
     })
     .then((data) => {
-      if (typeof data.attachment === "undefined") {
-        data.attachment = hasAttachment ? "Yes" : "No";
-      }
-      showResult(data);
+      // Normalize/guard fields
+      const label = (data.label || "unknown").toLowerCase();
+      const score =
+        typeof data.score === "number"
+          ? clamp01(data.score)
+          : clamp01(parseFloat(data.score));
+
+      showResult({
+        ...data,
+        label,
+        score,
+        attachment:
+          typeof data.attachment === "string"
+            ? data.attachment
+            : data.attachment ? "Yes" : "No",
+      });
+
       setStatus("Classification complete.");
     })
     .catch((err) => {
@@ -67,18 +83,18 @@ function classifyEmail(emailText, hasAttachment) {
 }
 
 function showResult(data) {
-  const label = (data.label || "unknown").toLowerCase();
+  const label = data.label || "unknown";
   const score = clamp01(Number(data.score) || 0);
   const percent = `${Math.round(score * 100)}%`;
 
-  // 1) Animate needle reliably
+  // 1) Animate needle (set transition and rotate)
   const needle = document.getElementById("needle");
   if (needle) {
     needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
     needle.setAttribute("transform", `rotate(${angleFor(label)} 100 100)`);
   }
 
-  // 2) Set gradient colors (and solid color fallback)
+  // 2) Gradient colors per classification
   const palette = {
     green: "#28a745",
     orange: "#fd7e14",
@@ -86,7 +102,6 @@ function showResult(data) {
     blue: "#007bff",
     gray: "#6c757d",
   };
-
   const { g1, g2, g3, fallback } = gradientFor(label, palette);
 
   const s1 = document.getElementById("grad-stop-1");
@@ -98,32 +113,32 @@ function showResult(data) {
     s3.setAttribute("stop-color", g3);
   }
 
-  // 3) Animate arc fill (force start at 283, then animate)
+  // 3) Animate arc fill (force start -> animate to target)
   const arc = document.getElementById("risk-arc");
   if (arc) {
-    // Ensure gradient stroke is applied
+    // Ensure gradient stroke applied
     arc.setAttribute("stroke", "url(#arcGradient)");
 
-    // If gradient fails, set solid fallback color briefly
+    // Fallback color if gradient not found
     if (!(s1 && s2 && s3)) {
       arc.setAttribute("stroke", fallback);
     }
 
-    // Force initial state for animation
     const maxArc = 283;
+    // Reset to initial hidden state without transition
     arc.style.transition = "none";
-    arc.style.strokeDashoffset = `${maxArc}`; // start hidden
+    arc.style.strokeDashoffset = `${maxArc}`;
 
-    // Next frame: apply transition and target offset
+    // Next frame: apply transitions and target value
     requestAnimationFrame(() => {
       arc.style.transition =
         "stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.5s ease-in-out";
-      const target = maxArc - (score * maxArc);
+      const target = maxArc - score * maxArc;
       arc.style.strokeDashoffset = `${target}`;
     });
   }
 
-  // 4) Labels
+  // 4) Update labels
   setText("score-label", data.display || label.toUpperCase());
   setText("score-value", percent);
 
@@ -137,11 +152,26 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // 5) Analysis details
+  // 5) Update analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
   setText("attachment", data.attachment || "--");
+}
+
+// Ensure initial visual state so first update animates
+function initializeGaugeVisuals() {
+  const arc = document.getElementById("risk-arc");
+  const needle = document.getElementById("needle");
+  if (arc) {
+    arc.setAttribute("stroke", "url(#arcGradient)");
+    arc.style.transition = "none";
+    arc.style.strokeDashoffset = "283";
+  }
+  if (needle) {
+    needle.style.transition = "none";
+    needle.setAttribute("transform", "rotate(-90 100 100)");
+  }
 }
 
 // Helpers
