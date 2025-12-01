@@ -4,7 +4,7 @@ Office.onReady(() => {
   waitForGauge(() => {
     initializeGaugeVisuals();
 
-    // 🔧 Self-check mode: force a visible arc immediately
+    // 🔧 Self-check mode: force a visible arc and label immediately
     showResult({
       score: 0.75,
       label: "spam",
@@ -44,7 +44,8 @@ function initializeGaugeVisuals() {
     arc.setAttribute("stroke-dasharray", arcLength);
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
-    arc.setAttribute("stroke", "url(#arcGradient)"); // gradient reference
+    // Keep attribute form for gradients (more reliable than CSS style)
+    arc.setAttribute("stroke", "url(#arcGradient)");
   }
 
   if (needle) {
@@ -137,7 +138,6 @@ function showResult(data) {
 
   setText("score-label", data.display || labelDisplay(label));
 
-  // Removed score-value completely (no % shown)
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
