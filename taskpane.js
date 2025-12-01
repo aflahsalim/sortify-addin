@@ -67,28 +67,18 @@ function classifyEmail(emailText, hasAttachment) {
 }
 
 function showResult(data) {
-  const label = data.label || "unknown";
-  const score = Math.max(0, Math.min(Number(data.score) || 0, 1));
+  const label = (data.label || "unknown").toLowerCase();
+  const score = clamp01(Number(data.score) || 0);
   const percent = `${Math.round(score * 100)}%`;
 
-  // Fixed needle angles by category
-  const angleMap = {
-    ham: -90,
-    support: -45,
-    spam: 45,
-    phishing: 90,
-    unknown: -90,
-  };
-  const needleAngle = angleMap[label] ?? -90;
-
+  // 1) Animate needle reliably
   const needle = document.getElementById("needle");
   if (needle) {
-    // Trigger animation by updating transform
-    needle.style.transition = "transform 0.9s ease-in-out";
-    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
+    needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
+    needle.setAttribute("transform", `rotate(${angleFor(label)} 100 100)`);
   }
 
-  // Gradient color stops per category
+  // 2) Set gradient colors (and solid color fallback)
   const palette = {
     green: "#28a745",
     orange: "#fd7e14",
@@ -97,20 +87,8 @@ function showResult(data) {
     gray: "#6c757d",
   };
 
-  let g1 = palette.green, g2 = palette.orange, g3 = palette.red;
-  if (label === "ham") {
-    g1 = palette.green; g2 = "#4bd07e"; g3 = "#7be0a3";
-  } else if (label === "support") {
-    g1 = palette.blue; g2 = "#2fa8ff"; g3 = palette.green;
-  } else if (label === "spam") {
-    g1 = palette.orange; g2 = "#ff9a3b"; g3 = palette.red;
-  } else if (label === "phishing") {
-    g1 = "#ff6b6b"; g2 = palette.red; g3 = "#b00020";
-  } else {
-    g1 = palette.gray; g2 = "#8a8f94"; g3 = "#b0b5bb";
-  }
+  const { g1, g2, g3, fallback } = gradientFor(label, palette);
 
-  // Update gradient stops
   const s1 = document.getElementById("grad-stop-1");
   const s2 = document.getElementById("grad-stop-2");
   const s3 = document.getElementById("grad-stop-3");
@@ -120,20 +98,35 @@ function showResult(data) {
     s3.setAttribute("stop-color", g3);
   }
 
-  // Animate arc fill
+  // 3) Animate arc fill (force start at 283, then animate)
   const arc = document.getElementById("risk-arc");
   if (arc) {
+    // Ensure gradient stroke is applied
     arc.setAttribute("stroke", "url(#arcGradient)");
-    arc.style.transition = "stroke-dashoffset 0.9s ease-in-out";
+
+    // If gradient fails, set solid fallback color briefly
+    if (!(s1 && s2 && s3)) {
+      arc.setAttribute("stroke", fallback);
+    }
+
+    // Force initial state for animation
     const maxArc = 283;
-    arc.style.strokeDashoffset = maxArc - (score * maxArc);
+    arc.style.transition = "none";
+    arc.style.strokeDashoffset = `${maxArc}`; // start hidden
+
+    // Next frame: apply transition and target offset
+    requestAnimationFrame(() => {
+      arc.style.transition =
+        "stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.5s ease-in-out";
+      const target = maxArc - (score * maxArc);
+      arc.style.strokeDashoffset = `${target}`;
+    });
   }
 
-  // Update gauge label and percentage
+  // 4) Labels
   setText("score-label", data.display || label.toUpperCase());
   setText("score-value", percent);
 
-  // Update status badge
   const badge = document.getElementById("status");
   if (badge) {
     badge.textContent = data.display || label.toUpperCase();
@@ -144,11 +137,44 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // Update analysis details
+  // 5) Analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
   setText("attachment", data.attachment || "--");
+}
+
+// Helpers
+
+function angleFor(label) {
+  const angleMap = {
+    ham: -90,
+    support: -45,
+    spam: 45,
+    phishing: 90,
+    unknown: -90,
+  };
+  return angleMap[label] ?? -90;
+}
+
+function gradientFor(label, palette) {
+  switch (label) {
+    case "ham":
+      return { g1: palette.green, g2: "#4bd07e", g3: "#7be0a3", fallback: palette.green };
+    case "support":
+      return { g1: palette.blue, g2: "#2fa8ff", g3: palette.green, fallback: palette.blue };
+    case "spam":
+      return { g1: palette.orange, g2: "#ff9a3b", g3: palette.red, fallback: palette.orange };
+    case "phishing":
+      return { g1: "#ff6b6b", g2: palette.red, g3: "#b00020", fallback: palette.red };
+    default:
+      return { g1: palette.gray, g2: "#8a8f94", g3: "#b0b5bb", fallback: palette.gray };
+  }
+}
+
+function clamp01(x) {
+  if (Number.isNaN(x)) return 0;
+  return Math.max(0, Math.min(x, 1));
 }
 
 function setStatus(message) {
