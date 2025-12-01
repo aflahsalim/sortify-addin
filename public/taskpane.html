@@ -18,18 +18,23 @@
         <svg viewBox="0 0 200 100" class="gauge-svg">
           <!-- Background arc -->
           <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#333" stroke-width="20" />
-          <!-- Risk arc -->
-          <path id="risk-arc" d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#00FF94" stroke-width="20" stroke-linecap="round" />
+          <!-- Risk arc (animated stroke) -->
+          <path id="risk-arc" d="M10,100 A90,90 0 0,1 190,100"
+                fill="none" stroke="#00FF94" stroke-width="20"
+                stroke-linecap="round" stroke-dasharray="283"
+                stroke-dashoffset="283" />
           <!-- Needle -->
-          <line id="needle" x1="100" y1="100" x2="100" y2="20" stroke="#ccc" stroke-width="4" transform="rotate(-90 100 100)" />
+          <line id="needle" x1="100" y1="100" x2="100" y2="20"
+                stroke="#ccc" stroke-width="4"
+                transform="rotate(-90 100 100)" />
         </svg>
         <div class="risk-label">
-          <div class="score-label">Phishing Risk</div>
-          <div class="score-value">--</div>
+          <div class="score-label" id="score-label">--</div>
+          <div class="score-value" id="score-value">--%</div>
         </div>
       </div>
       <div class="classification-result">
-        <span class="status-badge status-loading">Loading...</span>
+        <span class="status-badge status-loading" id="status">Loading...</span>
       </div>
     </section>
 
