@@ -42,15 +42,12 @@ function initializeGaugeVisuals() {
   if (arc) {
     const arcLength = arc.getTotalLength();
     arc.setAttribute("stroke-dasharray", arcLength);
-    arc.style.transition = "none";
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
     arc.setAttribute("stroke", "url(#arcGradient)");
-    arc.style.stroke = "url(#arcGradient)";
   }
 
   if (needle) {
-    needle.style.transition = "none";
     needle.setAttribute("transform", "rotate(-90 100 100)");
   }
 }
@@ -129,25 +126,19 @@ function showResult(data) {
   const needle = document.getElementById("needle");
   if (needle) {
     const angle = -90 + score * 180;
-    needle.style.transition = "none";
-    needle.setAttribute("transform", "rotate(-90 100 100)");
-    void needle.offsetWidth;
-    needle.style.transition = "transform 0.9s ease-in-out";
     needle.setAttribute("transform", `rotate(${angle} 100 100)`);
   }
 
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
-    arc.style.transition = "none";
-    arc.style.strokeDashoffset = arcLength;
-    void arc.offsetWidth;
-    arc.style.transition = "stroke-dashoffset 0.9s ease-in-out";
     arc.style.strokeDashoffset = arcLength - score * arcLength;
   }
 
   setText("score-label", data.display || labelDisplay(label));
-  setText("score-value", ""); // ✅ clears the unwanted percentage
+
+  // Removed score-value completely since you don’t want %
+  // setText("score-value", "");
 
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
