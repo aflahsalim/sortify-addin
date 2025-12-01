@@ -17,7 +17,8 @@
       <div class="dial-gauge">
         <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
           <defs>
-            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <!-- Gradient runs bottom → top for visible spread -->
+            <linearGradient id="arcGradient" x1="0%" y1="100%" x2="0%" y2="0%">
               <stop id="grad-stop-1" offset="0%" stop-color="#28a745"/>
               <stop id="grad-stop-2" offset="50%" stop-color="#fd7e14"/>
               <stop id="grad-stop-3" offset="100%" stop-color="#dc3545"/>
