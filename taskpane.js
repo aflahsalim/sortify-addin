@@ -5,7 +5,6 @@ Office.onReady(() => {
     initializeGaugeVisuals();
 
     // 🔧 Self-check mode: force a visible arc immediately
-    console.log("🔧 Self-check: forcing arc to 75% fill");
     showResult({
       score: 0.75,
       label: "spam",
@@ -101,10 +100,8 @@ function classifyEmail(emailText, hasAttachment) {
       return res.json();
     })
     .then((data) => {
-      console.log("✅ Backend response:", data);
       const label = String(data.label || "unknown").toLowerCase();
       const score = resolveScore(data.score);
-      console.log("✅ Resolved score:", score);
 
       showResult({
         ...data,
@@ -129,8 +126,6 @@ function showResult(data) {
   const label = data.label || "unknown";
   const score = resolveScore(data.score);
 
-  console.log("🔧 showResult called with:", { label, score });
-
   const needle = document.getElementById("needle");
   if (needle) {
     const angle = -90 + score * 180;
@@ -152,6 +147,7 @@ function showResult(data) {
   }
 
   setText("score-label", data.display || labelDisplay(label));
+  setText("score-value", ""); // ✅ clears the unwanted percentage
 
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
