@@ -17,27 +17,34 @@
       <div class="dial-gauge">
         <svg id="gauge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
           <defs>
-            <linearGradient id="sortifyArcGradient" gradientUnits="userSpaceOnUse" x1="10" y1="100" x2="190" y2="100">
-              <stop id="sortify-grad-1" offset="0%" stop-color="#28a745"/>
-              <stop id="sortify-grad-2" offset="50%" stop-color="#fd7e14"/>
-              <stop id="sortify-grad-3" offset="100%" stop-color="#dc3545"/>
+            <linearGradient id="arcGradient" gradientUnits="userSpaceOnUse" x1="10" y1="100" x2="190" y2="100">
+              <stop offset="0%" stop-color="#28a745"/>
+              <stop offset="50%" stop-color="#fd7e14"/>
+              <stop offset="100%" stop-color="#dc3545"/>
             </linearGradient>
           </defs>
 
-          <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#2a2a2a" stroke-width="20" />
+          <!-- Background arc -->
+          <path d="M10,100 A90,90 0 0,1 190,100"
+                fill="none"
+                stroke="#2a2a2a"
+                stroke-width="20" />
 
+          <!-- Risk arc -->
           <path id="risk-arc"
                 d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
-                stroke="url(#sortifyArcGradient)"
+                stroke="url(#arcGradient)"
                 stroke-width="20"
                 stroke-linecap="round"
                 stroke-dasharray="283"
                 stroke-dashoffset="283" />
 
+          <!-- Needle -->
           <line id="needle"
                 x1="100" y1="100" x2="100" y2="20"
-                stroke="#e6e6e6" stroke-width="4"
+                stroke="#e6e6e6"
+                stroke-width="4"
                 transform="rotate(-90 100 100)" />
         </svg>
 
