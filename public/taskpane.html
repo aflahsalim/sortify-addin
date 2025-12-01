@@ -8,33 +8,53 @@
 
   <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <link href="taskpane.css" rel="stylesheet" type="text/css" />
-  <script src="taskpane.js"></script>
+  <script defer src="taskpane.js"></script>
 </head>
 
 <body>
   <div class="container">
     <section class="score-section glass-card">
       <div class="dial-gauge">
-        <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg">
+        <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
+          <defs>
+            <!-- Gradient used for arc color transitions -->
+            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop id="grad-stop-1" offset="0%" stop-color="#28a745"/>  <!-- green -->
+              <stop id="grad-stop-2" offset="50%" stop-color="#fd7e14"/> <!-- orange -->
+              <stop id="grad-stop-3" offset="100%" stop-color="#dc3545"/> <!-- red -->
+            </linearGradient>
+          </defs>
+
           <!-- Background arc -->
-          <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#333" stroke-width="20" />
-          <!-- Risk arc -->
-          <path id="risk-arc" d="M10,100 A90,90 0 0,1 190,100"
-                fill="none" stroke="#00FF94" stroke-width="20"
-                stroke-linecap="round" stroke-dasharray="283"
+          <path d="M10,100 A90,90 0 0,1 190,100"
+                fill="none" stroke="#2a2a2a" stroke-width="20" />
+
+          <!-- Risk arc (animated) -->
+          <path id="risk-arc"
+                d="M10,100 A90,90 0 0,1 190,100"
+                fill="none"
+                stroke="url(#arcGradient)"
+                stroke-width="20"
+                stroke-linecap="round"
+                stroke-dasharray="283"
                 stroke-dashoffset="283" />
+
           <!-- Needle -->
-          <line id="needle" x1="100" y1="100" x2="100" y2="20"
-                stroke="#ccc" stroke-width="4"
+          <line id="needle"
+                x1="100" y1="100" x2="100" y2="20"
+                stroke="#e6e6e6" stroke-width="4"
                 transform="rotate(-90 100 100)" />
         </svg>
+
         <div class="risk-label">
           <div class="score-label" id="score-label">--</div>
           <div class="score-value" id="score-value">--%</div>
         </div>
       </div>
+
       <div class="classification-result">
         <span class="status-badge status-loading" id="status">Loading...</span>
+        <div id="confidence" class="confidence-text">Confidence: --%</div>
       </div>
     </section>
 
