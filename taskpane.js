@@ -7,7 +7,7 @@ Office.onReady(() => {
     // 🔧 Self-check mode: force a visible arc immediately
     console.log("🔧 Self-check: forcing arc to 75% fill");
     showResult({
-      score: 0.75, // hardcoded test value
+      score: 0.75,
       label: "spam",
       display: "Spam (Test)",
       sender: "debug@example.com",
@@ -16,7 +16,7 @@ Office.onReady(() => {
       attachment: "No"
     });
 
-    // After test, continue with real classification
+    // Then run real classification
     startClassification();
   });
 });
@@ -33,6 +33,24 @@ function waitForGauge(callback) {
     callback();
   } else {
     requestAnimationFrame(() => waitForGauge(callback));
+  }
+}
+
+function initializeGaugeVisuals() {
+  const arc = document.getElementById("risk-arc");
+  const needle = document.getElementById("needle");
+
+  if (arc) {
+    const arcLength = arc.getTotalLength(); // ~283 for semi-circle
+    arc.setAttribute("stroke-dasharray", arcLength);
+    arc.style.strokeDashoffset = arcLength;
+    arc.dataset.arcLength = arcLength;
+    arc.setAttribute("stroke", "url(#arcGradient)");
+  }
+
+  if (needle) {
+    needle.style.transition = "none";
+    needle.setAttribute("transform", "rotate(-90 100 100)");
   }
 }
 
@@ -114,36 +132,22 @@ function showResult(data) {
 
   const needle = document.getElementById("needle");
   if (needle) {
+    const angle = -90 + score * 180; // semi-circle sweep
     needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
-    needle.setAttribute("transform", `rotate(${angleFor(label)} 100 100)`);
+    needle.setAttribute("transform", `rotate(${angle} 100 100)`);
   }
 
   const arc = document.getElementById("risk-arc");
   if (arc) {
-    const maxArc = 283;
-    arc.setAttribute("stroke", "url(#arcGradient)");
+    const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
     arc.style.transition =
       "stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.5s ease-in-out";
-    arc.style.strokeDashoffset = `${maxArc - score * maxArc}`;
+    arc.style.strokeDashoffset = arcLength - score * arcLength;
     console.log("🔧 Arc updated:", arc.style.strokeDashoffset);
   }
 
   setText("score-label", data.display || labelDisplay(label));
   setText("score-value", percent);
-}
-
-function initializeGaugeVisuals() {
-  const arc = document.getElementById("risk-arc");
-  const needle = document.getElementById("needle");
-  if (arc) {
-    arc.setAttribute("stroke", "url(#arcGradient)");
-    arc.style.transition = "none";
-    arc.style.strokeDashoffset = "283";
-  }
-  if (needle) {
-    needle.style.transition = "none";
-    needle.setAttribute("transform", "rotate(-90 100 100)");
-  }
 }
 
 function resolveScore(raw) {
@@ -153,17 +157,6 @@ function resolveScore(raw) {
   return Math.max(0, Math.min(s, 1));
 }
 
-function angleFor(label) {
-  const angleMap = {
-    ham: -90,
-    support: -45,
-    spam: 45,
-    phishing: 90,
-    unknown: -90,
-  };
-  return angleMap[label] ?? -90;
-}
-
 function labelDisplay(label) {
   switch (label) {
     case "ham": return "Ham (Safe)";
@@ -171,21 +164,6 @@ function labelDisplay(label) {
     case "spam": return "Spam";
     case "phishing": return "Phishing";
     default: return "Unknown";
-  }
-}
-
-function gradientFor(label, palette) {
-  switch (label) {
-    case "ham":
-      return { g1: palette.green, g2: "#4bd07e", g3: "#7be0a3", fallback: palette.green };
-    case "support":
-      return { g1: palette.blue, g2: "#2fa8ff", g3: palette.green, fallback: palette.blue };
-    case "spam":
-      return { g1: palette.orange, g2: "#ff9a3b", g3: palette.red, fallback: palette.orange };
-    case "phishing":
-      return { g1: "#ff6b6b", g2: palette.red, g3: "#b00020", fallback: palette.red };
-    default:
-      return { g1: palette.gray, g2: "#8a8f94", g3: "#b0b5bb", fallback: palette.gray };
   }
 }
 
