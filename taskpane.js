@@ -44,7 +44,7 @@ function initializeGaugeVisuals() {
     arc.setAttribute("stroke-dasharray", arcLength);
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
-    arc.setAttribute("stroke", "url(#arcGradient)");
+    arc.setAttribute("stroke", "url(#arcGradient)"); // gradient reference
   }
 
   if (needle) {
@@ -137,9 +137,7 @@ function showResult(data) {
 
   setText("score-label", data.display || labelDisplay(label));
 
-  // Removed score-value completely since you don’t want %
-  // setText("score-value", "");
-
+  // Removed score-value completely (no % shown)
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
