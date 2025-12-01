@@ -17,19 +17,15 @@
       <div class="dial-gauge">
         <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
           <defs>
-            <!-- Gradient used for arc color transitions -->
             <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop id="grad-stop-1" offset="0%" stop-color="#28a745"/>  <!-- green -->
-              <stop id="grad-stop-2" offset="50%" stop-color="#fd7e14"/> <!-- orange -->
-              <stop id="grad-stop-3" offset="100%" stop-color="#dc3545"/> <!-- red -->
+              <stop id="grad-stop-1" offset="0%" stop-color="#28a745"/>
+              <stop id="grad-stop-2" offset="50%" stop-color="#fd7e14"/>
+              <stop id="grad-stop-3" offset="100%" stop-color="#dc3545"/>
             </linearGradient>
           </defs>
 
-          <!-- Background arc -->
           <path d="M10,100 A90,90 0 0,1 190,100"
                 fill="none" stroke="#2a2a2a" stroke-width="20" />
-
-          <!-- Risk arc (animated) -->
           <path id="risk-arc"
                 d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
@@ -38,8 +34,6 @@
                 stroke-linecap="round"
                 stroke-dasharray="283"
                 stroke-dashoffset="283" />
-
-          <!-- Needle -->
           <line id="needle"
                 x1="100" y1="100" x2="100" y2="20"
                 stroke="#e6e6e6" stroke-width="4"
@@ -54,7 +48,6 @@
 
       <div class="classification-result">
         <span class="status-badge status-loading" id="status">Loading...</span>
-        <div id="confidence" class="confidence-text">Confidence: --%</div>
       </div>
     </section>
 
