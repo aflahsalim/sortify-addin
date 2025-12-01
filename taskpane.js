@@ -120,11 +120,11 @@ function showResult(data) {
     arc.style.strokeDashoffset = maxArc - (score * maxArc);
   }
 
-  // Update labels (only gauge label + percentage)
+  // Update gauge label and percentage
   setText("score-label", data.display || label.toUpperCase());
   setText("score-value", percent);
 
-  // Status badge
+  // Update status badge
   const badge = document.getElementById("status");
   if (badge) {
     badge.textContent = data.display || label.toUpperCase();
@@ -135,7 +135,7 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // Analysis details
+  // Update analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
