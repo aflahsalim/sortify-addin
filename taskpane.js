@@ -20,7 +20,6 @@ Office.onReady(() => {
           score: 0,
           label: "ham",
           display: "Ham (Safe)",
-          color: "green",
           sender: "--",
           links: "--",
           content: "No content",
@@ -69,8 +68,8 @@ function classifyEmail(emailText, hasAttachment) {
 
 function showResult(data) {
   const label = data.label || "unknown";
-  const score = Math.max(0, Math.min(Number(data.score) || 0, 1)); // clamp between 0–1
-  const confidencePercent = `${Math.round(score * 100)}%`;
+  const score = Math.max(0, Math.min(Number(data.score) || 0, 1));
+  const percent = `${Math.round(score * 100)}%`;
 
   // Fixed needle angles by category
   const angleMap = {
@@ -87,7 +86,7 @@ function showResult(data) {
     needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
   }
 
-  // Gradient color stops
+  // Gradient color stops per category
   const palette = {
     green: "#28a745",
     orange: "#fd7e14",
@@ -111,9 +110,7 @@ function showResult(data) {
 
   ["grad-stop-1", "grad-stop-2", "grad-stop-3"].forEach((id, i) => {
     const stop = document.getElementById(id);
-    if (stop) {
-      stop.setAttribute("stop-color", [g1, g2, g3][i]);
-    }
+    if (stop) stop.setAttribute("stop-color", [g1, g2, g3][i]);
   });
 
   // Animate arc fill
@@ -123,12 +120,11 @@ function showResult(data) {
     arc.style.strokeDashoffset = maxArc - (score * maxArc);
   }
 
-  // Update labels
+  // Update labels (only gauge label + percentage)
   setText("score-label", data.display || label.toUpperCase());
-  setText("score-value", confidencePercent);
-  setText("confidence", `Confidence: ${confidencePercent}`);
+  setText("score-value", percent);
 
-  // Update status badge
+  // Status badge
   const badge = document.getElementById("status");
   if (badge) {
     badge.textContent = data.display || label.toUpperCase();
@@ -139,7 +135,7 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // Update analysis details
+  // Analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
