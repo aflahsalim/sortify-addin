@@ -3,6 +3,20 @@
 Office.onReady(() => {
   waitForGauge(() => {
     initializeGaugeVisuals();
+
+    // 🔧 Self-check mode: force a visible arc immediately
+    console.log("🔧 Self-check: forcing arc to 75% fill");
+    showResult({
+      score: 0.75, // hardcoded test value
+      label: "spam",
+      display: "Spam (Test)",
+      sender: "debug@example.com",
+      links: "2 test links",
+      content: "Debug content",
+      attachment: "No"
+    });
+
+    // After test, continue with real classification
     startClassification();
   });
 });
@@ -38,15 +52,6 @@ function startClassification() {
 
       if (!emailText.trim()) {
         setStatus("Email has no readable body text.");
-        showResult({
-          score: 0.5,
-          label: "support",
-          display: "Support Ticket",
-          sender: "--",
-          links: "--",
-          content: "No content",
-          attachment: hasAttachment ? "Yes" : "No",
-        });
         return;
       }
 
@@ -76,8 +81,10 @@ function classifyEmail(emailText, hasAttachment) {
       return res.json();
     })
     .then((data) => {
+      console.log("✅ Backend response:", data);
       const label = String(data.label || "unknown").toLowerCase();
       const score = resolveScore(data.score);
+      console.log("✅ Resolved score:", score);
 
       showResult({
         ...data,
@@ -95,15 +102,6 @@ function classifyEmail(emailText, hasAttachment) {
     .catch((err) => {
       console.error("Fetch error:", err);
       setStatus("Error contacting backend");
-      showResult({
-        score: 0.6,
-        label: "spam",
-        display: "Spam",
-        sender: "--",
-        links: "--",
-        content: "--",
-        attachment: "No",
-      });
     });
 }
 
@@ -112,60 +110,26 @@ function showResult(data) {
   const score = resolveScore(data.score);
   const percent = `${Math.round(score * 100)}%`;
 
+  console.log("🔧 showResult called with:", { label, score, percent });
+
   const needle = document.getElementById("needle");
   if (needle) {
     needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
     needle.setAttribute("transform", `rotate(${angleFor(label)} 100 100)`);
   }
 
-  const palette = {
-    green: "#28a745",
-    orange: "#fd7e14",
-    red: "#dc3545",
-    blue: "#007bff",
-    gray: "#6c757d",
-  };
-  const { g1, g2, g3, fallback } = gradientFor(label, palette);
-
-  const s1 = document.getElementById("grad-stop-1");
-  const s2 = document.getElementById("grad-stop-2");
-  const s3 = document.getElementById("grad-stop-3");
-  if (s1 && s2 && s3) {
-    s1.setAttribute("stop-color", g1);
-    s2.setAttribute("stop-color", g2);
-    s3.setAttribute("stop-color", g3);
-  }
-
   const arc = document.getElementById("risk-arc");
   if (arc) {
-    arc.setAttribute("stroke", "url(#arcGradient)");
-    if (!(s1 && s2 && s3)) {
-      arc.setAttribute("stroke", fallback);
-    }
-
     const maxArc = 283;
+    arc.setAttribute("stroke", "url(#arcGradient)");
     arc.style.transition =
       "stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.5s ease-in-out";
     arc.style.strokeDashoffset = `${maxArc - score * maxArc}`;
+    console.log("🔧 Arc updated:", arc.style.strokeDashoffset);
   }
 
   setText("score-label", data.display || labelDisplay(label));
   setText("score-value", percent);
-
-  const badge = document.getElementById("status");
-  if (badge) {
-    badge.textContent = data.display || labelDisplay(label);
-    badge.className = "status-badge";
-    if (label === "phishing") badge.classList.add("status-spam");
-    else if (label === "spam") badge.classList.add("status-medium");
-    else if (label === "support") badge.classList.add("status-support");
-    else badge.classList.add("status-safe");
-  }
-
-  setText("sender", data.sender || "--");
-  setText("links", data.links || "--");
-  setText("keywords", data.content || "--");
-  setText("attachment", data.attachment || "--");
 }
 
 function initializeGaugeVisuals() {
