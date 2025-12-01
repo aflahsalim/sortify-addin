@@ -1,153 +1,138 @@
 :root {
-  --bg-color: #121212;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --accent-color: #00FF94;   /* ham / safe */
-  --danger-color: #FF4B4B;   /* phishing */
-  --warning-color: #FFA500;  /* spam */
-  --support-color: #00BFFF;  /* support */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --font-family: 'Inter', sans-serif;
+  --bg: #0f1216;
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --card-border: rgba(255, 255, 255, 0.18);
+  --text: #e9eef6;
+  --muted: #9aa7b6;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  background-color: var(--bg-color);
-  font-family: var(--font-family);
-  color: var(--text-primary);
+* { box-sizing: border-box; }
+
+body {
+  font-family: Segoe UI, system-ui, -apple-system, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
   margin: 0;
-  padding: 0;
+  padding: 20px;
 }
 
 .container {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
 }
 
+/* Gauge */
 .dial-gauge {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
   align-items: center;
-  gap: 16px; /* spacing between gauge and label */
-  margin-top: 4px;
 }
 
 .gauge-svg {
-  width: 160px;
-  height: 80px;
+  width: 220px;
+  height: 110px;
+  display: block;
+}
+
+#gauge-svg #needle {
+  transition: transform 0.8s ease-in-out;
+}
+
+#gauge-svg #risk-arc {
+  transition: stroke 0.4s ease-in-out, stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .risk-label {
-  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
-.score-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+#score-label {
+  font-weight: 600;
+  font-size: 18px;
 }
 
-.score-value {
-  font-size: 20px;
-  font-weight: 700;
+#score-value {
+  font-size: 16px;
+  color: var(--muted);
 }
 
+/* Classification status badge */
 .status-badge {
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-block;
   padding: 6px 12px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  margin-top: 4px;
-  text-align: center;
-  min-width: 120px;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-top: 12px;
 }
 
-/* === Badge Styles for Each Label === */
-.status-spam { /* phishing emails */
-  background: rgba(255, 75, 75, 0.15);
-  color: var(--danger-color);
-  border: 1px solid rgba(255, 75, 75, 0.3);
+.status-safe    { background: #28a745; color: white; }
+.status-support { background: #007bff; color: white; }
+.status-medium  { background: #fd7e14; color: white; }
+.status-spam    { background: #dc3545; color: white; }
+.status-loading { background: #6c757d; color: white; }
+
+.confidence-text {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
-.status-medium { /* spam emails */
-  background: rgba(255, 165, 0, 0.15);
-  color: var(--warning-color);
-  border: 1px solid rgba(255, 165, 0, 0.3);
-}
-
-.status-support { /* support emails */
-  background: rgba(0, 191, 255, 0.15);
-  color: var(--support-color);
-  border: 1px solid rgba(0, 191, 255, 0.3);
-}
-
-.status-safe { /* ham / safe emails */
-  background: rgba(0, 255, 148, 0.15);
-  color: var(--accent-color);
-  border: 1px solid rgba(0, 255, 148, 0.3);
-}
-
-.status-loading {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-}
-
+/* Analysis section */
 .analysis-section {
-  padding-top: 8px;
+  margin-top: 24px;
+}
+
+.section-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .details-list {
-  display: flex;
-  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
   gap: 10px;
 }
 
 .detail-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 
 .detail-icon {
   font-size: 18px;
-  margin-right: 4px;
 }
 
 .detail-content {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .detail-label {
-  font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--muted);
 }
 
 .detail-value {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text);
+  font-weight: 600;
 }
