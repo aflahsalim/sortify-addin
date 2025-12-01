@@ -4,7 +4,7 @@ Office.onReady(() => {
   waitForGauge(() => {
     initializeGaugeVisuals();
 
-    // 🔧 Self-check mode: force a visible arc and label immediately
+    // Self-check: show visible arc & label to confirm rendering
     showResult({
       score: 0.75,
       label: "spam",
@@ -15,7 +15,6 @@ Office.onReady(() => {
       attachment: "No"
     });
 
-    // Then run real classification
     startClassification();
   });
 });
@@ -24,9 +23,9 @@ function waitForGauge(callback) {
   const arc = document.getElementById("risk-arc");
   const needle = document.getElementById("needle");
   const stops = [
-    document.getElementById("grad-stop-1"),
-    document.getElementById("grad-stop-2"),
-    document.getElementById("grad-stop-3"),
+    document.getElementById("sortify-grad-1"),
+    document.getElementById("sortify-grad-2"),
+    document.getElementById("sortify-grad-3"),
   ];
   if (arc && needle && stops.every(Boolean)) {
     callback();
@@ -44,8 +43,9 @@ function initializeGaugeVisuals() {
     arc.setAttribute("stroke-dasharray", arcLength);
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
-    // Keep attribute form for gradients (more reliable than CSS style)
-    arc.setAttribute("stroke", "url(#arcGradient)");
+
+    // Ensure attribute form for gradient reference
+    arc.setAttribute("stroke", "url(#sortifyArcGradient)");
   }
 
   if (needle) {
@@ -134,6 +134,14 @@ function showResult(data) {
   if (arc) {
     const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
     arc.style.strokeDashoffset = arcLength - score * arcLength;
+
+    // Fallback if gradient fails: map color by score
+    const gradientRef = "url(#sortifyArcGradient)";
+    const computedStroke = arc.getAttribute("stroke");
+    if (!computedStroke || computedStroke !== gradientRef) {
+      const color = score < 0.33 ? "#28a745" : score < 0.66 ? "#fd7e14" : "#dc3545";
+      arc.setAttribute("stroke", color);
+    }
   }
 
   setText("score-label", data.display || labelDisplay(label));
