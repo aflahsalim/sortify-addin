@@ -62,7 +62,7 @@ function classifyEmail(emailText, hasAttachment) {
     })
     .catch((err) => {
       console.error("Fetch error:", err);
-      setStatus("Error contacting backend.");
+      setStatus("Error contacting backend");
     });
 }
 
