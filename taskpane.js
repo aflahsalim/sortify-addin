@@ -1,7 +1,7 @@
 /* global Office, document */
 
 Office.onReady(() => {
-  const item = Office.context.mailbox.item;
+  const item = Office.context?.mailbox?.item;
   if (!item) {
     setStatus("No email item available.");
     return;
@@ -59,6 +59,7 @@ function classifyEmail(emailText, hasAttachment) {
         data.attachment = hasAttachment ? "Yes" : "No";
       }
       showResult(data);
+      setStatus("Classification complete.");
     })
     .catch((err) => {
       console.error("Fetch error:", err);
@@ -70,17 +71,56 @@ function showResult(data) {
   const label = data.label || "unknown";
   const score = Number(data.score) || 0;
 
-  // Use backend-provided display + color
-  const gaugeColor = data.color || "#00FF94";
-  const badgeText = data.display || label.toUpperCase();
+  // Fixed needle angles by category
+  const angleMap = {
+    ham: -90,
+    support: -45,
+    spam: 45,
+    phishing: 90,
+    unknown: -90,
+  };
+  const needleAngle = angleMap[label] ?? -90;
 
-  // Animate gauge arc + needle based on confidence score
-  updateGauge(score, badgeText, gaugeColor);
+  // Color mapping from backend keywords to hex
+  const colorMap = {
+    green: "#28a745",
+    orange: "#fd7e14",
+    red: "#dc3545",
+    blue: "#007bff",
+  };
+  const gaugeColor = colorMap[data.color] || "#00FF94";
+
+  // Animate needle
+  const needle = document.getElementById("needle");
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
+  }
+
+  // Animate arc length by confidence + update color
+  const arc = document.getElementById("risk-arc");
+  if (arc) {
+    arc.setAttribute("stroke", gaugeColor);
+    const maxArc = 283; // half-circle path length used in SVG
+    const offset = maxArc - (score * maxArc); // 0 = full, maxArc = empty
+    arc.style.strokeDashoffset = offset;
+  }
+
+  // Update labels
+  const scoreLabel = document.getElementById("score-label");
+  const scoreValue = document.getElementById("score-value");
+  if (scoreLabel) scoreLabel.textContent = data.display || label.toUpperCase();
+  if (scoreValue) scoreValue.textContent = `${Math.round(score * 100)}%`;
+
+  // Confidence text
+  const confidenceEl = document.getElementById("confidence");
+  if (confidenceEl) {
+    confidenceEl.textContent = `Confidence: ${Math.round(score * 100)}%`;
+  }
 
   // Update badge
-  const badge = document.querySelector(".status-badge");
+  const badge = document.getElementById("status");
   if (badge) {
-    badge.innerText = badgeText;
+    badge.textContent = data.display || label.toUpperCase();
     badge.className = "status-badge"; // reset classes
     if (label === "phishing") badge.classList.add("status-spam");
     else if (label === "spam") badge.classList.add("status-medium");
@@ -88,48 +128,22 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // Show confidence score
-  const confidenceEl = document.getElementById("confidence");
-  if (confidenceEl) {
-    confidenceEl.innerText = `Confidence: ${Math.round(score * 100)}%`;
-  }
-
-  // Update analysis details
-  document.getElementById("sender").innerText = data.sender || "--";
-  document.getElementById("links").innerText = data.links || "--";
-  document.getElementById("keywords").innerText = data.content || "--";
-  document.getElementById("attachment").innerText = data.attachment || "--";
-}
-
-function updateGauge(score, label, color) {
-  const arc = document.getElementById("risk-arc");
-  const needle = document.getElementById("needle");
-  const scoreLabel = document.getElementById("score-label");
-  const scoreValue = document.getElementById("score-value");
-
-  // Animate arc fill (stroke-dashoffset)
-  const maxArc = 283; // half-circle length
-  const offset = maxArc - (score * maxArc);
-  if (arc) {
-    arc.style.strokeDashoffset = offset;
-    arc.style.stroke = color;
-  }
-
-  // Animate needle rotation
-  const angle = -90 + (score * 180); // map 0–1 to -90°–90°
-  if (needle) {
-    needle.setAttribute("transform", `rotate(${angle} 100 100)`);
-  }
-
-  // Update labels
-  if (scoreLabel) scoreLabel.textContent = label;
-  if (scoreValue) scoreValue.textContent = `${Math.round(score * 100)}%`;
+  // Update analysis details (placeholders until you compute these)
+  setText("sender", data.sender || "--");
+  setText("links", data.links || "--");
+  setText("keywords", data.content || "--");
+  setText("attachment", data.attachment || "--");
 }
 
 function setStatus(message) {
-  const badge = document.querySelector(".status-badge");
+  const badge = document.getElementById("status");
   if (badge) {
-    badge.innerText = message;
+    badge.textContent = message;
     badge.className = "status-badge status-loading";
   }
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
