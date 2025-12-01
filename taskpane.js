@@ -22,12 +22,7 @@ Office.onReady(() => {
 function waitForGauge(callback) {
   const arc = document.getElementById("risk-arc");
   const needle = document.getElementById("needle");
-  const stops = [
-    document.getElementById("sortify-grad-1"),
-    document.getElementById("sortify-grad-2"),
-    document.getElementById("sortify-grad-3"),
-  ];
-  if (arc && needle && stops.every(Boolean)) {
+  if (arc && needle) {
     callback();
   } else {
     requestAnimationFrame(() => waitForGauge(callback));
@@ -45,7 +40,7 @@ function initializeGaugeVisuals() {
     arc.dataset.arcLength = arcLength;
 
     // Ensure attribute form for gradient reference
-    arc.setAttribute("stroke", "url(#sortifyArcGradient)");
+    arc.setAttribute("stroke", "url(#arcGradient)");
   }
 
   if (needle) {
@@ -136,7 +131,7 @@ function showResult(data) {
     arc.style.strokeDashoffset = arcLength - score * arcLength;
 
     // Fallback if gradient fails: map color by score
-    const gradientRef = "url(#sortifyArcGradient)";
+    const gradientRef = "url(#arcGradient)";
     const computedStroke = arc.getAttribute("stroke");
     if (!computedStroke || computedStroke !== gradientRef) {
       const color = score < 0.33 ? "#28a745" : score < 0.66 ? "#fd7e14" : "#dc3545";
