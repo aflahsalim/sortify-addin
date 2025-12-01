@@ -74,31 +74,8 @@ function showResult(data) {
   const gaugeColor = data.color || "#00FF94";
   const badgeText = data.display || label.toUpperCase();
 
-  // Map needle angle by label
-  const angleMap = {
-    phishing: 90,
-    spam: 45,
-    support: 0,
-    ham: -90,
-    unknown: -90,
-  };
-  const needleAngle = angleMap[label] ?? -90;
-
-  // Update gauge
-  const needle = document.getElementById("needle");
-  if (needle) {
-    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
-  }
-  const arc = document.getElementById("risk-arc");
-  if (arc) {
-    arc.setAttribute("stroke", gaugeColor);
-  }
-
-  // Update risk label
-  const scoreEl = document.querySelector(".score-value");
-  if (scoreEl) {
-    scoreEl.innerText = badgeText;
-  }
+  // Animate gauge arc + needle based on confidence score
+  updateGauge(score, badgeText, gaugeColor);
 
   // Update badge
   const badge = document.querySelector(".status-badge");
@@ -114,7 +91,7 @@ function showResult(data) {
   // Show confidence score
   const confidenceEl = document.getElementById("confidence");
   if (confidenceEl) {
-    confidenceEl.innerText = `Confidence: ${score}`;
+    confidenceEl.innerText = `Confidence: ${Math.round(score * 100)}%`;
   }
 
   // Update analysis details
@@ -122,6 +99,31 @@ function showResult(data) {
   document.getElementById("links").innerText = data.links || "--";
   document.getElementById("keywords").innerText = data.content || "--";
   document.getElementById("attachment").innerText = data.attachment || "--";
+}
+
+function updateGauge(score, label, color) {
+  const arc = document.getElementById("risk-arc");
+  const needle = document.getElementById("needle");
+  const scoreLabel = document.getElementById("score-label");
+  const scoreValue = document.getElementById("score-value");
+
+  // Animate arc fill (stroke-dashoffset)
+  const maxArc = 283; // half-circle length
+  const offset = maxArc - (score * maxArc);
+  if (arc) {
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = color;
+  }
+
+  // Animate needle rotation
+  const angle = -90 + (score * 180); // map 0–1 to -90°–90°
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${angle} 100 100)`);
+  }
+
+  // Update labels
+  if (scoreLabel) scoreLabel.textContent = label;
+  if (scoreValue) scoreValue.textContent = `${Math.round(score * 100)}%`;
 }
 
 function setStatus(message) {
