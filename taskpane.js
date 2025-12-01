@@ -83,6 +83,8 @@ function showResult(data) {
 
   const needle = document.getElementById("needle");
   if (needle) {
+    // Trigger animation by updating transform
+    needle.style.transition = "transform 0.9s ease-in-out";
     needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
   }
 
@@ -109,15 +111,20 @@ function showResult(data) {
   }
 
   // Update gradient stops
-  ["grad-stop-1", "grad-stop-2", "grad-stop-3"].forEach((id, i) => {
-    const stop = document.getElementById(id);
-    if (stop) stop.setAttribute("stop-color", [g1, g2, g3][i]);
-  });
+  const s1 = document.getElementById("grad-stop-1");
+  const s2 = document.getElementById("grad-stop-2");
+  const s3 = document.getElementById("grad-stop-3");
+  if (s1 && s2 && s3) {
+    s1.setAttribute("stop-color", g1);
+    s2.setAttribute("stop-color", g2);
+    s3.setAttribute("stop-color", g3);
+  }
 
-  // Force gradient refresh (in case it's not rendering)
+  // Animate arc fill
   const arc = document.getElementById("risk-arc");
   if (arc) {
     arc.setAttribute("stroke", "url(#arcGradient)");
+    arc.style.transition = "stroke-dashoffset 0.9s ease-in-out";
     const maxArc = 283;
     arc.style.strokeDashoffset = maxArc - (score * maxArc);
   }
