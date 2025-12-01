@@ -69,9 +69,9 @@ function classifyEmail(emailText, hasAttachment) {
 
 function showResult(data) {
   const label = data.label || "unknown";
-  const score = Number(data.score) || 0;
+  const score = Math.max(0, Math.min(Number(data.score) || 0, 1)); // clamp between 0–1
 
-  // Fixed needle angles by category
+  // Needle angle by category
   const angleMap = {
     ham: -90,
     support: -45,
@@ -81,14 +81,12 @@ function showResult(data) {
   };
   const needleAngle = angleMap[label] ?? -90;
 
-  // Animate needle
   const needle = document.getElementById("needle");
   if (needle) {
     needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
   }
 
-  // Arc color: set gradient stops based on category
-  // Base palette
+  // Gradient color stops
   const palette = {
     green: "#28a745",
     orange: "#fd7e14",
@@ -97,8 +95,6 @@ function showResult(data) {
     gray: "#6c757d",
   };
 
-  // Determine gradient per label
-  // ham -> green gradient; support -> blue→green; spam -> orange→red; phishing -> red dominant
   let g1 = palette.green, g2 = palette.orange, g3 = palette.red;
   if (label === "ham") {
     g1 = palette.green; g2 = "#4bd07e"; g3 = "#7be0a3";
@@ -112,41 +108,38 @@ function showResult(data) {
     g1 = palette.gray; g2 = "#8a8f94"; g3 = "#b0b5bb";
   }
 
-  // Update gradient stops (smooth color transition)
-  const s1 = document.getElementById("grad-stop-1");
-  const s2 = document.getElementById("grad-stop-2");
-  const s3 = document.getElementById("grad-stop-3");
-  if (s1 && s2 && s3) {
-    s1.setAttribute("stop-color", g1);
-    s2.setAttribute("stop-color", g2);
-    s3.setAttribute("stop-color", g3);
-  }
+  ["grad-stop-1", "grad-stop-2", "grad-stop-3"].forEach((id, i) => {
+    const stop = document.getElementById(id);
+    if (stop) {
+      stop.setAttribute("stop-color", [g1, g2, g3][i]);
+    }
+  });
 
-  // Animate arc length by confidence
+  // Arc fill animation
   const arc = document.getElementById("risk-arc");
   if (arc) {
-    const maxArc = 283; // half-circle path length
-    const offset = maxArc - (score * maxArc); // 0 = full, maxArc = empty
-    arc.style.strokeDashoffset = offset;
+    const maxArc = 283;
+    arc.style.strokeDashoffset = maxArc - (score * maxArc);
   }
 
   // Update labels
+  const confidencePercent = `${Math.round(score * 100)}%`;
   setText("score-label", data.display || label.toUpperCase());
-  setText("score-value", `${Math.round(score * 100)}%`);
-  setText("confidence", `Confidence: ${Math.round(score * 100)}%`);
+  setText("score-value", confidencePercent);
+  setText("confidence", `Confidence: ${confidencePercent}`);
 
-  // Update status badge
+  // Status badge
   const badge = document.getElementById("status");
   if (badge) {
     badge.textContent = data.display || label.toUpperCase();
-    badge.className = "status-badge"; // reset classes
+    badge.className = "status-badge";
     if (label === "phishing") badge.classList.add("status-spam");
     else if (label === "spam") badge.classList.add("status-medium");
     else if (label === "support") badge.classList.add("status-support");
     else badge.classList.add("status-safe");
   }
 
-  // Analysis details (placeholders unless you compute these)
+  // Analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
