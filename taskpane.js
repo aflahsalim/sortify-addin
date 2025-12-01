@@ -70,8 +70,9 @@ function classifyEmail(emailText, hasAttachment) {
 function showResult(data) {
   const label = data.label || "unknown";
   const score = Math.max(0, Math.min(Number(data.score) || 0, 1)); // clamp between 0–1
+  const confidencePercent = `${Math.round(score * 100)}%`;
 
-  // Needle angle by category
+  // Fixed needle angles by category
   const angleMap = {
     ham: -90,
     support: -45,
@@ -115,7 +116,7 @@ function showResult(data) {
     }
   });
 
-  // Arc fill animation
+  // Animate arc fill
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const maxArc = 283;
@@ -123,12 +124,11 @@ function showResult(data) {
   }
 
   // Update labels
-  const confidencePercent = `${Math.round(score * 100)}%`;
   setText("score-label", data.display || label.toUpperCase());
   setText("score-value", confidencePercent);
   setText("confidence", `Confidence: ${confidencePercent}`);
 
-  // Status badge
+  // Update status badge
   const badge = document.getElementById("status");
   if (badge) {
     badge.textContent = data.display || label.toUpperCase();
@@ -139,7 +139,7 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // Analysis details
+  // Update analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
