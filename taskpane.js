@@ -43,6 +43,7 @@ function initializeGaugeVisuals() {
   if (arc) {
     const arcLength = arc.getTotalLength(); // ~283 for semi-circle
     arc.setAttribute("stroke-dasharray", arcLength);
+    arc.style.transition = "none";
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
     arc.setAttribute("stroke", "url(#arcGradient)");
@@ -132,18 +133,20 @@ function showResult(data) {
 
   const needle = document.getElementById("needle");
   if (needle) {
-    const angle = -90 + score * 180; // semi-circle sweep
-    needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
-    needle.setAttribute("transform", `rotate(${angle} 100 100)`);
+    const angle = -90 + score * 180;
+    needle.style.transition = "transform 0.9s ease-in-out";
+    requestAnimationFrame(() => {
+      needle.setAttribute("transform", `rotate(${angle} 100 100)`);
+    });
   }
 
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
-    arc.style.transition =
-      "stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.5s ease-in-out";
-    arc.style.strokeDashoffset = arcLength - score * arcLength;
-    console.log("🔧 Arc updated:", arc.style.strokeDashoffset);
+    arc.style.transition = "stroke-dashoffset 0.9s ease-in-out";
+    requestAnimationFrame(() => {
+      arc.style.strokeDashoffset = arcLength - score * arcLength;
+    });
   }
 
   setText("score-label", data.display || labelDisplay(label));
