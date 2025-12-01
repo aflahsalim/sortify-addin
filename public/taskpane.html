@@ -15,10 +15,11 @@
   <div class="container">
     <section class="score-section glass-card">
       <div class="dial-gauge">
-        <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
+        <!-- Add xmlns to ensure gradients render reliably -->
+        <svg id="gauge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
           <defs>
-            <!-- Gradient runs left → right for visible spread -->
-            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <!-- Use userSpaceOnUse so coordinates match the arc path (left→right along y=100) -->
+            <linearGradient id="arcGradient" gradientUnits="userSpaceOnUse" x1="10" y1="100" x2="190" y2="100">
               <stop id="grad-stop-1" offset="0%" stop-color="#28a745"/>
               <stop id="grad-stop-2" offset="50%" stop-color="#fd7e14"/>
               <stop id="grad-stop-3" offset="100%" stop-color="#dc3545"/>
@@ -26,8 +27,7 @@
           </defs>
 
           <!-- Background arc -->
-          <path d="M10,100 A90,90 0 0,1 190,100"
-                fill="none" stroke="#2a2a2a" stroke-width="20" />
+          <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#2a2a2a" stroke-width="20" />
 
           <!-- Risk arc (animated) -->
           <path id="risk-arc"
