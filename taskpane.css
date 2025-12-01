@@ -31,10 +31,10 @@ body {
 
 /* Gauge */
 .dial-gauge {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 12px;
 }
 
 .gauge-svg {
@@ -49,24 +49,20 @@ body {
 }
 
 #gauge-svg #risk-arc {
-  transition: stroke 0.5s ease-in-out,
-              stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Label under gauge */
 .risk-label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
 }
 
 #score-label {
   font-weight: 600;
   font-size: 18px;
-}
-
-#score-value {
-  font-size: 16px;
-  color: var(--muted);
+  color: var(--text);
 }
 
 /* Classification status badge */
