@@ -83,12 +83,6 @@ body {
 .status-spam    { background: #dc3545; color: white; }
 .status-loading { background: #6c757d; color: white; }
 
-.confidence-text {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
 /* Analysis section */
 .analysis-section {
   margin-top: 24px;
