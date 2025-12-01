@@ -1,8 +1,28 @@
 /* global Office, document */
 
 Office.onReady(() => {
-  initializeGaugeVisuals();
+  waitForGauge(() => {
+    initializeGaugeVisuals();
+    startClassification();
+  });
+});
 
+function waitForGauge(callback) {
+  const arc = document.getElementById("risk-arc");
+  const needle = document.getElementById("needle");
+  const stops = [
+    document.getElementById("grad-stop-1"),
+    document.getElementById("grad-stop-2"),
+    document.getElementById("grad-stop-3"),
+  ];
+  if (arc && needle && stops.every(Boolean)) {
+    callback();
+  } else {
+    requestAnimationFrame(() => waitForGauge(callback));
+  }
+}
+
+function startClassification() {
   const item = Office.context?.mailbox?.item;
   if (!item) {
     setStatus("No email item available.");
@@ -35,7 +55,7 @@ Office.onReady(() => {
       setStatus("Failed to read email body.");
     }
   });
-});
+}
 
 function classifyEmail(emailText, hasAttachment) {
   setStatus("Classifying email...");
@@ -92,14 +112,12 @@ function showResult(data) {
   const score = resolveScore(data.score);
   const percent = `${Math.round(score * 100)}%`;
 
-  // Animate needle
   const needle = document.getElementById("needle");
   if (needle) {
     needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
     needle.setAttribute("transform", `rotate(${angleFor(label)} 100 100)`);
   }
 
-  // Gradient colors
   const palette = {
     green: "#28a745",
     orange: "#fd7e14",
@@ -118,7 +136,6 @@ function showResult(data) {
     s3.setAttribute("stop-color", g3);
   }
 
-  // Animate arc fill
   const arc = document.getElementById("risk-arc");
   if (arc) {
     arc.setAttribute("stroke", "url(#arcGradient)");
@@ -132,7 +149,6 @@ function showResult(data) {
     arc.style.strokeDashoffset = `${maxArc - score * maxArc}`;
   }
 
-  // Labels
   setText("score-label", data.display || labelDisplay(label));
   setText("score-value", percent);
 
