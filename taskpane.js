@@ -1,7 +1,6 @@
 /* global Office, document */
 
 Office.onReady(() => {
-  // Ensure initial arc/needle state ready for animation
   initializeGaugeVisuals();
 
   const item = Office.context?.mailbox?.item;
@@ -57,7 +56,6 @@ function classifyEmail(emailText, hasAttachment) {
       return res.json();
     })
     .then((data) => {
-      // Normalize/guard fields
       const label = (data.label || "unknown").toLowerCase();
       const score =
         typeof data.score === "number"
@@ -87,14 +85,14 @@ function showResult(data) {
   const score = clamp01(Number(data.score) || 0);
   const percent = `${Math.round(score * 100)}%`;
 
-  // 1) Animate needle (set transition and rotate)
+  // Animate needle
   const needle = document.getElementById("needle");
   if (needle) {
     needle.style.transition = "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)";
     needle.setAttribute("transform", `rotate(${angleFor(label)} 100 100)`);
   }
 
-  // 2) Gradient colors per classification
+  // Gradient colors per classification
   const palette = {
     green: "#28a745",
     orange: "#fd7e14",
@@ -113,23 +111,18 @@ function showResult(data) {
     s3.setAttribute("stop-color", g3);
   }
 
-  // 3) Animate arc fill (force start -> animate to target)
+  // Animate arc fill
   const arc = document.getElementById("risk-arc");
   if (arc) {
-    // Ensure gradient stroke applied
     arc.setAttribute("stroke", "url(#arcGradient)");
-
-    // Fallback color if gradient not found
     if (!(s1 && s2 && s3)) {
       arc.setAttribute("stroke", fallback);
     }
 
     const maxArc = 283;
-    // Reset to initial hidden state without transition
     arc.style.transition = "none";
     arc.style.strokeDashoffset = `${maxArc}`;
 
-    // Next frame: apply transitions and target value
     requestAnimationFrame(() => {
       arc.style.transition =
         "stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.5s ease-in-out";
@@ -138,7 +131,7 @@ function showResult(data) {
     });
   }
 
-  // 4) Update labels
+  // Update labels
   setText("score-label", data.display || label.toUpperCase());
   setText("score-value", percent);
 
@@ -152,14 +145,13 @@ function showResult(data) {
     else badge.classList.add("status-safe");
   }
 
-  // 5) Update analysis details
+  // Update analysis details
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
   setText("attachment", data.attachment || "--");
 }
 
-// Ensure initial visual state so first update animates
 function initializeGaugeVisuals() {
   const arc = document.getElementById("risk-arc");
   const needle = document.getElementById("needle");
@@ -173,8 +165,6 @@ function initializeGaugeVisuals() {
     needle.setAttribute("transform", "rotate(-90 100 100)");
   }
 }
-
-// Helpers
 
 function angleFor(label) {
   const angleMap = {
