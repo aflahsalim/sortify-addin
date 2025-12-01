@@ -1,139 +1,167 @@
-:root {
-  --bg: #0f1216;
-  --card-bg: rgba(255, 255, 255, 0.08);
-  --card-border: rgba(255, 255, 255, 0.18);
-  --text: #e9eef6;
-  --muted: #9aa7b6;
+/* global Office, document */
+
+Office.onReady(() => {
+  const item = Office.context?.mailbox?.item;
+  if (!item) {
+    setStatus("No email item available.");
+    return;
+  }
+
+  setStatus("Reading email...");
+  item.body.getAsync(Office.CoercionType.Text, (result) => {
+    if (result.status === Office.AsyncResultStatus.Succeeded) {
+      const emailText = result.value || "";
+      const hasAttachment =
+        Array.isArray(item.attachments) && item.attachments.length > 0;
+
+      if (!emailText.trim()) {
+        setStatus("Email has no readable body text.");
+        showResult({
+          score: 0,
+          label: "ham",
+          display: "Ham (Safe)",
+          color: "green",
+          sender: "--",
+          links: "--",
+          content: "No content",
+          attachment: hasAttachment ? "Yes" : "No",
+        });
+        return;
+      }
+
+      classifyEmail(emailText, hasAttachment);
+    } else {
+      setStatus("Failed to read email body.");
+    }
+  });
+});
+
+function classifyEmail(emailText, hasAttachment) {
+  setStatus("Classifying email...");
+
+  fetch("https://sortify-y7ru.onrender.com/classify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: emailText,
+      attachment: hasAttachment ? "Yes" : "No",
+    }),
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Backend ${res.status}: ${body}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      if (typeof data.attachment === "undefined") {
+        data.attachment = hasAttachment ? "Yes" : "No";
+      }
+      showResult(data);
+      setStatus("Classification complete.");
+    })
+    .catch((err) => {
+      console.error("Fetch error:", err);
+      setStatus("Error contacting backend");
+    });
 }
 
-* { box-sizing: border-box; }
+function showResult(data) {
+  const label = data.label || "unknown";
+  const score = Number(data.score) || 0;
 
-body {
-  font-family: Segoe UI, system-ui, -apple-system, Arial, sans-serif;
-  color: var(--text);
-  background: var(--bg);
-  margin: 0;
-  padding: 20px;
+  // Fixed needle angles by category
+  const angleMap = {
+    ham: -90,
+    support: -45,
+    spam: 45,
+    phishing: 90,
+    unknown: -90,
+  };
+  const needleAngle = angleMap[label] ?? -90;
+
+  // Animate needle
+  const needle = document.getElementById("needle");
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
+  }
+
+  // Arc color: set gradient stops based on category
+  // Base palette
+  const palette = {
+    green: "#28a745",
+    orange: "#fd7e14",
+    red: "#dc3545",
+    blue: "#007bff",
+    gray: "#6c757d",
+  };
+
+  // Determine gradient per label
+  // ham -> green gradient; support -> blue→green; spam -> orange→red; phishing -> red dominant
+  let g1 = palette.green, g2 = palette.orange, g3 = palette.red;
+  if (label === "ham") {
+    g1 = palette.green; g2 = "#4bd07e"; g3 = "#7be0a3";
+  } else if (label === "support") {
+    g1 = palette.blue; g2 = "#2fa8ff"; g3 = palette.green;
+  } else if (label === "spam") {
+    g1 = palette.orange; g2 = "#ff9a3b"; g3 = palette.red;
+  } else if (label === "phishing") {
+    g1 = "#ff6b6b"; g2 = palette.red; g3 = "#b00020";
+  } else {
+    g1 = palette.gray; g2 = "#8a8f94"; g3 = "#b0b5bb";
+  }
+
+  // Update gradient stops (smooth color transition)
+  const s1 = document.getElementById("grad-stop-1");
+  const s2 = document.getElementById("grad-stop-2");
+  const s3 = document.getElementById("grad-stop-3");
+  if (s1 && s2 && s3) {
+    s1.setAttribute("stop-color", g1);
+    s2.setAttribute("stop-color", g2);
+    s3.setAttribute("stop-color", g3);
+  }
+
+  // Animate arc length by confidence
+  const arc = document.getElementById("risk-arc");
+  if (arc) {
+    const maxArc = 283; // half-circle path length
+    const offset = maxArc - (score * maxArc); // 0 = full, maxArc = empty
+    arc.style.strokeDashoffset = offset;
+  }
+
+  // Update labels
+  setText("score-label", data.display || label.toUpperCase());
+  setText("score-value", `${Math.round(score * 100)}%`);
+  setText("confidence", `Confidence: ${Math.round(score * 100)}%`);
+
+  // Update status badge
+  const badge = document.getElementById("status");
+  if (badge) {
+    badge.textContent = data.display || label.toUpperCase();
+    badge.className = "status-badge"; // reset classes
+    if (label === "phishing") badge.classList.add("status-spam");
+    else if (label === "spam") badge.classList.add("status-medium");
+    else if (label === "support") badge.classList.add("status-support");
+    else badge.classList.add("status-safe");
+  }
+
+  // Analysis details (placeholders unless you compute these)
+  setText("sender", data.sender || "--");
+  setText("links", data.links || "--");
+  setText("keywords", data.content || "--");
+  setText("attachment", data.attachment || "--");
 }
 
-.container {
-  max-width: 720px;
-  margin: 0 auto;
+function setStatus(message) {
+  const badge = document.getElementById("status");
+  if (badge) {
+    badge.textContent = message;
+    badge.className = "status-badge status-loading";
+  }
 }
 
-.glass-card {
-  backdrop-filter: blur(12px);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 20px;
-}
-
-/* Gauge */
-.dial-gauge {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 16px;
-  align-items: center;
-}
-
-.gauge-svg {
-  width: 220px;
-  height: 110px;
-  display: block;
-}
-
-/* Smooth transitions */
-#gauge-svg #needle {
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-#gauge-svg #risk-arc {
-  transition: stroke 0.5s ease-in-out, stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.risk-label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-#score-label {
-  font-weight: 600;
-  font-size: 18px;
-}
-
-#score-value {
-  font-size: 16px;
-  color: var(--muted);
-}
-
-/* Classification status badge */
-.status-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-weight: 600;
-  margin-top: 12px;
-}
-
-.status-safe    { background: #28a745; color: white; }
-.status-support { background: #007bff; color: white; }
-.status-medium  { background: #fd7e14; color: white; }
-.status-spam    { background: #dc3545; color: white; }
-.status-loading { background: #6c757d; color: white; }
-
-.confidence-text {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-/* Analysis section */
-.analysis-section {
-  margin-top: 24px;
-}
-
-.section-title {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.details-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.detail-item {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.detail-icon {
-  font-size: 18px;
-}
-
-.detail-content {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.detail-label {
-  color: var(--muted);
-}
-
-.detail-value {
-  color: var(--text);
-  font-weight: 600;
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
