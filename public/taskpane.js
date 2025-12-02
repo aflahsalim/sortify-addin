@@ -1,40 +1,148 @@
 /* global Office, document */
 
 Office.onReady(() => {
-  const item = Office.context.mailbox.item;
-  if (!item) {
-    setStatus("No email item available.");
-    return;
+  waitForGauge(() => {
+    initializeGauge();
+
+    // Optional sanity test (remove if not needed)
+    showResult({
+      score: 0.2,
+      label: "ham",
+      display: labelDisplay("ham"),
+      sender: "debug@example.com",
+      links: "None",
+      content: "Debug content",
+      attachment: "Yes"
+    });
+
+    startClassification();
+  });
+});
+
+function waitForGauge(callback) {
+  const arc = document.getElementById("risk-arc");
+  const needle = document.getElementById("needle");
+  if (arc && needle) {
+    callback();
+  } else {
+    requestAnimationFrame(() => waitForGauge(callback));
   }
+}
+
+function initializeGauge() {
+  const arc = document.getElementById("risk-arc");
+  if (arc) {
+    const len = arc.getTotalLength();
+    arc.setAttribute("stroke-dasharray", len);
+    arc.style.strokeDashoffset = len;
+    arc.dataset.arcLength = String(len);
+  }
+
+  const needle = document.getElementById("needle");
+  if (needle) {
+    needle.setAttribute("transform", "rotate(-90 100 80)");
+  }
+}
+
+function showResult(data) {
+  const score = resolveScore(data.score);
+  const label = (data.label || "unknown").toLowerCase();
+  const display = data.display || labelDisplay(label);
+  const color = getRiskColor(label);
+
+  // Rotate needle proportional to score (0..1 maps -90..+90)
+  const needle = document.getElementById("needle");
+  if (needle) {
+    const angle = -90 + score * 180;
+    needle.setAttribute("transform", `rotate(${angle} 100 80)`);
+  }
+
+  // Animate arc fill and set solid color
+  const arc = document.getElementById("risk-arc");
+  if (arc) {
+    const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
+    arc.style.strokeDashoffset = len - score * len;
+    arc.setAttribute("stroke", color);
+  }
+
+  // Label text and color
+  const labelEl = document.getElementById("score-label");
+  if (labelEl) {
+    labelEl.textContent = display;
+    labelEl.style.color = color;
+  }
+
+  // Button text and color
+  const button = document.getElementById("result-button");
+  if (button) {
+    button.textContent = display.toUpperCase();
+    button.style.background = color;
+  }
+
+  // Analysis details
+  setText("sender", data.sender);
+  setText("links", data.links);
+  setText("keywords", data.content);
+  setText("attachment", typeof data.attachment === "string" ? data.attachment : (data.attachment ? "Yes" : "No"));
+}
+
+function getRiskColor(label) {
+  switch ((label || "").toLowerCase()) {
+    case "ham": return "#28a745";       // Safe (Ham)
+    case "spam": return "#fd7e14";      // Risk (Spam)
+    case "phishing": return "#dc3545";  // High Risk (Phishing)
+    case "support": return "#00bfff";   // Safe (Support)
+    default: return "#6c757d";          // Unknown
+  }
+}
+
+function labelDisplay(label) {
+  switch ((label || "").toLowerCase()) {
+    case "ham": return "Safe";
+    case "spam": return "Risk";
+    case "phishing": return "High Risk";
+    case "support": return "Safe";
+    default: return "Unknown";
+  }
+}
+
+function resolveScore(raw) {
+  let s = typeof raw === "number" ? raw : parseFloat(raw);
+  if (Number.isNaN(s)) return 0.5;
+  if (s > 1 && s <= 100) s = s / 100;
+  return Math.max(0, Math.min(s, 1));
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = (value === null || value === undefined || value === "") ? "--" : value;
+}
+
+function setStatus(msg) {
+  const badge = document.getElementById("status");
+  if (badge) badge.textContent = msg;
+}
+
+function startClassification() {
+  const item = Office.context?.mailbox?.item;
+  if (!item) return setStatus("No email item available.");
 
   setStatus("Reading email...");
   item.body.getAsync(Office.CoercionType.Text, (result) => {
-    if (result.status === Office.AsyncResultStatus.Succeeded) {
-      const emailText = result.value || "";
-      const hasAttachment =
-        Array.isArray(item.attachments) && item.attachments.length > 0;
-
-      if (!emailText.trim()) {
-        setStatus("Email has no readable body text.");
-        showResult({
-          score: 0,
-          label: "ham",
-          display: "Ham (Safe)",
-          color: "green",
-          sender: "--",
-          links: "--",
-          content: "No content",
-          attachment: hasAttachment ? "Yes" : "No",
-        });
-        return;
-      }
-
-      classifyEmail(emailText, hasAttachment);
-    } else {
-      setStatus("Failed to read email body.");
+    if (result.status !== Office.AsyncResultStatus.Succeeded) {
+      return setStatus("Failed to read email body.");
     }
+
+    const emailText = result.value || "";
+    const hasAttachment = Array.isArray(item.attachments) && item.attachments.length > 0;
+
+    if (!emailText.trim()) {
+      return setStatus("Email has no readable body text.");
+    }
+
+    classifyEmail(emailText, hasAttachment);
   });
-});
+}
 
 function classifyEmail(emailText, hasAttachment) {
   setStatus("Classifying email...");
@@ -44,92 +152,34 @@ function classifyEmail(emailText, hasAttachment) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text: emailText,
-      attachment: hasAttachment ? "Yes" : "No",
+      attachment: hasAttachment ? "Yes" : "No"
     }),
   })
     .then(async (res) => {
       if (!res.ok) {
         const body = await res.text();
-        throw new Error(`Backend ${res.status}: ${body}`);
+        throw new Error(body || `HTTP ${res.status}`);
       }
       return res.json();
     })
     .then((data) => {
-      if (typeof data.attachment === "undefined") {
-        data.attachment = hasAttachment ? "Yes" : "No";
-      }
-      showResult(data);
+      const label = String(data.label || "unknown").toLowerCase();
+      const score = resolveScore(data.score);
+
+      showResult({
+        score,
+        label,
+        display: labelDisplay(label),
+        sender: data.sender,
+        links: data.links,
+        content: data.content,
+        attachment: data.attachment
+      });
+
+      setStatus("Classification complete.");
     })
     .catch((err) => {
-      console.error("Fetch error:", err);
-      setStatus("Error contacting backend");
+      console.error("Backend error:", err);
+      setStatus("Error contacting backend.");
     });
-}
-
-function showResult(data) {
-  const label = data.label || "unknown";
-  const score = Number(data.score) || 0;
-
-  // Use backend-provided display + color
-  const gaugeColor = data.color || "#00FF94";
-  const badgeText = data.display || label.toUpperCase();
-
-  // Animate gauge arc + needle based on confidence score
-  updateGauge(score, badgeText, gaugeColor);
-
-  // Update badge
-  const badge = document.querySelector(".status-badge");
-  if (badge) {
-    badge.innerText = badgeText;
-    badge.className = "status-badge"; // reset classes
-    if (label === "phishing") badge.classList.add("status-spam");
-    else if (label === "spam") badge.classList.add("status-medium");
-    else if (label === "support") badge.classList.add("status-support");
-    else badge.classList.add("status-safe");
-  }
-
-  // Show confidence score
-  const confidenceEl = document.getElementById("confidence");
-  if (confidenceEl) {
-    confidenceEl.innerText = `Confidence: ${Math.round(score * 100)}%`;
-  }
-
-  // Update analysis details
-  document.getElementById("sender").innerText = data.sender || "--";
-  document.getElementById("links").innerText = data.links || "--";
-  document.getElementById("keywords").innerText = data.content || "--";
-  document.getElementById("attachment").innerText = data.attachment || "--";
-}
-
-function updateGauge(score, label, color) {
-  const arc = document.getElementById("risk-arc");
-  const needle = document.getElementById("needle");
-  const scoreLabel = document.getElementById("score-label");
-  const scoreValue = document.getElementById("score-value");
-
-  // Animate arc fill (stroke-dashoffset)
-  const maxArc = 283; // half-circle length
-  const offset = maxArc - (score * maxArc);
-  if (arc) {
-    arc.style.strokeDashoffset = offset;
-    arc.style.stroke = color;
-  }
-
-  // Animate needle rotation
-  const angle = -90 + (score * 180); // map 0–1 to -90°–90°
-  if (needle) {
-    needle.setAttribute("transform", `rotate(${angle} 100 100)`);
-  }
-
-  // Update labels
-  if (scoreLabel) scoreLabel.textContent = label;
-  if (scoreValue) scoreValue.textContent = `${Math.round(score * 100)}%`;
-}
-
-function setStatus(message) {
-  const badge = document.querySelector(".status-badge");
-  if (badge) {
-    badge.innerText = message;
-    badge.className = "status-badge status-loading";
-  }
 }
