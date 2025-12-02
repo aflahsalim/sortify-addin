@@ -6,13 +6,13 @@ Office.onReady(() => {
 
     // Self-check: test rendering
     showResult({
-      score: 0.75,
-      label: "spam",
-      display: "Spam (Test)",
+      score: 0.2,
+      label: "ham",
+      display: "Ham (Safe)",
       sender: "debug@example.com",
-      links: "2 test links",
+      links: "None",
       content: "Debug content",
-      attachment: "No"
+      attachment: "Yes"
     });
 
     startClassification();
@@ -115,33 +115,38 @@ function showResult(data) {
   const label = data.label || "unknown";
   const score = resolveScore(data.score);
 
-  // Needle rotation
+  // Determine color based on score
+  let color = "#28a745"; // green
+  if (score >= 0.75) {
+    color = "#dc3545"; // red
+  } else if (score >= 0.67) {
+    color = "#00bfff"; // blue
+  } else if (score >= 0.34) {
+    color = "#fd7e14"; // orange
+  }
+
+  // Rotate needle
   const needle = document.getElementById("needle");
   if (needle) {
     const angle = -90 + score * 180;
     needle.setAttribute("transform", `rotate(${angle} 100 80)`);
   }
 
-  // Arc update
+  // Update arc
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
     arc.style.strokeDashoffset = arcLength - score * arcLength;
-
-    // Pick solid color based on score
-    let color = "#28a745"; // green
-    if (score >= 0.75) {
-      color = "#dc3545"; // red
-    } else if (score >= 0.67) {
-      color = "#00bfff"; // blue
-    } else if (score >= 0.34) {
-      color = "#fd7e14"; // orange
-    }
     arc.setAttribute("stroke", color);
   }
 
-  // Update labels
-  setText("score-label", data.display || labelDisplay(label));
+  // Update label and color
+  const labelEl = document.getElementById("score-label");
+  if (labelEl) {
+    labelEl.textContent = data.display || labelDisplay(label);
+    labelEl.style.color = color;
+  }
+
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
