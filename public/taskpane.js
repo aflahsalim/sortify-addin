@@ -135,11 +135,9 @@ function startClassification() {
 function classifyEmail(emailText, hasAttachment, item) {
   setStatus("Classifying email...");
 
-  // 🔗 Link detection
   const linkRegex = /(https?:\/\/[^\s]+)/gi;
   const hasLinks = linkRegex.test(emailText);
 
-  // ⚠️ Sender reputation
   const senderEmail = item?.from?.emailAddress?.address || "";
   const senderDomain = senderEmail.split("@")[1] || "";
   const isFreeDomain = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"].includes(senderDomain.toLowerCase());
