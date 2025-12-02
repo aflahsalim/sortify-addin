@@ -6,36 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sortify Add-in</title>
 
-  <!-- Office.js -->
   <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <!-- Styles -->
   <link href="taskpane.css" rel="stylesheet" type="text/css" />
-  <!-- Script -->
   <script defer src="taskpane.js"></script>
 </head>
 
 <body>
   <div class="container">
-    <!-- Gauge Section -->
     <section class="score-section glass-card">
       <div class="dial-gauge">
-        <svg id="gauge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
+        <svg id="gauge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" class="gauge-svg" aria-label="Risk gauge">
           <defs>
             <linearGradient id="arcGradient" gradientUnits="userSpaceOnUse" x1="10" y1="100" x2="190" y2="100">
-              <stop offset="0%" stop-color="#28a745"/>   <!-- green -->
-              <stop offset="33%" stop-color="#00bfff"/>  <!-- blue -->
-              <stop offset="66%" stop-color="#fd7e14"/>  <!-- orange/yellow -->
-              <stop offset="100%" stop-color="#dc3545"/> <!-- red -->
+              <stop offset="0%" stop-color="#28a745"/>
+              <stop offset="33%" stop-color="#00bfff"/>
+              <stop offset="66%" stop-color="#fd7e14"/>
+              <stop offset="100%" stop-color="#dc3545"/>
             </linearGradient>
           </defs>
 
-          <!-- Background arc -->
           <path d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
                 stroke="rgba(255,255,255,0.1)"
                 stroke-width="16" />
 
-          <!-- Risk arc -->
           <path id="risk-arc"
                 d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
@@ -45,12 +39,11 @@
                 stroke-dasharray="283"
                 stroke-dashoffset="283" />
 
-          <!-- Needle -->
           <line id="needle"
-                x1="100" y1="100" x2="100" y2="40"
+                x1="100" y1="90" x2="100" y2="50"
                 stroke="#e6e6e6"
                 stroke-width="3"
-                transform="rotate(-90 100 100)" />
+                transform="rotate(-90 100 90)" />
         </svg>
 
         <div class="risk-label">
@@ -63,7 +56,6 @@
       </div>
     </section>
 
-    <!-- Analysis Section -->
     <section class="analysis-section glass-card">
       <h2 class="section-title">Analysis Details</h2>
       <ul class="details-list">
