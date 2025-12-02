@@ -1,3 +1,10 @@
+/* Reset + box sizing to prevent padding inconsistencies */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
   --safe: #28a745;
   --medium: #fd7e14;
@@ -24,47 +31,42 @@ body {
   align-items: flex-start;
 }
 
+/* Container controls total width and top spacing */
 .container {
   width: 100%;
-  max-width: 328px;             /* Single source of width truth */
+  max-width: 328px;          /* single width source */
   margin: 0 auto;
-  padding: 0 16px;              /* Symmetric inner spacing */
-  box-sizing: border-box;
+  padding: 20px 16px 16px;   /* consistent top padding */
   display: flex;
   flex-direction: column;
   gap: 16px;
-  align-items: center;
 }
 
+/* Card with uniform inner padding */
 .card {
   width: 100%;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 14px;
-  padding: 16px;                /* Equal L/R padding */
-  box-sizing: border-box;       /* Prevents overflow from padding */
+  padding: 16px;             /* equal top/bottom/left/right */
   backdrop-filter: blur(10px);
   box-shadow: 0 6px 24px rgba(255,255,255,0.08);
 }
 
+/* Gauge section: remove any accidental extra top space */
 .gauge-card {
   display: flex;
   flex-direction: column;
-  align-items: center;          /* Gauge and badge centered */
-  text-align: center;
+  align-items: center;
 }
 
-.details-card {
-  display: flex;
-  flex-direction: column;
-}
-
+/* SVG: no top margin, only bottom spacing */
 .gauge-svg {
+  display: block;
   width: 100%;
   max-width: 260px;
   height: auto;
-  margin: 0 0 12px 0;
-  display: block;
+  margin: 0 0 12px 0;        /* bottom spacing only */
 }
 
 #risk-arc {
@@ -80,10 +82,11 @@ body {
   transition: transform 0.8s ease;
 }
 
+/* Label + badge spacing controlled for consistency */
 .result-label {
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin: 4px 0;             /* small, even top/bottom */
   letter-spacing: 0.5px;
 }
 
@@ -100,6 +103,12 @@ body {
   text-transform: uppercase;
 }
 
+/* Details card */
+.details-card {
+  display: flex;
+  flex-direction: column;
+}
+
 .details-section {
   display: flex;
   flex-direction: column;
@@ -112,7 +121,8 @@ body {
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: #e9eef6;
-  text-align: left;             /* Flush-left heading */
+  text-align: left;
+  margin: 0;                 /* remove default heading margins */
 }
 
 .details-list {
@@ -126,10 +136,10 @@ body {
 
 .details-list li {
   display: flex;
-  justify-content: space-between; /* Labels left, values right */
+  justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  padding: 10px 12px;            /* Balanced inner spacing */
+  padding: 10px 12px;
   background: rgba(255,255,255,0.03);
   border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.08);
@@ -146,7 +156,7 @@ body {
 .details-list li span:last-child {
   font-weight: 600;
   color: #e9eef6;
-  max-width: 50%;
+  max-width: 55%;
   text-align: right;
   overflow-wrap: anywhere;
 }
