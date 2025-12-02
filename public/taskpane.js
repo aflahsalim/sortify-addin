@@ -1,11 +1,10 @@
-console.log("✅ Gauge JS loaded v2025-12-02");
 /* global Office, document */
 
 Office.onReady(() => {
   waitForGauge(() => {
     initializeGaugeVisuals();
 
-    // Self-check: show visible arc & label to confirm rendering
+    // Self-check: test rendering
     showResult({
       score: 0.75,
       label: "spam",
@@ -32,19 +31,16 @@ function waitForGauge(callback) {
 
 function initializeGaugeVisuals() {
   const arc = document.getElementById("risk-arc");
-  const needle = document.getElementById("needle");
-
   if (arc) {
     const arcLength = arc.getTotalLength();
     arc.setAttribute("stroke-dasharray", arcLength);
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
-
-    arc.setAttribute("stroke", "url(#arcGradient)");
   }
 
+  const needle = document.getElementById("needle");
   if (needle) {
-    needle.setAttribute("transform", "rotate(-90 100 90)");
+    needle.setAttribute("transform", "rotate(-90 100 80)");
   }
 }
 
@@ -119,32 +115,32 @@ function showResult(data) {
   const label = data.label || "unknown";
   const score = resolveScore(data.score);
 
+  // Needle rotation
   const needle = document.getElementById("needle");
   if (needle) {
     const angle = -90 + score * 180;
-    needle.setAttribute("transform", `rotate(${angle} 100 90)`);
+    needle.setAttribute("transform", `rotate(${angle} 100 80)`);
   }
 
+  // Arc update
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
     arc.style.strokeDashoffset = arcLength - score * arcLength;
 
-    arc.setAttribute("stroke", "url(#arcGradient)");
-
+    // Pick solid color based on score
+    let color = "#28a745"; // green
     if (score >= 0.75) {
-      arc.classList.add("danger");
-    } else {
-      arc.classList.remove("danger");
+      color = "#dc3545"; // red
+    } else if (score >= 0.67) {
+      color = "#00bfff"; // blue
+    } else if (score >= 0.34) {
+      color = "#fd7e14"; // orange
     }
-
-    const computedStroke = arc.getAttribute("stroke");
-    if (!computedStroke || computedStroke !== "url(#arcGradient)") {
-      const color = score < 0.33 ? "#28a745" : score < 0.66 ? "#fd7e14" : "#dc3545";
-      arc.setAttribute("stroke", color);
-    }
+    arc.setAttribute("stroke", color);
   }
 
+  // Update labels
   setText("score-label", data.display || labelDisplay(label));
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
