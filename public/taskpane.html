@@ -2,42 +2,73 @@
 <html>
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sortify</title>
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <link rel="stylesheet" href="taskpane.css" />
-  <script defer src="taskpane.js"></script>
+  <title>Sortify Add-in</title>
+
+  <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link href="taskpane.css" rel="stylesheet" type="text/css" />
+  <script src="taskpane.js"></script>
 </head>
+
 <body>
   <div class="container">
-    <section class="glass-card gauge-card">
-      <svg id="gauge-svg" viewBox="0 0 200 80" class="gauge-svg">
-        <path d="M10,80 A90,90 0 0,1 190,80"
-              stroke="rgba(255,255,255,0.1)"
-              stroke-width="10" fill="none" />
-        <path id="risk-arc"
-              d="M10,80 A90,90 0 0,1 190,80"
-              stroke="#28a745"
-              stroke-width="10" fill="none"
-              stroke-linecap="round"
-              stroke-dasharray="283"
-              stroke-dashoffset="283" />
-        <line id="needle"
-              x1="100" y1="80" x2="100" y2="50"
-              stroke="#e6e6e6" stroke-width="3"
-              transform="rotate(-90 100 80)" />
-      </svg>
-      <div class="result-label" id="score-label">--</div>
-      <button class="result-button" id="result-button">--</button>
+    <section class="score-section glass-card">
+      <div class="dial-gauge">
+        <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg">
+          <!-- Background arc -->
+          <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="#333" stroke-width="20" />
+          <!-- Risk arc -->
+          <path id="risk-arc" d="M10,100 A90,90 0 0,1 190,100"
+                fill="none" stroke="#00FF94" stroke-width="20"
+                stroke-linecap="round" stroke-dasharray="283"
+                stroke-dashoffset="283" />
+          <!-- Needle -->
+          <line id="needle" x1="100" y1="100" x2="100" y2="20"
+                stroke="#ccc" stroke-width="4"
+                transform="rotate(-90 100 100)" />
+        </svg>
+        <div class="risk-label">
+          <div class="score-label" id="score-label">--</div>
+          <div class="score-value" id="score-value">--%</div>
+        </div>
+      </div>
+      <div class="classification-result">
+        <span class="status-badge status-loading" id="status">Loading...</span>
+      </div>
     </section>
 
-    <section class="glass-card">
-      <h3>Analysis Details</h3>
+    <section class="analysis-section">
+      <h2 class="section-title">Analysis Details</h2>
       <ul class="details-list">
-        <li><span>⚠️</span> Sender Reputation: <span id="sender">--</span></li>
-        <li><span>🔗</span> Link Analysis: <span id="links">--</span></li>
-        <li><span>📝</span> Content Check: <span id="keywords">--</span></li>
-        <li><span>📎</span> Attachment Found: <span id="attachment">--</span></li>
+        <li class="detail-item">
+          <span class="detail-icon">⚠️</span>
+          <div class="detail-content">
+            <span class="detail-label">Sender Reputation</span>
+            <span class="detail-value" id="sender">--</span>
+          </div>
+        </li>
+        <li class="detail-item">
+          <span class="detail-icon">🔗</span>
+          <div class="detail-content">
+            <span class="detail-label">Link Analysis</span>
+            <span class="detail-value" id="links">--</span>
+          </div>
+        </li>
+        <li class="detail-item">
+          <span class="detail-icon">📝</span>
+          <div class="detail-content">
+            <span class="detail-label">Content Check</span>
+            <span class="detail-value" id="keywords">--</span>
+          </div>
+        </li>
+        <li class="detail-item">
+          <span class="detail-icon">📎</span>
+          <div class="detail-content">
+            <span class="detail-label">Attachment Found</span>
+            <span class="detail-value" id="attachment">--</span>
+          </div>
+        </li>
       </ul>
     </section>
   </div>
