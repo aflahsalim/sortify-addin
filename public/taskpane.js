@@ -2,15 +2,23 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     const item = Office.context.mailbox.item;
     if (item) {
+      console.log("Mailbox item available:", item);
       showResult(item);
     } else {
-      console.warn("No mailbox item available.");
+      console.warn("No mailbox item found.");
     }
   }
 });
 
 function showResult(item) {
-  // ✅ Get sender email with fallback
+  // 🔍 Debug logs
+  console.log("Item:", item);
+  console.log("From:", item?.from);
+  console.log("Sender:", item?.sender);
+  console.log("Body:", item?.body);
+  console.log("Attachments:", item?.attachments);
+
+  // ✅ Sender reputation
   const senderEmail =
     item?.from?.emailAddress?.address ||
     item?.sender?.emailAddress?.address ||
