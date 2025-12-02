@@ -30,6 +30,7 @@ function showResult(data) {
   const angle = getFixedAngle(label);
   const fillRatio = getFillRatio(label);
 
+  // Needle + arc update
   const needle = document.getElementById("needle");
   if (needle) needle.setAttribute("transform", `rotate(${angle} 100 90)`);
 
@@ -40,12 +41,14 @@ function showResult(data) {
     arc.setAttribute("stroke", color);
   }
 
+  // Gauge label
   const labelEl = document.getElementById("score-label");
   if (labelEl) {
     labelEl.textContent = label.toUpperCase();
     labelEl.style.color = color;
   }
 
+  // Badge
   const badge = document.getElementById("result-button");
   if (badge) {
     badge.textContent = getBadgeText(label);
@@ -53,11 +56,41 @@ function showResult(data) {
     badge.style.color = "#000";
   }
 
-  setText("sender", data.sender);
-  setText("links", data.links);
-  setText("attachment", data.attachment);
+  // Analysis details
+  setText("sender", formatOrigin(data.sender));
+  setText("links", formatPresence(data.links));
+  setText("attachment", formatPresence(data.attachment));
+  setText("urgency", formatUrgency(label));
 }
 
+/* --- Professional formatting helpers --- */
+
+function formatOrigin(value) {
+  const val = String(value || "").toLowerCase();
+  if (val.includes("trusted")) return "Trusted";
+  if (val.includes("suspicious")) return "Suspicious";
+  return "Unknown";
+}
+
+function formatPresence(value) {
+  const val = String(value || "").toLowerCase();
+  if (val.includes("yes") || val.includes("link") || val.includes("present")) {
+    return "Detected";
+  }
+  return "None";
+}
+
+function formatUrgency(label) {
+  switch (label) {
+    case "phishing": return "Critical";
+    case "spam": return "Elevated";
+    case "ham":
+    case "support": return "Normal";
+    default: return "Unknown";
+  }
+}
+
+/* --- Badge text logic --- */
 function getBadgeText(label) {
   switch (label) {
     case "ham":
@@ -173,8 +206,8 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
       showResult({
         label,
         sender: senderReputation,
-        links: hasLinks ? "Links" : "No Links",
-        attachment: hasAttachment ? "Yes" : "No"
+        links: hasLinks ? "Present" : "Absent",
+        attachment: hasAttachment ? "Present" : "Absent"
       });
 
       setStatus("Classification complete.");
