@@ -1,145 +1,40 @@
-console.log("✅ Sortify JS restored");
 /* global Office, document */
 
 Office.onReady(() => {
-  waitForGauge(() => {
-    initializeGauge();
-
-    // Demo render (remove in production)
-    showResult({
-      score: 0.6,
-      label: "spam",
-      display: labelDisplay("spam"),
-      sender: "debug@example.com",
-      links: "None",
-      content: "Debug content",
-      attachment: "No"
-    });
-
-    startClassification();
-  });
-});
-
-function waitForGauge(callback) {
-  const arc = document.getElementById("risk-arc");
-  const needle = document.getElementById("needle");
-  if (arc && needle) callback();
-  else requestAnimationFrame(() => waitForGauge(callback));
-}
-
-function initializeGauge() {
-  const arc = document.getElementById("risk-arc");
-  if (arc) {
-    const len = arc.getTotalLength();
-    arc.setAttribute("stroke-dasharray", len);
-    arc.style.strokeDashoffset = len;
-    arc.dataset.arcLength = String(len);
-  }
-  const needle = document.getElementById("needle");
-  if (needle) {
-    needle.setAttribute("transform", "rotate(-90 100 80)");
-  }
-}
-
-function showResult(data) {
-  const score = resolveScore(data.score);
-  const label = (data.label || "unknown").toLowerCase();
-  const display = data.display || labelDisplay(label);
-  const color = getRiskColor(label);
-
-  // Rotate needle proportional to score
-  const needle = document.getElementById("needle");
-  if (needle) {
-    const angle = -90 + score * 180;
-    needle.setAttribute("transform", `rotate(${angle} 100 80)`);
-  }
-
-  // Arc stroke
-  const arc = document.getElementById("risk-arc");
-  if (arc) {
-    const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
-    arc.style.strokeDashoffset = len - score * len;
-    arc.setAttribute("stroke", color);
-  }
-
-  // Label
-  const labelEl = document.getElementById("score-label");
-  if (labelEl) {
-    labelEl.textContent = display;
-    labelEl.style.color = color;
-  }
-
-  // Button
-  const button = document.getElementById("result-button");
-  if (button) {
-    button.textContent = display.toUpperCase();
-    button.style.background = color;
-  }
-
-  // Details
-  setText("sender", data.sender);
-  setText("links", data.links);
-  setText("keywords", data.content);
-  setText("attachment", typeof data.attachment === "string" ? data.attachment : (data.attachment ? "Yes" : "No"));
-}
-
-function getRiskColor(label) {
-  switch ((label || "").toLowerCase()) {
-    case "ham": return "#28a745";       // Safe
-    case "spam": return "#fd7e14";      // Risk
-    case "phishing": return "#dc3545";  // High Risk
-    case "support": return "#00bfff";   // Safe (Support)
-    default: return "#6c757d";          // Unknown
-  }
-}
-
-function labelDisplay(label) {
-  switch ((label || "").toLowerCase()) {
-    case "ham": return "Safe";
-    case "spam": return "Risk";
-    case "phishing": return "High Risk";
-    case "support": return "Safe";
-    default: return "Unknown";
-  }
-}
-
-function resolveScore(raw) {
-  let s = typeof raw === "number" ? raw : parseFloat(raw);
-  if (Number.isNaN(s)) return 0.5;
-  if (s > 1 && s <= 100) s = s / 100;
-  return Math.max(0, Math.min(s, 1));
-}
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = (value === null || value === undefined || value === "") ? "--" : value;
-}
-
-function setStatus(msg) {
-  const badge = document.getElementById("status");
-  if (badge) badge.textContent = msg;
-}
-
-function startClassification() {
   const item = Office.context?.mailbox?.item;
-  if (!item) return setStatus("No email item available.");
+  if (!item) {
+    setStatus("No email item available.");
+    return;
+  }
 
   setStatus("Reading email...");
   item.body.getAsync(Office.CoercionType.Text, (result) => {
-    if (result.status !== Office.AsyncResultStatus.Succeeded) {
-      return setStatus("Failed to read email body.");
+    if (result.status === Office.AsyncResultStatus.Succeeded) {
+      const emailText = result.value || "";
+      const hasAttachment =
+        Array.isArray(item.attachments) && item.attachments.length > 0;
+
+      if (!emailText.trim()) {
+        setStatus("Email has no readable body text.");
+        showResult({
+          score: 0,
+          label: "ham",
+          display: "Ham (Safe)",
+          color: "green",
+          sender: "--",
+          links: "--",
+          content: "No content",
+          attachment: hasAttachment ? "Yes" : "No",
+        });
+        return;
+      }
+
+      classifyEmail(emailText, hasAttachment);
+    } else {
+      setStatus("Failed to read email body.");
     }
-
-    const emailText = result.value || "";
-    const hasAttachment = Array.isArray(item.attachments) && item.attachments.length > 0;
-
-    if (!emailText.trim()) {
-      return setStatus("Email has no readable body text.");
-    }
-
-    classifyEmail(emailText, hasAttachment);
   });
-}
+});
 
 function classifyEmail(emailText, hasAttachment) {
   setStatus("Classifying email...");
@@ -149,34 +44,106 @@ function classifyEmail(emailText, hasAttachment) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text: emailText,
-      attachment: hasAttachment ? "Yes" : "No"
+      attachment: hasAttachment ? "Yes" : "No",
     }),
   })
     .then(async (res) => {
       if (!res.ok) {
         const body = await res.text();
-        throw new Error(body || `HTTP ${res.status}`);
+        throw new Error(`Backend ${res.status}: ${body}`);
       }
       return res.json();
     })
     .then((data) => {
-      const label = String(data.label || "unknown").toLowerCase();
-      const score = resolveScore(data.score);
-
-      showResult({
-        score,
-        label,
-        display: labelDisplay(label),
-        sender: data.sender,
-        links: data.links,
-        content: data.content,
-        attachment: data.attachment
-      });
-
+      if (typeof data.attachment === "undefined") {
+        data.attachment = hasAttachment ? "Yes" : "No";
+      }
+      showResult(data);
       setStatus("Classification complete.");
     })
     .catch((err) => {
-      console.error("Backend error:", err);
-      setStatus("Error contacting backend.");
+      console.error("Fetch error:", err);
+      setStatus("Error contacting backend");
     });
+}
+
+function showResult(data) {
+  const label = data.label || "unknown";
+  const score = Number(data.score) || 0;
+
+  // Fixed needle angles by category
+  const angleMap = {
+    ham: -90,
+    support: -45,
+    spam: 45,
+    phishing: 90,
+    unknown: -90,
+  };
+  const needleAngle = angleMap[label] ?? -90;
+
+  // Color mapping from backend keywords to hex
+  const colorMap = {
+    green: "#28a745",
+    orange: "#fd7e14",
+    red: "#dc3545",
+    blue: "#007bff",
+  };
+  const gaugeColor = colorMap[data.color] || "#00FF94";
+
+  // Animate needle
+  const needle = document.getElementById("needle");
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
+  }
+
+  // Animate arc length by confidence + update color
+  const arc = document.getElementById("risk-arc");
+  if (arc) {
+    arc.setAttribute("stroke", gaugeColor);
+    const maxArc = 283; // half-circle path length used in SVG
+    const offset = maxArc - (score * maxArc); // 0 = full, maxArc = empty
+    arc.style.strokeDashoffset = offset;
+  }
+
+  // Update labels
+  const scoreLabel = document.getElementById("score-label");
+  const scoreValue = document.getElementById("score-value");
+  if (scoreLabel) scoreLabel.textContent = data.display || label.toUpperCase();
+  if (scoreValue) scoreValue.textContent = `${Math.round(score * 100)}%`;
+
+  // Confidence text
+  const confidenceEl = document.getElementById("confidence");
+  if (confidenceEl) {
+    confidenceEl.textContent = `Confidence: ${Math.round(score * 100)}%`;
+  }
+
+  // Update badge
+  const badge = document.getElementById("status");
+  if (badge) {
+    badge.textContent = data.display || label.toUpperCase();
+    badge.className = "status-badge"; // reset classes
+    if (label === "phishing") badge.classList.add("status-spam");
+    else if (label === "spam") badge.classList.add("status-medium");
+    else if (label === "support") badge.classList.add("status-support");
+    else badge.classList.add("status-safe");
+  }
+
+  // Update analysis details (placeholders until you compute these)
+  setText("sender", data.sender || "--");
+  setText("links", data.links || "--");
+  setText("keywords", data.content || "--");
+  setText("attachment", data.attachment || "--");
+}
+
+function setStatus(message) {
+  const badge = document.getElementById("status");
+  if (badge) {
+    badge.textContent = message;
+    badge.className = "status-badge status-loading";
+  }
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
