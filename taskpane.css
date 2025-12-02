@@ -1,34 +1,85 @@
+:root {
+  --safe: #28a745;
+  --medium: #fd7e14;
+  --support: #00bfff;
+  --spam: #dc3545;
+  --bg: #000000;
+  --text: #e9eef6;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
+  margin: 0;
+  font-family: Segoe UI, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+}
+
+.container {
+  max-width: 480px;
+  margin: auto;
 }
 
 .glass-card {
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 20px;
-}
-
-.gauge-svg #needle {
-  transition: transform 0.8s ease-in-out;
-}
-
-#gauge-svg #risk-arc {
-  transition: stroke 0.5s ease-in-out, stroke-dashoffset 0.8s ease-in-out;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 6px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 12px;
-  font-weight: bold;
-  margin-top: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(8px);
 }
 
-.status-safe { background: #28a745; color: white; }
-.status-support { background: #007bff; color: white; }
-.status-medium { background: #fd7e14; color: white; }
-.status-spam { background: #dc3545; color: white; }
-.status-loading { background: #6c757d; color: white; }
+.gauge-card {
+  text-align: center;
+  padding-bottom: 12px;
+}
+
+.gauge-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.gauge-svg {
+  width: 80px;
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+#risk-arc {
+  transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease;
+}
+
+#needle {
+  transition: transform 0.8s ease;
+}
+
+.result-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.result-button {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 12px;
+  color: white;
+  background: #6c757d;
+}
+
+.details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.details-list li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
