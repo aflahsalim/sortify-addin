@@ -7,11 +7,11 @@ Office.onReady(() => {
 
     // Test render (remove in production)
     showResult({
-      label: "phishing",
-      display: labelDisplay("phishing"),
-      sender: "--",
-      links: "--",
-      content: "--",
+      label: "support",
+      display: labelDisplay("support"),
+      sender: "support@company.com",
+      links: "No suspicious links",
+      content: "No phishing keywords",
       attachment: "No"
     });
 
@@ -76,10 +76,10 @@ function showResult(data) {
     button.style.background = color;
   }
 
-  // Details
-  setText("sender", data.sender);
-  setText("links", data.links);
-  setText("keywords", data.content);
+  // Details (with fallbacks)
+  setText("sender", data.sender || "Unknown");
+  setText("links", data.links || "No link data");
+  setText("keywords", data.content || "No keyword data");
   setText("attachment", typeof data.attachment === "string" ? data.attachment : (data.attachment ? "Yes" : "No"));
 }
 
