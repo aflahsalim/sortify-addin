@@ -30,6 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  align-items: center;
 }
 
 .glass-card {
@@ -39,6 +40,8 @@ body {
   padding: 20px;
   backdrop-filter: blur(8px);
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 300px;
 }
 
 .gauge-card {
