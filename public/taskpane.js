@@ -1,20 +1,8 @@
-console.log("✅ Sortify gauge logic loaded");
 /* global Office, document */
 
 Office.onReady(() => {
   waitForGauge(() => {
     initializeGauge();
-
-    // Test render (remove in production)
-    showResult({
-      label: "support",
-      display: labelDisplay("support"),
-      sender: "support@company.com",
-      links: "No suspicious links",
-      content: "No phishing keywords",
-      attachment: "No"
-    });
-
     startClassification();
   });
 });
@@ -37,7 +25,7 @@ function initializeGauge() {
 
   const needle = document.getElementById("needle");
   if (needle) {
-    needle.setAttribute("transform", "rotate(-90 100 80)");
+    needle.setAttribute("transform", "rotate(-90 100 90)");
   }
 }
 
@@ -51,10 +39,10 @@ function showResult(data) {
   // Rotate needle
   const needle = document.getElementById("needle");
   if (needle) {
-    needle.setAttribute("transform", `rotate(${angle} 100 80)`);
+    needle.setAttribute("transform", `rotate(${angle} 100 90)`);
   }
 
-  // Fill arc up to needle
+  // Fill arc
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
@@ -62,24 +50,24 @@ function showResult(data) {
     arc.setAttribute("stroke", color);
   }
 
-  // Label (classification type)
+  // Label
   const labelEl = document.getElementById("score-label");
   if (labelEl) {
-    labelEl.textContent = label.toUpperCase(); // e.g., PHISHING
+    labelEl.textContent = label.toUpperCase();
     labelEl.style.color = color;
   }
 
-  // Button (risk level)
+  // Button
   const button = document.getElementById("result-button");
   if (button) {
-    button.textContent = display.toUpperCase(); // e.g., HIGH RISK
+    button.textContent = display.toUpperCase();
     button.style.background = color;
   }
 
-  // Details (with fallbacks)
-  setText("sender", data.sender || "Unknown");
-  setText("links", data.links || "No link data");
-  setText("keywords", data.content || "No keyword data");
+  // Details
+  setText("sender", data.sender);
+  setText("links", data.links);
+  setText("keywords", data.content);
   setText("attachment", typeof data.attachment === "string" ? data.attachment : (data.attachment ? "Yes" : "No"));
 }
 
@@ -125,7 +113,8 @@ function getFillRatio(label) {
 
 function setText(id, value) {
   const el = document.getElementById(id);
-  if (el) el.textContent = value || "--";
+  if (!el) return;
+  el.textContent = value || "--";
 }
 
 function setStatus(msg) {
@@ -147,12 +136,29 @@ function startClassification() {
 
     if (!emailText.trim()) return setStatus("Email has no readable body text.");
 
-    classifyEmail(emailText, hasAttachment);
+    classifyEmail(emailText, hasAttachment, item);
   });
 }
 
-function classifyEmail(emailText, hasAttachment) {
+function classifyEmail(emailText, hasAttachment, item) {
   setStatus("Classifying email...");
+
+  // 🔗 Link detection
+  const linkRegex = /(https?:\/\/[^\s]+)/gi;
+  const hasLinks = linkRegex.test(emailText);
+
+  // 📄 Keyword detection
+  const keywordList = ["login", "verify", "credentials", "reset", "urgent", "click here", "account", "password"];
+  const keywordHits = keywordList.filter(word => emailText.toLowerCase().includes(word));
+  const hasKeywords = keywordHits.length > 0;
+
+  // ⚠️ Sender reputation
+  const senderEmail = item?.from?.emailAddress?.address || "";
+  const senderDomain = senderEmail.split("@")[1] || "";
+  const isFreeDomain = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"].includes(senderDomain.toLowerCase());
+  const senderReputation = senderEmail
+    ? (isFreeDomain ? "Suspicious domain" : "Reputable domain")
+    : "Unknown";
 
   fetch("https://sortify-y7ru.onrender.com/classify", {
     method: "POST",
@@ -175,10 +181,10 @@ function classifyEmail(emailText, hasAttachment) {
       showResult({
         label,
         display: labelDisplay(label),
-        sender: data.sender,
-        links: data.links,
-        content: data.content,
-        attachment: data.attachment
+        sender: senderReputation,
+        links: hasLinks ? "Link(s) found" : "No links detected",
+        content: hasKeywords ? "Suspicious keywords found" : "No keyword data",
+        attachment: hasAttachment ? "Yes" : "No"
       });
 
       setStatus("Classification complete.");
