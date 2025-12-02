@@ -1,158 +1,107 @@
-console.log("✅ Sortify frontend loaded");
-/* global Office, document */
-
-Office.onReady(() => {
-  waitForGauge(() => {
-    initializeGauge();
-
-    // Optional: test rendering
-    showResult({
-      score: 0.2,
-      label: "ham",
-      display: "Ham (Safe)",
-      sender: "debug@example.com",
-      links: "None",
-      content: "Debug content",
-      attachment: "Yes"
-    });
-
-    startClassification();
-  });
-});
-
-function waitForGauge(callback) {
-  const arc = document.getElementById("risk-arc");
-  const needle = document.getElementById("needle");
-  if (arc && needle) callback();
-  else requestAnimationFrame(() => waitForGauge(callback));
-}
-
-function initializeGauge() {
-  const arc = document.getElementById("risk-arc");
-  if (arc) {
-    const len = arc.getTotalLength();
-    arc.setAttribute("stroke-dasharray", len);
-    arc.style.strokeDashoffset = len;
-    arc.dataset.arcLength = len;
-  }
-
-  const needle = document.getElementById("needle");
-  if (needle) {
-    needle.setAttribute("transform", "rotate(-90 100 80)");
-  }
-}
-
-function showResult(data) {
-  const score = resolveScore(data.score);
-  const color = getRiskColor(score);
-
-  // Rotate needle
-  const needle = document.getElementById("needle");
-  if (needle) {
-    const angle = -90 + score * 180;
-    needle.setAttribute("transform", `rotate(${angle} 100 80)`);
-  }
-
-  // Animate arc
-  const arc = document.getElementById("risk-arc");
-  if (arc) {
-    const len = parseFloat(arc.dataset.arcLength);
-    arc.style.strokeDashoffset = len - score * len;
-    arc.setAttribute("stroke", color);
-  }
-
-  // Update label
-  const label = document.getElementById("score-label");
-  if (label) {
-    label.textContent = data.display || labelDisplay(data.label);
-    label.style.color = color;
-  }
-
-  // Update analysis details
-  setText("sender", data.sender);
-  setText("links", data.links);
-  setText("keywords", data.content);
-  setText("attachment", data.attachment);
-}
-
-function getRiskColor(score) {
-  if (score >= 0.75) return "#dc3545"; // red
-  if (score >= 0.67) return "#00bfff"; // blue
-  if (score >= 0.34) return "#fd7e14"; // orange
-  return "#28a745"; // green
-}
-
-function resolveScore(raw) {
-  let s = typeof raw === "number" ? raw : parseFloat(raw);
-  if (isNaN(s)) return 0.5;
-  if (s > 1 && s <= 100) s /= 100;
-  return Math.max(0, Math.min(s, 1));
-}
-
-function labelDisplay(label) {
-  switch ((label || "").toLowerCase()) {
-    case "ham": return "Ham (Safe)";
-    case "support": return "Support Ticket";
-    case "spam": return "Spam";
-    case "phishing": return "Phishing";
-    default: return "Unknown";
-  }
-}
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value || "--";
-}
-
-function setStatus(msg) {
-  const badge = document.getElementById("status");
-  if (badge) badge.textContent = msg;
-}
-
-function startClassification() {
-  const item = Office.context?.mailbox?.item;
-  if (!item) return setStatus("No email item available.");
-
-  setStatus("Reading email...");
-  item.body.getAsync(Office.CoercionType.Text, (result) => {
-    if (result.status !== Office.AsyncResultStatus.Succeeded)
-      return setStatus("Failed to read email body.");
-
-    const emailText = result.value || "";
-    const hasAttachment = Array.isArray(item.attachments) && item.attachments.length > 0;
-
-    if (!emailText.trim()) return setStatus("Email has no readable body text.");
-
-    classifyEmail(emailText, hasAttachment);
-  });
-}
-
-function classifyEmail(emailText, hasAttachment) {
-  setStatus("Classifying email...");
-
-  fetch("https://sortify-y7ru.onrender.com/classify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: emailText,
-      attachment: hasAttachment ? "Yes" : "No"
-    }),
-  })
-    .then(res => res.ok ? res.json() : res.text().then(body => { throw new Error(body); }))
-    .then(data => {
-      showResult({
-        score: resolveScore(data.score),
-        label: data.label,
-        display: data.display || labelDisplay(data.label),
-        sender: data.sender,
-        links: data.links,
-        content: data.content,
-        attachment: data.attachment ? "Yes" : "No"
-      });
-      setStatus("Classification complete.");
-    })
-    .catch(err => {
-      console.error("Error:", err);
-      setStatus("Error contacting backend.");
-    });
-}
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" xsi:type="MailApp">
+  <Id>c5f819cd-8f58-4a03-bfd8-188e1b5f7ead</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Contoso</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="sortify"/>
+  <Description DefaultValue="A template to get started."/>
+  <IconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png"/>
+  <SupportUrl DefaultValue="https://www.contoso.com/help"/>
+  <AppDomains>
+    <AppDomain>https://www.contoso.com</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Mailbox"/>
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+        <RequestedHeight>250</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadWriteItem</Permissions>
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
+  </Rule>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Requirements>
+      <bt:Sets DefaultMinVersion="1.3">
+        <bt:Set Name="Mailbox"/>
+      </bt:Sets>
+    </Requirements>
+    <Hosts>
+      <Host xsi:type="MailHost">
+        <DesktopFormFactor>
+          <FunctionFile resid="Commands.Url"/>
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="msgReadGroup">
+                <Label resid="GroupLabel"/>
+                <Control xsi:type="Button" id="msgReadOpenPaneButton">
+                  <Label resid="TaskpaneButton.Label"/>
+                  <Supertip>
+                    <Title resid="TaskpaneButton.Label"/>
+                    <Description resid="TaskpaneButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="ActionButton">
+                  <Label resid="ActionButton.Label"/>
+                  <Supertip>
+                    <Title resid="ActionButton.Label"/>
+                    <Description resid="ActionButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>action</FunctionName>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GroupLabel" DefaultValue="Contoso Add-in"/>
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Show Task Pane"/>
+        <bt:String id="ActionButton.Label" DefaultValue="Perform an action"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Opens a pane displaying all available properties."/>
+        <bt:String id="ActionButton.Tooltip" DefaultValue="Perform an action when clicked."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
