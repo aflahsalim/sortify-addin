@@ -65,7 +65,7 @@ body {
 }
 
 .gauge-svg path:first-child {
-  stroke-width: 12;
+  stroke-width: 16;
 }
 
 #needle {
@@ -79,15 +79,17 @@ body {
   letter-spacing: 0.5px;
 }
 
-.result-button {
+.risk-badge {
+  display: inline-block;
   padding: 6px 16px;
-  border: none;
-  border-radius: 10px;
+  border-radius: 20px;
   font-weight: 600;
   font-size: 12px;
-  color: white;
-  background: #6c757d;
-  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  color: #000;
+  background: #ffdd57;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  margin-top: 6px;
+  text-transform: uppercase;
 }
 
 .details-section {
