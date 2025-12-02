@@ -39,12 +39,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .gauge-svg {
-  width: 140px;
-  height: 80px;
+  width: 120px;
+  height: 60px;
   display: block;
   margin: 0 auto;
 }
@@ -54,11 +54,8 @@ body {
 }
 
 #gauge-svg #risk-arc {
-  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-#gauge-svg #risk-arc.danger {
-  filter: drop-shadow(0 0 6px var(--spam));
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+              stroke 0.3s ease-in-out;
 }
 
 .risk-label {
@@ -67,7 +64,7 @@ body {
 
 #score-label {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text);
 }
 
