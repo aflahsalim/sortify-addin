@@ -21,7 +21,6 @@
       <div class="dial-gauge">
         <svg id="gauge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
           <defs>
-            <!-- Multi-stop gradient: green → blue → yellow → red -->
             <linearGradient id="arcGradient" gradientUnits="userSpaceOnUse" x1="10" y1="100" x2="190" y2="100">
               <stop offset="0%" stop-color="#28a745"/>   <!-- green -->
               <stop offset="33%" stop-color="#00bfff"/>  <!-- blue -->
@@ -34,33 +33,31 @@
           <path d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
                 stroke="rgba(255,255,255,0.1)"
-                stroke-width="20" />
+                stroke-width="16" />
 
           <!-- Risk arc -->
           <path id="risk-arc"
                 d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
                 stroke="url(#arcGradient)"
-                stroke-width="20"
+                stroke-width="16"
                 stroke-linecap="round"
                 stroke-dasharray="283"
                 stroke-dashoffset="283" />
 
           <!-- Needle -->
           <line id="needle"
-                x1="100" y1="100" x2="100" y2="30"
+                x1="100" y1="100" x2="100" y2="40"
                 stroke="#e6e6e6"
-                stroke-width="4"
+                stroke-width="3"
                 transform="rotate(-90 100 100)" />
         </svg>
 
-        <!-- Label -->
         <div class="risk-label">
           <div class="score-label" id="score-label">--</div>
         </div>
       </div>
 
-      <!-- Classification result -->
       <div class="classification-result">
         <span class="status-badge status-loading" id="status">Loading...</span>
       </div>
