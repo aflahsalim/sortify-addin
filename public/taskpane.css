@@ -136,6 +136,16 @@ body {
   text-transform: uppercase;
 }
 
+/* ✅ Smooth transitions restored */
+#needle {
+  transition: transform 0.8s ease-in-out;
+}
+
+#risk-arc {
+  transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.3s ease;
+  stroke-width: 16;
+}
+
 .logo-section {
   display: flex;
   justify-content: center;
