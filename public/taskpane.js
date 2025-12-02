@@ -1,4 +1,3 @@
-console.log("✅ Gauge JS loaded v2025-12-02");
 /* global Office, document */
 
 Office.onReady(() => {
