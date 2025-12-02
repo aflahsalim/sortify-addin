@@ -52,10 +52,11 @@ function showResult(data) {
     labelEl.style.color = color;
   }
 
-  const button = document.getElementById("result-button");
-  if (button) {
-    button.textContent = display.toUpperCase();
-    button.style.background = color;
+  const badge = document.getElementById("result-button");
+  if (badge) {
+    badge.textContent = display.toUpperCase();
+    badge.style.background = color;
+    badge.style.color = label === "phishing" || label === "spam" ? "#000" : "#fff";
   }
 
   setText("sender", data.sender);
@@ -77,7 +78,7 @@ function labelDisplay(label) {
   switch (label) {
     case "ham": return "Safe";
     case "support": return "Safe";
-    case "spam": return "Risk";
+    case "spam": return "Spam";
     case "phishing": return "High Risk";
     default: return "Unknown";
   }
