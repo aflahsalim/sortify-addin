@@ -40,7 +40,7 @@ function initializeGaugeVisuals() {
     arc.style.strokeDashoffset = arcLength;
     arc.dataset.arcLength = arcLength;
 
-    // Ensure attribute form for gradient reference
+    // Ensure gradient reference
     arc.setAttribute("stroke", "url(#arcGradient)");
   }
 
@@ -131,17 +131,25 @@ function showResult(data) {
     const arcLength = parseFloat(arc.dataset.arcLength) || arc.getTotalLength();
     arc.style.strokeDashoffset = arcLength - score * arcLength;
 
-    // Fallback if gradient fails: map color by score
-    const gradientRef = "url(#arcGradient)";
+    // Always try to use gradient
+    arc.setAttribute("stroke", "url(#arcGradient)");
+
+    // Toggle glow if in danger zone
+    if (score >= 0.75) {
+      arc.classList.add("danger");
+    } else {
+      arc.classList.remove("danger");
+    }
+
+    // Fallback coloring if gradient fails
     const computedStroke = arc.getAttribute("stroke");
-    if (!computedStroke || computedStroke !== gradientRef) {
+    if (!computedStroke || computedStroke !== "url(#arcGradient)") {
       const color = score < 0.33 ? "#28a745" : score < 0.66 ? "#fd7e14" : "#dc3545";
       arc.setAttribute("stroke", color);
     }
   }
 
   setText("score-label", data.display || labelDisplay(label));
-
   setText("sender", data.sender || "--");
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
