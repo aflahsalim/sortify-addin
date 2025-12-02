@@ -3,7 +3,7 @@
   --medium: #fd7e14;
   --support: #00bfff;
   --spam: #dc3545;
-  --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  --bg: #000000;
   --text: #e9eef6;
 }
 
@@ -12,7 +12,7 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: Segoe UI, sans-serif;
-  background: var(--bg-gradient);
+  background: var(--bg);
   color: var(--text);
   font-size: 13px;
   overflow-x: hidden;
@@ -26,37 +26,44 @@ body {
 
 .container {
   width: 100%;
-  max-width: 320px;
-  padding: 20px;
+  max-width: 328px;             /* Single source of width truth */
+  margin: 0 auto;
+  padding: 0 16px;              /* Symmetric inner spacing */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 }
 
-.glass-card {
+.card {
+  width: 100%;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 14px;
-  padding: 20px;
+  padding: 16px;                /* Equal L/R padding */
+  box-sizing: border-box;       /* Prevents overflow from padding */
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 16px rgba(0,255,128,0.15);
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
+  box-shadow: 0 6px 24px rgba(255,255,255,0.08);
 }
 
 .gauge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;          /* Gauge and badge centered */
   text-align: center;
-  padding-bottom: 10px;
+}
+
+.details-card {
+  display: flex;
+  flex-direction: column;
 }
 
 .gauge-svg {
   width: 100%;
   max-width: 260px;
   height: auto;
-  margin: 0 auto 18px;
+  margin: 0 0 12px 0;
   display: block;
 }
 
@@ -89,24 +96,23 @@ body {
   color: #000;
   background: #ffdd57;
   box-shadow: 0 0 6px rgba(0,0,0,0.2);
-  margin-top: 6px;
+  margin-top: 4px;
   text-transform: uppercase;
 }
 
 .details-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .details-heading {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.8px;
-  margin-bottom: 6px;
   text-transform: uppercase;
   color: #e9eef6;
-  text-align: left;
+  text-align: left;             /* Flush-left heading */
 }
 
 .details-list {
@@ -115,15 +121,15 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .details-list li {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Labels left, values right */
   align-items: center;
   font-size: 13px;
-  padding: 10px 14px;
+  padding: 10px 12px;            /* Balanced inner spacing */
   background: rgba(255,255,255,0.03);
   border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.08);
@@ -140,4 +146,7 @@ body {
 .details-list li span:last-child {
   font-weight: 600;
   color: #e9eef6;
+  max-width: 50%;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
