@@ -21,7 +21,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-size: 13px;
-  overflow: hidden; /* ✅ disables scroll */
+  overflow: hidden;
 }
 
 body {
@@ -42,12 +42,11 @@ body {
 
 .card {
   width: 100%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: #111; /* ✅ solid background, no glass */
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
   padding: 16px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 6px 24px rgba(255,255,255,0.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
 }
 
 .gauge-card {
@@ -70,6 +69,10 @@ body {
   flex-direction: column;
   padding: 16px;
   gap: 14px;
+  background: #111; /* ✅ solid background */
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
 }
 
 .details-section {
@@ -98,25 +101,29 @@ body {
 
 .details-list li {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
   font-size: 13px;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.03);
+  background: #1a1a1a;
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.08);
   line-height: 1.5;
+  flex-wrap: wrap; /* ✅ allows wrapping for long labels */
 }
 
 .details-list li span:first-child {
   font-weight: 500;
   color: #ccc;
+  flex: 1 1 45%; /* ✅ label side takes up to 45% */
+  min-width: 120px;
 }
 
 .details-list li span:last-child {
   font-weight: 600;
   color: #e9eef6;
-  max-width: 55%;
+  flex: 1 1 50%; /* ✅ value side takes up to 50% */
   text-align: right;
   overflow-wrap: anywhere;
 }
@@ -141,7 +148,6 @@ body {
   text-transform: uppercase;
 }
 
-/* ✅ Smooth transitions */
 #needle {
   transition: transform 0.8s ease-in-out;
 }
