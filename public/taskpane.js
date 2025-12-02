@@ -1,5 +1,3 @@
-/* global Office, document */
-
 Office.onReady(() => {
   waitForGauge(() => {
     initializeGauge();
@@ -36,13 +34,11 @@ function showResult(data) {
   const angle = getFixedAngle(label);
   const fillRatio = getFillRatio(label);
 
-  // Rotate needle
   const needle = document.getElementById("needle");
   if (needle) {
     needle.setAttribute("transform", `rotate(${angle} 100 90)`);
   }
 
-  // Fill arc
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
@@ -50,34 +46,30 @@ function showResult(data) {
     arc.setAttribute("stroke", color);
   }
 
-  // Label
   const labelEl = document.getElementById("score-label");
   if (labelEl) {
     labelEl.textContent = label.toUpperCase();
     labelEl.style.color = color;
   }
 
-  // Button
   const button = document.getElementById("result-button");
   if (button) {
     button.textContent = display.toUpperCase();
     button.style.background = color;
   }
 
-  // Details
   setText("sender", data.sender);
   setText("links", data.links);
-  setText("keywords", data.content);
-  setText("attachment", typeof data.attachment === "string" ? data.attachment : (data.attachment ? "Yes" : "No"));
+  setText("attachment", data.attachment);
 }
 
 function getRiskColor(label) {
   switch (label) {
-    case "ham": return "#28a745";       // Green
-    case "support": return "#00bfff";   // Blue
-    case "spam": return "#fd7e14";      // Orange
-    case "phishing": return "#dc3545";  // Red
-    default: return "#6c757d";          // Gray
+    case "ham": return "#28a745";
+    case "support": return "#00bfff";
+    case "spam": return "#fd7e14";
+    case "phishing": return "#dc3545";
+    default: return "#6c757d";
   }
 }
 
@@ -147,17 +139,12 @@ function classifyEmail(emailText, hasAttachment, item) {
   const linkRegex = /(https?:\/\/[^\s]+)/gi;
   const hasLinks = linkRegex.test(emailText);
 
-  // 📄 Keyword detection
-  const keywordList = ["login", "verify", "credentials", "reset", "urgent", "click here", "account", "password"];
-  const keywordHits = keywordList.filter(word => emailText.toLowerCase().includes(word));
-  const hasKeywords = keywordHits.length > 0;
-
   // ⚠️ Sender reputation
   const senderEmail = item?.from?.emailAddress?.address || "";
   const senderDomain = senderEmail.split("@")[1] || "";
   const isFreeDomain = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"].includes(senderDomain.toLowerCase());
   const senderReputation = senderEmail
-    ? (isFreeDomain ? "Suspicious domain" : "Reputable domain")
+    ? (isFreeDomain ? "Suspicious" : "Trusted")
     : "Unknown";
 
   fetch("https://sortify-y7ru.onrender.com/classify", {
@@ -182,8 +169,7 @@ function classifyEmail(emailText, hasAttachment, item) {
         label,
         display: labelDisplay(label),
         sender: senderReputation,
-        links: hasLinks ? "Link(s) found" : "No links detected",
-        content: hasKeywords ? "Suspicious keywords found" : "No keyword data",
+        links: hasLinks ? "Links" : "No Links",
         attachment: hasAttachment ? "Yes" : "No"
       });
 
