@@ -6,28 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sortify Add-in</title>
 
+  <!-- Office.js -->
   <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <!-- Styles -->
   <link href="taskpane.css" rel="stylesheet" type="text/css" />
+  <!-- Script -->
   <script defer src="taskpane.js"></script>
 </head>
 
 <body>
   <div class="container">
+    <!-- Gauge Section -->
     <section class="score-section glass-card">
       <div class="dial-gauge">
         <svg id="gauge-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
           <defs>
+            <!-- Multi-stop gradient: green → blue → yellow → red -->
             <linearGradient id="arcGradient" gradientUnits="userSpaceOnUse" x1="10" y1="100" x2="190" y2="100">
-              <stop offset="0%" stop-color="#28a745"/>
-              <stop offset="50%" stop-color="#fd7e14"/>
-              <stop offset="100%" stop-color="#dc3545"/>
+              <stop offset="0%" stop-color="#28a745"/>   <!-- green -->
+              <stop offset="33%" stop-color="#00bfff"/>  <!-- blue -->
+              <stop offset="66%" stop-color="#fd7e14"/>  <!-- orange/yellow -->
+              <stop offset="100%" stop-color="#dc3545"/> <!-- red -->
             </linearGradient>
           </defs>
 
           <!-- Background arc -->
           <path d="M10,100 A90,90 0 0,1 190,100"
                 fill="none"
-                stroke="#2a2a2a"
+                stroke="rgba(255,255,255,0.1)"
                 stroke-width="20" />
 
           <!-- Risk arc -->
@@ -42,23 +48,26 @@
 
           <!-- Needle -->
           <line id="needle"
-                x1="100" y1="100" x2="100" y2="20"
+                x1="100" y1="100" x2="100" y2="30"
                 stroke="#e6e6e6"
                 stroke-width="4"
                 transform="rotate(-90 100 100)" />
         </svg>
 
+        <!-- Label -->
         <div class="risk-label">
           <div class="score-label" id="score-label">--</div>
         </div>
       </div>
 
+      <!-- Classification result -->
       <div class="classification-result">
         <span class="status-badge status-loading" id="status">Loading...</span>
       </div>
     </section>
 
-    <section class="analysis-section">
+    <!-- Analysis Section -->
+    <section class="analysis-section glass-card">
       <h2 class="section-title">Analysis Details</h2>
       <ul class="details-list">
         <li class="detail-item">
