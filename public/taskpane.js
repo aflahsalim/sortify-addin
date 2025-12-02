@@ -7,8 +7,8 @@ Office.onReady(() => {
 
     // Test render (remove in production)
     showResult({
-      label: "support",
-      display: labelDisplay("support"),
+      label: "phishing",
+      display: labelDisplay("phishing"),
       sender: "--",
       links: "--",
       content: "--",
@@ -62,17 +62,17 @@ function showResult(data) {
     arc.setAttribute("stroke", color);
   }
 
-  // Label
+  // Label (classification type)
   const labelEl = document.getElementById("score-label");
   if (labelEl) {
-    labelEl.textContent = display;
+    labelEl.textContent = label.toUpperCase(); // e.g., PHISHING
     labelEl.style.color = color;
   }
 
-  // Button
+  // Button (risk level)
   const button = document.getElementById("result-button");
   if (button) {
-    button.textContent = display.toUpperCase();
+    button.textContent = display.toUpperCase(); // e.g., HIGH RISK
     button.style.background = color;
   }
 
