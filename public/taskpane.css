@@ -120,7 +120,7 @@ body {
 .result-label {
   font-size: 13px;
   font-weight: 600;
-  margin: 4px 0;
+  margin: 4px 0 10px 0; /* ✅ extra bottom spacing */
   letter-spacing: 0.5px;
 }
 
