@@ -1,5 +1,12 @@
-Office.onReady(() => {
-  // Office is ready
+Office.onReady((info) => {
+  if (info.host === Office.HostType.Outlook) {
+    const item = Office.context.mailbox.item;
+    if (item) {
+      showResult(item);
+    } else {
+      console.warn("No mailbox item available.");
+    }
+  }
 });
 
 function showResult(item) {
@@ -18,19 +25,18 @@ function showResult(item) {
     ? (isFreeDomain ? "Suspicious" : "Trusted")
     : "Unknown";
 
-  // ✅ Update UI
   document.getElementById("sender").textContent = senderReputation;
 
-  // Hyperlink assessment
+  // ✅ Hyperlink assessment
   const body = item?.body?.text || "";
   const hasLinks = body.includes("http://") || body.includes("https://");
   document.getElementById("links").textContent = hasLinks ? "Detected" : "None";
 
-  // File assessment
+  // ✅ File assessment
   const attachments = item?.attachments || [];
   document.getElementById("attachment").textContent = attachments.length > 0 ? "Found" : "None";
 
-  // Urgency assessment
+  // ✅ Urgency assessment
   const urgencyKeywords = ["urgent", "immediately", "critical", "asap"];
   const urgencyLevel = urgencyKeywords.some((kw) => body.toLowerCase().includes(kw))
     ? "Critical"
@@ -76,6 +82,3 @@ function showResult(item) {
     resultButton.style.background = "#dc3545";
   }
 }
-
-// ✅ Run when item is ready
-Office.context.mailbox.item && showResult(Office.context.mailbox.item);
