@@ -83,12 +83,17 @@ body {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  gap: 12px;
 }
 
 .details-list li {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 15px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
 }
