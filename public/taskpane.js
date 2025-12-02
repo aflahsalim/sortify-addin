@@ -1,18 +1,17 @@
-console.log("✅ Sortify JS loaded");
+console.log("✅ Sortify gauge logic loaded");
 /* global Office, document */
 
 Office.onReady(() => {
   waitForGauge(() => {
     initializeGauge();
 
-    // Optional test render
+    // Test render (remove in production)
     showResult({
-      score: 0.99,
       label: "support",
       display: labelDisplay("support"),
-      sender: "debug@example.com",
-      links: "None",
-      content: "Debug content",
+      sender: "--",
+      links: "--",
+      content: "--",
       attachment: "No"
     });
 
@@ -43,15 +42,15 @@ function initializeGauge() {
 }
 
 function showResult(data) {
-  const score = resolveScore(data.score);
   const label = (data.label || "unknown").toLowerCase();
   const display = data.display || labelDisplay(label);
   const color = getRiskColor(label);
+  const angle = getFixedAngle(label);
+  const fillRatio = getFillRatio(label);
 
   // Rotate needle
   const needle = document.getElementById("needle");
   if (needle) {
-    const angle = -90 + score * 180;
     needle.setAttribute("transform", `rotate(${angle} 100 80)`);
   }
 
@@ -59,7 +58,7 @@ function showResult(data) {
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
-    arc.style.strokeDashoffset = len - score * len;
+    arc.style.strokeDashoffset = len - fillRatio * len;
     arc.setAttribute("stroke", color);
   }
 
@@ -85,30 +84,43 @@ function showResult(data) {
 }
 
 function getRiskColor(label) {
-  switch ((label || "").toLowerCase()) {
-    case "ham": return "#28a745";       // Safe
-    case "spam": return "#fd7e14";      // Risk
-    case "phishing": return "#dc3545";  // High Risk
-    case "support": return "#00bfff";   // Safe (Support)
-    default: return "#6c757d";          // Unknown
+  switch (label) {
+    case "ham": return "#28a745";       // Green
+    case "support": return "#00bfff";   // Blue
+    case "spam": return "#fd7e14";      // Orange
+    case "phishing": return "#dc3545";  // Red
+    default: return "#6c757d";          // Gray
   }
 }
 
 function labelDisplay(label) {
-  switch ((label || "").toLowerCase()) {
+  switch (label) {
     case "ham": return "Safe";
+    case "support": return "Safe";
     case "spam": return "Risk";
     case "phishing": return "High Risk";
-    case "support": return "Safe";
     default: return "Unknown";
   }
 }
 
-function resolveScore(raw) {
-  let s = typeof raw === "number" ? raw : parseFloat(raw);
-  if (isNaN(s)) return 0.5;
-  if (s > 1 && s <= 100) s /= 100;
-  return Math.max(0, Math.min(s, 1));
+function getFixedAngle(label) {
+  switch (label) {
+    case "ham": return -90;
+    case "support": return -45;
+    case "spam": return 45;
+    case "phishing": return 90;
+    default: return 0;
+  }
+}
+
+function getFillRatio(label) {
+  switch (label) {
+    case "ham": return 0.0;
+    case "support": return 0.25;
+    case "spam": return 0.75;
+    case "phishing": return 1.0;
+    default: return 0.5;
+  }
 }
 
 function setText(id, value) {
@@ -159,10 +171,8 @@ function classifyEmail(emailText, hasAttachment) {
     })
     .then((data) => {
       const label = String(data.label || "unknown").toLowerCase();
-      const score = resolveScore(data.score);
 
       showResult({
-        score,
         label,
         display: labelDisplay(label),
         sender: data.sender,
