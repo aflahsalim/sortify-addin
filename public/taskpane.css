@@ -14,6 +14,7 @@ html, body {
   font-family: Segoe UI, sans-serif;
   background: var(--bg);
   color: var(--text);
+  font-size: 13px;
 }
 
 body {
@@ -24,35 +25,29 @@ body {
 
 .container {
   width: 100%;
-  max-width: 720px;
-  padding: 32px;
+  max-width: 640px;
+  padding: 24px;
   box-sizing: border-box;
 }
 
 .glass-card {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
 .gauge-card {
   text-align: center;
 }
 
-.gauge-title {
-  margin: 0 0 16px;
-  font-size: 20px;
-  font-weight: 600;
-}
-
 .gauge-svg {
-  width: 160px;
-  height: 80px;
-  margin-bottom: 16px;
+  width: 140px;
+  height: 70px;
+  margin-bottom: 12px;
 }
 
 #risk-arc {
@@ -64,17 +59,17 @@ body {
 }
 
 .result-label {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .result-button {
-  padding: 8px 20px;
+  padding: 6px 16px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   color: white;
   background: #6c757d;
 }
@@ -84,16 +79,16 @@ body {
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .details-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 15px;
-  padding: 8px 12px;
+  font-size: 13px;
+  padding: 6px 10px;
   background: rgba(255,255,255,0.03);
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.08);
 }
