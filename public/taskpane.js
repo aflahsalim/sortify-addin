@@ -1,3 +1,4 @@
+console.log("✅ Gauge JS loaded v2025-12-02");
 /* global Office, document */
 
 Office.onReady(() => {
@@ -114,16 +115,7 @@ function classifyEmail(emailText, hasAttachment) {
 function showResult(data) {
   const label = data.label || "unknown";
   const score = resolveScore(data.score);
-
-  // Determine color based on score
-  let color = "#28a745"; // green
-  if (score >= 0.75) {
-    color = "#dc3545"; // red
-  } else if (score >= 0.67) {
-    color = "#00bfff"; // blue
-  } else if (score >= 0.34) {
-    color = "#fd7e14"; // orange
-  }
+  const color = getRiskColor(score);
 
   // Rotate needle
   const needle = document.getElementById("needle");
@@ -140,7 +132,7 @@ function showResult(data) {
     arc.setAttribute("stroke", color);
   }
 
-  // Update label and color
+  // Update label
   const labelEl = document.getElementById("score-label");
   if (labelEl) {
     labelEl.textContent = data.display || labelDisplay(label);
@@ -151,6 +143,13 @@ function showResult(data) {
   setText("links", data.links || "--");
   setText("keywords", data.content || "--");
   setText("attachment", data.attachment || "--");
+}
+
+function getRiskColor(score) {
+  if (score >= 0.75) return "#dc3545"; // red
+  if (score >= 0.67) return "#00bfff"; // blue
+  if (score >= 0.34) return "#fd7e14"; // orange
+  return "#28a745"; // green
 }
 
 function resolveScore(raw) {
