@@ -12,16 +12,14 @@
   <div class="container">
     <section class="card gauge-card">
       <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
-        <!-- Sharp-edged arc -->
-        <path d="M25,90 L60,30 L140,30 L175,90"
+        <path d="M25,90 A75,75 0 0,1 175,90"
               stroke="rgba(255,255,255,0.1)"
-              stroke-width="16" fill="none" stroke-linejoin="miter" />
+              stroke-width="16" fill="none" />
         <path id="risk-arc"
-              d="M25,90 L60,30 L140,30 L175,90"
+              d="M25,90 A75,75 0 0,1 175,90"
               stroke="#28a745"
               stroke-width="16" fill="none"
-              stroke-linecap="butt"
-              stroke-linejoin="miter"
+              stroke-linecap="round"
               stroke-dasharray="235"
               stroke-dashoffset="235" />
         <line id="needle"
