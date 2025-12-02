@@ -26,7 +26,6 @@ function initializeGauge() {
 
 function showResult(data) {
   const label = (data.label || "unknown").toLowerCase();
-  const display = data.display || labelDisplay(label);
   const color = getRiskColor(label);
   const angle = getFixedAngle(label);
   const fillRatio = getFillRatio(label);
@@ -49,7 +48,7 @@ function showResult(data) {
 
   const badge = document.getElementById("result-button");
   if (badge) {
-    badge.textContent = display.toUpperCase();
+    badge.textContent = getBadgeText(label);
     badge.style.background = bubbleColor(label);
     badge.style.color = "#000";
   }
@@ -57,6 +56,20 @@ function showResult(data) {
   setText("sender", data.sender);
   setText("links", data.links);
   setText("attachment", data.attachment);
+}
+
+function getBadgeText(label) {
+  switch (label) {
+    case "ham":
+    case "support":
+      return "SAFE";
+    case "spam":
+      return "RISK";
+    case "phishing":
+      return "HIGH RISK";
+    default:
+      return "UNKNOWN";
+  }
 }
 
 function getRiskColor(label) {
@@ -76,16 +89,6 @@ function bubbleColor(label) {
     case "spam": return "#ffdd57";
     case "phishing": return "#ff9aa2";
     default: return "#d0d3d8";
-  }
-}
-
-function labelDisplay(label) {
-  switch (label) {
-    case "ham": return "Safe";
-    case "support": return "Safe";
-    case "spam": return "Spam";
-    case "phishing": return "High Risk";
-    default: return "Unknown";
   }
 }
 
@@ -169,7 +172,6 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
 
       showResult({
         label,
-        display: labelDisplay(label),
         sender: senderReputation,
         links: hasLinks ? "Links" : "No Links",
         attachment: hasAttachment ? "Yes" : "No"
