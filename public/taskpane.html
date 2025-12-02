@@ -13,45 +13,36 @@
 
 <body>
   <div class="container">
-    <!-- Gauge Section -->
     <section class="score-section glass-card">
       <div class="dial-gauge">
         <svg id="gauge-svg" viewBox="0 0 200 80" class="gauge-svg" aria-label="Risk gauge">
-          <!-- Background arc -->
           <path d="M10,80 A90,90 0 0,1 190,80"
                 fill="none"
                 stroke="rgba(255,255,255,0.1)"
-                stroke-width="12" />
-
-          <!-- Risk arc -->
+                stroke-width="10" />
           <path id="risk-arc"
                 d="M10,80 A90,90 0 0,1 190,80"
                 fill="none"
                 stroke="#28a745"
-                stroke-width="12"
+                stroke-width="10"
                 stroke-linecap="round"
                 stroke-dasharray="283"
                 stroke-dashoffset="283" />
-
-          <!-- Needle -->
           <line id="needle"
                 x1="100" y1="80" x2="100" y2="50"
                 stroke="#e6e6e6"
                 stroke-width="3"
                 transform="rotate(-90 100 80)" />
         </svg>
-
         <div class="risk-label">
           <div class="score-label" id="score-label">--</div>
         </div>
       </div>
-
       <div class="classification-result">
         <span class="status-badge status-loading" id="status">Loading...</span>
       </div>
     </section>
 
-    <!-- Analysis Section -->
     <section class="analysis-section glass-card">
       <h2 class="section-title">Analysis Details</h2>
       <ul class="details-list">
