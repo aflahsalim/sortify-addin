@@ -11,20 +11,19 @@
 <body>
   <div class="container">
     <section class="glass-card gauge-card">
-      <h2 class="gauge-title">PHISHING RISK</h2>
       <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg">
         <path d="M30,90 A70,70 0 0,1 170,90"
               stroke="rgba(255,255,255,0.1)"
-              stroke-width="6" fill="none" />
+              stroke-width="5" fill="none" />
         <path id="risk-arc"
               d="M30,90 A70,70 0 0,1 170,90"
               stroke="#28a745"
-              stroke-width="6" fill="none"
+              stroke-width="5" fill="none"
               stroke-linecap="round"
               stroke-dasharray="220"
               stroke-dashoffset="220" />
         <line id="needle"
-              x1="100" y1="90" x2="100" y2="40"
+              x1="100" y1="90" x2="100" y2="36"
               stroke="#e6e6e6" stroke-width="2"
               transform="rotate(-90 100 90)" />
       </svg>
@@ -33,11 +32,10 @@
     </section>
 
     <section class="glass-card">
-      <h3>Analysis Details</h3>
       <ul class="details-list">
         <li><span>⚠️ Sender Reputation:</span> <span id="sender">--</span></li>
         <li><span>🔗 Link Analysis:</span> <span id="links">--</span></li>
-        <li><span>📝 Content Check:</span> <span id="keywords">--</span></li>
+        <li><span>📄 Content Check:</span> <span id="keywords">--</span></li>
         <li><span>📎 Attachment Found:</span> <span id="attachment">--</span></li>
       </ul>
     </section>
