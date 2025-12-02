@@ -1,3 +1,4 @@
+console.log("✅ Sortify JS loaded");
 /* global Office, document */
 
 Office.onReady(() => {
