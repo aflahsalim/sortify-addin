@@ -1,149 +1,46 @@
-/* global Office, document */
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sortify</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css" />
+  <script defer src="taskpane.js"></script>
+</head>
+<body>
+  <div class="container">
+    <section class="glass-card gauge-card">
+      <h2 class="gauge-title">PHISHING RISK</h2>
+      <svg id="gauge-svg" viewBox="0 0 200 80" class="gauge-svg">
+        <path d="M10,80 A90,90 0 0,1 190,80"
+              stroke="rgba(255,255,255,0.1)"
+              stroke-width="8" fill="none" />
+        <path id="risk-arc"
+              d="M10,80 A90,90 0 0,1 190,80"
+              stroke="#28a745"
+              stroke-width="8" fill="none"
+              stroke-linecap="round"
+              stroke-dasharray="283"
+              stroke-dashoffset="283" />
+        <line id="needle"
+              x1="100" y1="80" x2="100" y2="52"
+              stroke="#e6e6e6" stroke-width="2"
+              transform="rotate(-90 100 80)" />
+      </svg>
+      <div class="result-label" id="score-label">--</div>
+      <button class="result-button" id="result-button">--</button>
+    </section>
 
-Office.onReady(() => {
-  const item = Office.context?.mailbox?.item;
-  if (!item) {
-    setStatus("No email item available.");
-    return;
-  }
-
-  setStatus("Reading email...");
-  item.body.getAsync(Office.CoercionType.Text, (result) => {
-    if (result.status === Office.AsyncResultStatus.Succeeded) {
-      const emailText = result.value || "";
-      const hasAttachment =
-        Array.isArray(item.attachments) && item.attachments.length > 0;
-
-      if (!emailText.trim()) {
-        setStatus("Email has no readable body text.");
-        showResult({
-          score: 0,
-          label: "ham",
-          display: "Ham (Safe)",
-          color: "green",
-          sender: "--",
-          links: "--",
-          content: "No content",
-          attachment: hasAttachment ? "Yes" : "No",
-        });
-        return;
-      }
-
-      classifyEmail(emailText, hasAttachment);
-    } else {
-      setStatus("Failed to read email body.");
-    }
-  });
-});
-
-function classifyEmail(emailText, hasAttachment) {
-  setStatus("Classifying email...");
-
-  fetch("https://sortify-y7ru.onrender.com/classify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: emailText,
-      attachment: hasAttachment ? "Yes" : "No",
-    }),
-  })
-    .then(async (res) => {
-      if (!res.ok) {
-        const body = await res.text();
-        throw new Error(`Backend ${res.status}: ${body}`);
-      }
-      return res.json();
-    })
-    .then((data) => {
-      if (typeof data.attachment === "undefined") {
-        data.attachment = hasAttachment ? "Yes" : "No";
-      }
-      showResult(data);
-      setStatus("Classification complete.");
-    })
-    .catch((err) => {
-      console.error("Fetch error:", err);
-      setStatus("Error contacting backend");
-    });
-}
-
-function showResult(data) {
-  const label = data.label || "unknown";
-  const score = Number(data.score) || 0;
-
-  // Fixed needle angles by category
-  const angleMap = {
-    ham: -90,
-    support: -45,
-    spam: 45,
-    phishing: 90,
-    unknown: -90,
-  };
-  const needleAngle = angleMap[label] ?? -90;
-
-  // Color mapping from backend keywords to hex
-  const colorMap = {
-    green: "#28a745",
-    orange: "#fd7e14",
-    red: "#dc3545",
-    blue: "#007bff",
-  };
-  const gaugeColor = colorMap[data.color] || "#00FF94";
-
-  // Animate needle
-  const needle = document.getElementById("needle");
-  if (needle) {
-    needle.setAttribute("transform", `rotate(${needleAngle} 100 100)`);
-  }
-
-  // Animate arc length by confidence + update color
-  const arc = document.getElementById("risk-arc");
-  if (arc) {
-    arc.setAttribute("stroke", gaugeColor);
-    const maxArc = 283; // half-circle path length used in SVG
-    const offset = maxArc - (score * maxArc); // 0 = full, maxArc = empty
-    arc.style.strokeDashoffset = offset;
-  }
-
-  // Update labels
-  const scoreLabel = document.getElementById("score-label");
-  const scoreValue = document.getElementById("score-value");
-  if (scoreLabel) scoreLabel.textContent = data.display || label.toUpperCase();
-  if (scoreValue) scoreValue.textContent = `${Math.round(score * 100)}%`;
-
-  // Confidence text
-  const confidenceEl = document.getElementById("confidence");
-  if (confidenceEl) {
-    confidenceEl.textContent = `Confidence: ${Math.round(score * 100)}%`;
-  }
-
-  // Update badge
-  const badge = document.getElementById("status");
-  if (badge) {
-    badge.textContent = data.display || label.toUpperCase();
-    badge.className = "status-badge"; // reset classes
-    if (label === "phishing") badge.classList.add("status-spam");
-    else if (label === "spam") badge.classList.add("status-medium");
-    else if (label === "support") badge.classList.add("status-support");
-    else badge.classList.add("status-safe");
-  }
-
-  // Update analysis details (placeholders until you compute these)
-  setText("sender", data.sender || "--");
-  setText("links", data.links || "--");
-  setText("keywords", data.content || "--");
-  setText("attachment", data.attachment || "--");
-}
-
-function setStatus(message) {
-  const badge = document.getElementById("status");
-  if (badge) {
-    badge.textContent = message;
-    badge.className = "status-badge status-loading";
-  }
-}
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
+    <section class="glass-card">
+      <h3>Analysis Details</h3>
+      <ul class="details-list">
+        <li><span>⚠️</span> Sender Reputation: <span id="sender">--</span></li>
+        <li><span>🔗</span> Link Analysis: <span id="links">--</span></li>
+        <li><span>📝</span> Content Check: <span id="keywords">--</span></li>
+        <li><span>📎</span> Attachment Found: <span id="attachment">--</span></li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
