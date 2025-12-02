@@ -61,7 +61,7 @@ body {
 
 #risk-arc {
   transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease;
-  stroke-width: 12;
+  stroke-width: 16;
 }
 
 .gauge-svg path:first-child {
