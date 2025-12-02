@@ -1,19 +1,19 @@
-console.log("✅ Sortify JS loaded");
+console.log("✅ Sortify JS restored");
 /* global Office, document */
 
 Office.onReady(() => {
   waitForGauge(() => {
     initializeGauge();
 
-    // Optional sanity test (remove if not needed)
+    // Demo render (remove in production)
     showResult({
-      score: 0.2,
-      label: "ham",
-      display: labelDisplay("ham"),
+      score: 0.6,
+      label: "spam",
+      display: labelDisplay("spam"),
       sender: "debug@example.com",
       links: "None",
       content: "Debug content",
-      attachment: "Yes"
+      attachment: "No"
     });
 
     startClassification();
@@ -23,11 +23,8 @@ Office.onReady(() => {
 function waitForGauge(callback) {
   const arc = document.getElementById("risk-arc");
   const needle = document.getElementById("needle");
-  if (arc && needle) {
-    callback();
-  } else {
-    requestAnimationFrame(() => waitForGauge(callback));
-  }
+  if (arc && needle) callback();
+  else requestAnimationFrame(() => waitForGauge(callback));
 }
 
 function initializeGauge() {
@@ -38,7 +35,6 @@ function initializeGauge() {
     arc.style.strokeDashoffset = len;
     arc.dataset.arcLength = String(len);
   }
-
   const needle = document.getElementById("needle");
   if (needle) {
     needle.setAttribute("transform", "rotate(-90 100 80)");
@@ -51,14 +47,14 @@ function showResult(data) {
   const display = data.display || labelDisplay(label);
   const color = getRiskColor(label);
 
-  // Rotate needle proportional to score (0..1 maps -90..+90)
+  // Rotate needle proportional to score
   const needle = document.getElementById("needle");
   if (needle) {
     const angle = -90 + score * 180;
     needle.setAttribute("transform", `rotate(${angle} 100 80)`);
   }
 
-  // Animate arc fill and set solid color
+  // Arc stroke
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
@@ -66,21 +62,21 @@ function showResult(data) {
     arc.setAttribute("stroke", color);
   }
 
-  // Label text and color
+  // Label
   const labelEl = document.getElementById("score-label");
   if (labelEl) {
     labelEl.textContent = display;
     labelEl.style.color = color;
   }
 
-  // Button text and color
+  // Button
   const button = document.getElementById("result-button");
   if (button) {
     button.textContent = display.toUpperCase();
     button.style.background = color;
   }
 
-  // Analysis details
+  // Details
   setText("sender", data.sender);
   setText("links", data.links);
   setText("keywords", data.content);
@@ -89,9 +85,9 @@ function showResult(data) {
 
 function getRiskColor(label) {
   switch ((label || "").toLowerCase()) {
-    case "ham": return "#28a745";       // Safe (Ham)
-    case "spam": return "#fd7e14";      // Risk (Spam)
-    case "phishing": return "#dc3545";  // High Risk (Phishing)
+    case "ham": return "#28a745";       // Safe
+    case "spam": return "#fd7e14";      // Risk
+    case "phishing": return "#dc3545";  // High Risk
     case "support": return "#00bfff";   // Safe (Support)
     default: return "#6c757d";          // Unknown
   }
