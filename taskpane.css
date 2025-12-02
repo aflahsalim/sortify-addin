@@ -5,7 +5,6 @@
   --text: #e9eef6;
   --muted: #9aa7b6;
 
-  /* Accent colors for states */
   --safe: #28a745;
   --support: #00bfff;
   --medium: #fd7e14;
@@ -43,16 +42,16 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .gauge-svg {
-  width: 180px;   /* smaller gauge */
-  height: 90px;
+  width: 140px;   /* smaller gauge */
+  height: 70px;
   display: block;
+  margin: 0 auto;
 }
 
-/* Smooth transitions */
 #gauge-svg #needle {
   transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -68,14 +67,12 @@ body {
 
 /* Label under gauge */
 .risk-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
 }
 
 #score-label {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text);
 }
 
