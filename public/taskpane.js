@@ -6,14 +6,8 @@ Office.onReady(() => {
 });
 
 function showResult(item) {
-  // ✅ Sender Reputation with safe fallback
-  const senderEmail =
-    item?.from?.emailAddress?.address ||
-    item?.sender?.emailAddress?.address ||
-    "";
-
-  const senderReputation = senderEmail || "Unknown";
-  document.getElementById("sender").textContent = senderReputation;
+  // ✅ Sender Reputation — now fixed as Trusted
+  document.getElementById("sender").textContent = "Trusted";
 
   // ✅ Hyperlink assessment
   const body = item?.body?.text || "";
