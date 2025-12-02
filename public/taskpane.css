@@ -59,28 +59,61 @@ body {
 .details-card {
   display: flex;
   flex-direction: column;
-  margin-bottom: 24px;
+  padding: 16px;
+  gap: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(255,255,255,0.08);
 }
 
-.gauge-svg {
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: auto;
-  margin: 0 0 12px 0;
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-#risk-arc {
-  transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease;
-  stroke-width: 16;
+.details-heading {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #e9eef6;
+  margin-bottom: 4px;
 }
 
-.gauge-svg path:first-child {
-  stroke-width: 16;
+.details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-#needle {
-  transition: transform 0.8s ease;
+.details-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.details-list li span:first-child {
+  font-weight: 500;
+  color: #ccc;
+}
+
+.details-list li span:last-child {
+  font-weight: 600;
+  color: #e9eef6;
+  max-width: 55%;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .result-label {
@@ -101,58 +134,6 @@ body {
   box-shadow: 0 0 6px rgba(0,0,0,0.2);
   margin-top: 4px;
   text-transform: uppercase;
-}
-
-.details-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.details-heading {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: #e9eef6;
-  text-align: left;
-  margin: 0;
-}
-
-.details-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.details-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.details-list li span:first-child {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 500;
-  color: #ccc;
-}
-
-.details-list li span:last-child {
-  font-weight: 600;
-  color: #e9eef6;
-  max-width: 55%;
-  text-align: right;
-  overflow-wrap: anywhere;
 }
 
 .logo-section {
