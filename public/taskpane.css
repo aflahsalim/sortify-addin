@@ -41,11 +41,6 @@ body {
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
-.wide-card {
-  max-width: 320px;
-  margin: 0 auto;
-}
-
 .gauge-card {
   text-align: center;
   padding-bottom: 10px;
