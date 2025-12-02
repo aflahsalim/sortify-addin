@@ -30,10 +30,11 @@ function showResult(data) {
   const angle = getFixedAngle(label);
   const fillRatio = getFillRatio(label);
 
-  // Needle + arc update
+  // Update needle
   const needle = document.getElementById("needle");
   if (needle) needle.setAttribute("transform", `rotate(${angle} 100 90)`);
 
+  // Update arc
   const arc = document.getElementById("risk-arc");
   if (arc) {
     const len = parseFloat(arc.dataset.arcLength || arc.getTotalLength());
@@ -42,25 +43,25 @@ function showResult(data) {
   }
 
   // Gauge label
-  const labelEl = document.getElementById("score-label");
-  if (labelEl) {
-    labelEl.textContent = label.toUpperCase();
-    labelEl.style.color = color;
-  }
+  setText("score-label", label.toUpperCase());
 
   // Badge
-  const badge = document.getElementById("result-button");
-  if (badge) {
-    badge.textContent = getBadgeText(label);
-    badge.style.background = bubbleColor(label);
-    badge.style.color = "#000";
-  }
+  setBadge(label);
 
   // Analysis details
   setText("sender", formatOrigin(data.sender));
   setText("links", formatPresence(data.links));
   setText("attachment", formatPresence(data.attachment));
   setText("urgency", formatUrgency(label));
+}
+
+function setBadge(label) {
+  const badge = document.getElementById("result-button");
+  if (badge) {
+    badge.textContent = getBadgeText(label);
+    badge.style.background = bubbleColor(label);
+    badge.style.color = "#000";
+  }
 }
 
 /* --- Professional formatting helpers --- */
