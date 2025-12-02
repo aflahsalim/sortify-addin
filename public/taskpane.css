@@ -1,4 +1,3 @@
-/* Reset + box sizing */
 *,
 *::before,
 *::after {
@@ -35,7 +34,7 @@ body {
   width: 100%;
   max-width: 328px;
   margin: 0 auto;
-  padding: 20px 16px 32px;   /* top, sides, bottom */
+  padding: 20px 16px 40px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -60,7 +59,7 @@ body {
 .details-card {
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;       /* space after details */
+  margin-bottom: 24px;
 }
 
 .gauge-svg {
@@ -68,7 +67,7 @@ body {
   width: 100%;
   max-width: 260px;
   height: auto;
-  margin: 0 0 12px 0;        /* bottom spacing only */
+  margin: 0 0 12px 0;
 }
 
 #risk-arc {
@@ -156,11 +155,10 @@ body {
   overflow-wrap: anywhere;
 }
 
-/* Logo section */
 .logo-section {
   display: flex;
   justify-content: center;
-  margin-top: 24px;   /* space after details card */
+  margin-top: 32px;
   padding-bottom: 16px;
 }
 
