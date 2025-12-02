@@ -20,11 +20,8 @@ function initializeGauge() {
     arc.style.strokeDashoffset = len;
     arc.dataset.arcLength = String(len);
   }
-
   const needle = document.getElementById("needle");
-  if (needle) {
-    needle.setAttribute("transform", "rotate(-90 100 90)");
-  }
+  if (needle) needle.setAttribute("transform", "rotate(-90 100 90)");
 }
 
 function showResult(data) {
@@ -35,9 +32,7 @@ function showResult(data) {
   const fillRatio = getFillRatio(label);
 
   const needle = document.getElementById("needle");
-  if (needle) {
-    needle.setAttribute("transform", `rotate(${angle} 100 90)`);
-  }
+  if (needle) needle.setAttribute("transform", `rotate(${angle} 100 90)`);
 
   const arc = document.getElementById("risk-arc");
   if (arc) {
@@ -55,8 +50,8 @@ function showResult(data) {
   const badge = document.getElementById("result-button");
   if (badge) {
     badge.textContent = display.toUpperCase();
-    badge.style.background = color;
-    badge.style.color = label === "phishing" || label === "spam" ? "#000" : "#fff";
+    badge.style.background = bubbleColor(label);
+    badge.style.color = "#000";
   }
 
   setText("sender", data.sender);
@@ -71,6 +66,16 @@ function getRiskColor(label) {
     case "spam": return "#fd7e14";
     case "phishing": return "#dc3545";
     default: return "#6c757d";
+  }
+}
+
+function bubbleColor(label) {
+  switch (label) {
+    case "ham": return "#9ff08c";
+    case "support": return "#8fd5ff";
+    case "spam": return "#ffdd57";
+    case "phishing": return "#ff9aa2";
+    default: return "#d0d3d8";
   }
 }
 
@@ -127,21 +132,19 @@ function startClassification() {
     const emailText = result.value || "";
     const hasAttachment = Array.isArray(item.attachments) && item.attachments.length > 0;
 
-    if (!emailText.trim()) return setStatus("Email has no readable body text.");
+    const linkRegex = /(https?:\/\/[^\s]+)/gi;
+    const hasLinks = linkRegex.test(emailText);
 
-    classifyEmail(emailText, hasAttachment, item);
+    classifyEmail(emailText, hasAttachment, hasLinks, item);
   });
 }
 
-function classifyEmail(emailText, hasAttachment, item) {
+function classifyEmail(emailText, hasAttachment, hasLinks, item) {
   setStatus("Classifying email...");
-
-  const linkRegex = /(https?:\/\/[^\s]+)/gi;
-  const hasLinks = linkRegex.test(emailText);
 
   const senderEmail = item?.from?.emailAddress?.address || "";
   const senderDomain = senderEmail.split("@")[1] || "";
-  const isFreeDomain = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"].includes(senderDomain.toLowerCase());
+  const isFreeDomain = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"].includes(senderDomain?.toLowerCase());
   const senderReputation = senderEmail
     ? (isFreeDomain ? "Suspicious" : "Trusted")
     : "Unknown";
@@ -150,7 +153,7 @@ function classifyEmail(emailText, hasAttachment, item) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      text: emailText,
+      text: emailText || "",
       attachment: hasAttachment ? "Yes" : "No"
     }),
   })
