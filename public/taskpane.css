@@ -48,18 +48,24 @@ body {
 
 .gauge-card {
   text-align: center;
+  padding-bottom: 10px;
 }
 
 .gauge-svg {
   width: 100%;
-  max-width: 240px;
+  max-width: 260px;
   height: auto;
-  margin: 0 auto 14px;
+  margin: 0 auto 18px;
   display: block;
 }
 
 #risk-arc {
   transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease;
+  stroke-width: 12;
+}
+
+.gauge-svg path:first-child {
+  stroke-width: 12;
 }
 
 #needle {
@@ -114,7 +120,7 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: rgba(255,255,255,0.03);
   border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.08);
