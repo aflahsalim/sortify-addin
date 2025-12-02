@@ -12,15 +12,16 @@
   <div class="container">
     <section class="card gauge-card">
       <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
-        <!-- Flatter arc -->
-        <path d="M25,90 C60,10 140,10 175,90"
+        <!-- Sharp-edged arc -->
+        <path d="M25,90 L60,30 L140,30 L175,90"
               stroke="rgba(255,255,255,0.1)"
-              stroke-width="16" fill="none" />
+              stroke-width="16" fill="none" stroke-linejoin="miter" />
         <path id="risk-arc"
-              d="M25,90 C60,10 140,10 175,90"
+              d="M25,90 L60,30 L140,30 L175,90"
               stroke="#28a745"
               stroke-width="16" fill="none"
-              stroke-linecap="round"
+              stroke-linecap="butt"
+              stroke-linejoin="miter"
               stroke-dasharray="235"
               stroke-dashoffset="235" />
         <line id="needle"
@@ -32,7 +33,7 @@
       <div class="risk-badge" id="result-button">--</div>
     </section>
 
-    <section class="card details-card">
+    <section class="details-card">
       <div class="details-section">
         <div class="details-heading">Analysis Details</div>
         <ul class="details-list">
