@@ -20,14 +20,16 @@ html, body {
 body {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .container {
   width: 100%;
-  max-width: 640px;
-  padding: 28px;
+  padding: 20px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .glass-card {
@@ -35,7 +37,6 @@ body {
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 14px;
   padding: 20px;
-  margin-bottom: 20px;
   backdrop-filter: blur(8px);
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
@@ -45,9 +46,11 @@ body {
 }
 
 .gauge-svg {
-  width: 180px;
-  height: 90px;
-  margin-bottom: 14px;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  margin: 0 auto 14px;
+  display: block;
 }
 
 #risk-arc {
