@@ -4,7 +4,6 @@
   --card-border: rgba(255, 255, 255, 0.18);
   --text: #e9eef6;
   --muted: #9aa7b6;
-
   --safe: #28a745;
   --support: #00bfff;
   --medium: #fd7e14;
@@ -26,7 +25,6 @@ body {
   margin: 0 auto;
 }
 
-/* Glassmorphic card */
 .glass-card {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -37,7 +35,6 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
-/* Gauge */
 .dial-gauge {
   display: flex;
   flex-direction: column;
@@ -46,8 +43,8 @@ body {
 }
 
 .gauge-svg {
-  width: 140px;   /* smaller gauge */
-  height: 70px;
+  width: 140px;
+  height: 80px;
   display: block;
   margin: 0 auto;
 }
@@ -60,12 +57,10 @@ body {
   transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Glow effect when in red zone */
 #gauge-svg #risk-arc.danger {
   filter: drop-shadow(0 0 6px var(--spam));
 }
 
-/* Label under gauge */
 .risk-label {
   text-align: center;
 }
@@ -76,7 +71,6 @@ body {
   color: var(--text);
 }
 
-/* Classification status badge */
 .status-badge {
   display: inline-block;
   padding: 6px 12px;
@@ -91,7 +85,6 @@ body {
 .status-spam    { background: var(--spam); color: white; }
 .status-loading { background: #6c757d; color: white; }
 
-/* Analysis section */
 .analysis-section {
   margin-top: 24px;
 }
