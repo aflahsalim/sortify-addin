@@ -4,6 +4,12 @@
   --card-border: rgba(255, 255, 255, 0.18);
   --text: #e9eef6;
   --muted: #9aa7b6;
+
+  /* Accent colors for states */
+  --safe: #28a745;
+  --support: #00bfff;
+  --medium: #fd7e14;
+  --spam: #dc3545;
 }
 
 * { box-sizing: border-box; }
@@ -21,12 +27,15 @@ body {
   margin: 0 auto;
 }
 
+/* Glassmorphic card */
 .glass-card {
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
 /* Gauge */
@@ -38,8 +47,8 @@ body {
 }
 
 .gauge-svg {
-  width: 220px;
-  height: 110px;
+  width: 180px;   /* smaller gauge */
+  height: 90px;
   display: block;
 }
 
@@ -52,6 +61,11 @@ body {
   transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Glow effect when in red zone */
+#gauge-svg #risk-arc.danger {
+  filter: drop-shadow(0 0 6px var(--spam));
+}
+
 /* Label under gauge */
 .risk-label {
   display: flex;
@@ -61,7 +75,7 @@ body {
 
 #score-label {
   font-weight: 600;
-  font-size: 18px;
+  font-size: 16px;
   color: var(--text);
 }
 
@@ -74,10 +88,10 @@ body {
   margin-top: 12px;
 }
 
-.status-safe    { background: #28a745; color: white; }
-.status-support { background: #007bff; color: white; }
-.status-medium  { background: #fd7e14; color: white; }
-.status-spam    { background: #dc3545; color: white; }
+.status-safe    { background: var(--safe); color: white; }
+.status-support { background: var(--support); color: white; }
+.status-medium  { background: var(--medium); color: white; }
+.status-spam    { background: var(--spam); color: white; }
 .status-loading { background: #6c757d; color: white; }
 
 /* Analysis section */
