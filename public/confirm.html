@@ -5,105 +5,76 @@
   <title>Sortify Confirmation</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
-    /* Page */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background-color: #0f0f0f;
       color: #fff;
-      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 32px; /* page padding so modal never touches edges */
+      height: 100vh;
     }
 
-    /* Modal (glass) */
     .modal {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 36px 28px; /* generous top/bottom padding */
-      width: 100%;
-      max-width: 440px;   /* wider for breathing room */
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 12px rgba(0, 255, 128, 0.2);
     }
 
-    /* Content */
     .modal h2 {
-      font-size: 20px;
-      margin: 0 0 14px;
-      letter-spacing: 0.2px;
+      font-size: 16px;
+      margin-bottom: 10px;
     }
 
     .modal p {
-      font-size: 14px;
-      color: #cfcfcf;
-      margin: 0;
-      line-height: 1.6; /* more line height for readability */
-    }
-
-    .note {
-      display: block;
       font-size: 12px;
-      color: #9e9e9e;
-      margin-top: 14px;
+      color: #ccc;
+      margin-bottom: 12px;
+      line-height: 1.4;
     }
 
-    /* Buttons */
+    .modal em {
+      font-size: 11px;
+      color: #999;
+    }
+
     .buttons {
       display: flex;
       justify-content: center;
-      gap: 14px;
-      margin-top: 22px;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     button {
-      padding: 10px 22px;
+      padding: 6px 14px;
       border: none;
-      border-radius: 10px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: 600;
-      font-size: 14px;
       cursor: pointer;
-      transition: transform 0.06s ease, background 0.25s ease, box-shadow 0.25s ease;
     }
 
     .yes {
       background-color: #00ff99;
       color: #000;
-      box-shadow: 0 0 0 rgba(0,0,0,0);
-    }
-    .yes:hover {
-      background-color: #00e68c;
-      box-shadow: 0 6px 16px rgba(0, 255, 153, 0.25);
-      transform: translateY(-1px);
     }
 
     .cancel {
-      background-color: #2f2f2f;
+      background-color: #333;
       color: #fff;
-    }
-    .cancel:hover {
-      background-color: #484848;
-      transform: translateY(-1px);
-    }
-
-    /* Safe focus styles */
-    button:focus {
-      outline: 2px solid #00ff99;
-      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
-  <div class="modal" role="dialog" aria-labelledby="title" aria-describedby="desc">
-    <h2 id="title">Send to Sortify Support?</h2>
-    <p id="desc">
-      Do you want to forward this email to the Sortify support team for analysis?
-      <span class="note">If the email contains attachments, please forward the original message as an attachment for full context.</span>
+  <div class="modal">
+    <h2>Send to Sortify Support?</h2>
+    <p>
+      Do you want to forward this email to the Sortify support team for analysis?<br><br>
+      <em>If the email contains attachments, please forward the original message as an attachment for full context.</em>
     </p>
     <div class="buttons">
       <button class="yes" onclick="Office.context.ui.messageParent('yes')">Yes</button>
