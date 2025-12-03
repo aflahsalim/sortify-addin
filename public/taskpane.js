@@ -6,8 +6,8 @@ Office.onReady(() => {
 });
 
 function showResult(item) {
-  // ✅ Sender Reputation — now fixed as Trusted
-  document.getElementById("sender").textContent = "Trusted";
+  // ✅ Sender Reputation — simplified
+  document.getElementById("sender").textContent = "Unknown";
 
   // ✅ Hyperlink assessment
   const body = item?.body?.text || "";
@@ -16,14 +16,11 @@ function showResult(item) {
 
   // ✅ File assessment
   const attachments = item?.attachments || [];
-  document.getElementById("attachment").textContent =
-    attachments.length > 0 ? "Found" : "None";
+  document.getElementById("attachment").textContent = attachments.length > 0 ? "Found" : "None";
 
   // ✅ Urgency assessment
   const urgencyKeywords = ["urgent", "immediately", "critical", "asap"];
-  const urgencyLevel = urgencyKeywords.some((kw) =>
-    body.toLowerCase().includes(kw)
-  )
+  const urgencyLevel = urgencyKeywords.some((kw) => body.toLowerCase().includes(kw))
     ? "Critical"
     : "Normal";
   document.getElementById("urgency").textContent = urgencyLevel;
