@@ -2,70 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Send to Sortify Support</title>
+  <title>Sortify Confirmation</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #111; /* simple dark background */
-      height: 100vh;
+      background-color: #0f0f0f;
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      height: 100vh;
+      padding: 24px;
     }
 
     .modal {
-      background: #1a1a1a;
+      background-color: #1a1a1a;
       border-radius: 12px;
-      padding: 24px;
-      width: 340px;
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 16px rgba(0, 255, 128, 0.2);
       text-align: center;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
     }
 
     .modal h2 {
-      margin-bottom: 12px;
-      font-size: 18px;
+      font-size: 20px;
+      margin-bottom: 16px;
     }
 
     .modal p {
-      font-size: 13px;
+      font-size: 14px;
       margin-bottom: 20px;
-      color: #bbb;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .modal em {
+      font-size: 12px;
+      color: #999;
     }
 
     .buttons {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 16px;
+      margin-top: 20px;
     }
 
     button {
-      padding: 8px 18px;
+      padding: 10px 24px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: 600;
       font-size: 14px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.3s ease;
     }
 
     .yes {
-      background: #00ff99;
+      background-color: #00ff99;
       color: #000;
     }
+
     .yes:hover {
-      background: #00cc7a;
+      background-color: #00cc7a;
     }
 
     .cancel {
-      background: #333;
+      background-color: #333;
       color: #fff;
     }
+
     .cancel:hover {
-      background: #555;
+      background-color: #555;
     }
   </style>
 </head>
