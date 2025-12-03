@@ -2,17 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Sortify Confirmation</title>
-  <link rel="stylesheet" href="confirm.css" />
+  <title>Send to Sortify Support</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #111; /* simple dark background */
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .modal {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 24px;
+      width: 340px;
+      text-align: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+
+    .modal h2 {
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .modal p {
+      font-size: 13px;
+      margin-bottom: 20px;
+      color: #bbb;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .yes {
+      background: #00ff99;
+      color: #000;
+    }
+    .yes:hover {
+      background: #00cc7a;
+    }
+
+    .cancel {
+      background: #333;
+      color: #fff;
+    }
+    .cancel:hover {
+      background: #555;
+    }
+  </style>
 </head>
 <body>
-  <div class="confirm-box">
+  <div class="modal">
     <h2>Send to Sortify Support?</h2>
-    <p>Do you want to forward this email to the Sortify support team for analysis?</p>
-    <p class="note">If the email contains attachments, please forward the original message as an attachment for full context.</p>
-    <div class="button-row">
-      <button class="yes">Yes</button>
-      <button class="cancel">Cancel</button>
+    <p>
+      Do you want to forward this email to the Sortify support team for analysis?<br><br>
+      <em>If the email contains attachments, please forward the original message as an attachment for full context.</em>
+    </p>
+    <div class="buttons">
+      <button class="yes" onclick="Office.context.ui.messageParent('yes')">Yes</button>
+      <button class="cancel" onclick="Office.context.ui.messageParent('no')">Cancel</button>
     </div>
   </div>
 </body>
