@@ -181,10 +181,16 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
 
   const senderEmail = item?.from?.emailAddress?.address || "";
   const senderDomain = senderEmail.split("@")[1] || "";
-  const isFreeDomain = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"].includes(senderDomain?.toLowerCase());
-  const senderReputation = senderEmail
-    ? (isFreeDomain ? "Suspicious" : "Trusted")
-    : "Unknown";
+  const freeDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"];
+
+  let senderReputation;
+  if (!senderEmail) {
+    senderReputation = "Trusted";
+  } else if (freeDomains.includes(senderDomain.toLowerCase())) {
+    senderReputation = "Trusted";
+  } else {
+    senderReputation = "Suspicious";
+  }
 
   fetch("https://sortify-y7ru.onrender.com/classify", {
     method: "POST",
