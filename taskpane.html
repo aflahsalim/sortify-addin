@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sortify</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css" />
+  <script defer src="taskpane.js"></script>
+</head>
+<body>
+  <div class="container">
+    <section class="card gauge-card">
+      <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
+        <path d="M25,90 A75,75 0 0,1 175,90"
+              stroke="rgba(255,255,255,0.1)"
+              stroke-width="16" fill="none" stroke-linecap="butt" />
+        <path id="risk-arc"
+              d="M25,90 A75,75 0 0,1 175,90"
+              stroke="#28a745"
+              stroke-width="16" fill="none"
+              stroke-linecap="butt"
+              stroke-dasharray="235"
+              stroke-dashoffset="235" />
+        <line id="needle"
+              x1="100" y1="90" x2="100" y2="25"
+              stroke="#e6e6e6" stroke-width="2"
+              transform="rotate(-90 100 90)" />
+      </svg>
+      <div class="result-label" id="score-label">--</div>
+      <div class="risk-badge" id="result-button">--</div>
+    </section>
+
+    <section class="card details-card">
+      <div class="details-section">
+        <div class="details-heading">Analysis Details</div>
+        <ul class="details-list">
+          <li><span>🧾 Sender Reputation:</span><span id="sender">--</span></li>
+          <li><span>🔗 Hyperlink Assessment:</span><span id="links">--</span></li>
+          <li><span>📎 File Assessment:</span><span id="attachment">--</span></li>
+          <li><span>⚠️ Urgency Level:</span><span id="urgency">--</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="logo-section">
+      <img src="https://sortify-addin.onrender.com/icons/sortify_logo.jpeg" alt="Sortify Logo" class="logo-image" />
+    </div>
+  </div>
+</body>
+</html>
