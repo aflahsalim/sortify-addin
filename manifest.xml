@@ -120,6 +120,7 @@
       </bt:Images>
 
       <bt:Urls>
+        <!-- UPDATED COMMANDS + TASKPANE -->
         <bt:Url id="Commands.Url" DefaultValue="https://aflahsalim.github.io/sortify-addin/commands.html"/>
         <bt:Url id="Taskpane.Url" DefaultValue="https://aflahsalim.github.io/sortify-addin/taskpane.html"/>
       </bt:Urls>
@@ -135,7 +136,7 @@
       <bt:LongStrings>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open Sortify and classify this email for phishing risk."/>
         <bt:String id="SupportButton.Tooltip" DefaultValue="Forward this email to our support team for manual verification."/>
-      </bt:String>
+      </bt:LongStrings>
     </Resources>
   </VersionOverrides>
 </OfficeApp>
