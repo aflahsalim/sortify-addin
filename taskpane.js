@@ -65,7 +65,6 @@ function setBadge(label) {
 }
 
 /* --- Professional formatting helpers --- */
-
 function formatOrigin(value) {
   const val = String(value || "").toLowerCase();
   if (val.includes("trusted")) return "Trusted";
@@ -162,13 +161,13 @@ function startClassification() {
   if (!item) return setStatus("No email item available.");
 
   setStatus("Reading email...");
+
   item.body.getAsync(Office.CoercionType.Text, (result) => {
     if (result.status !== Office.AsyncResultStatus.Succeeded)
       return setStatus("Failed to read email body.");
 
     const emailText = result.value || "";
     const hasAttachment = Array.isArray(item.attachments) && item.attachments.length > 0;
-
     const linkRegex = /(https?:\/\/[^\s]+)/gi;
     const hasLinks = linkRegex.test(emailText);
 
@@ -179,18 +178,30 @@ function startClassification() {
 function classifyEmail(emailText, hasAttachment, hasLinks, item) {
   setStatus("Classifying email...");
 
-  const senderEmail = item?.from?.emailAddress?.address || "";
-  const senderDomain = senderEmail.split("@")[1] || "";
-  const freeDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"];
+  // FIX 4: safely read sender email to avoid crashes in Outlook Desktop
+  let senderEmail = "";
+  try {
+    senderEmail = item?.from?.emailAddress?.address || "";
+  } catch (e) {
+    senderEmail = "";
+  }
 
+  const senderDomain = senderEmail.split("@")[1] || "";
+
+  // FIX 1: free/personal domains are SUSPICIOUS, not Trusted
+  const freeDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"];
   let senderReputation;
   if (!senderEmail) {
-    senderReputation = "Trusted";
+    senderReputation = "Unknown";
   } else if (freeDomains.includes(senderDomain.toLowerCase())) {
-    senderReputation = "Trusted";
+    senderReputation = "Suspicious";   // ← FIXED: free domains flagged correctly
   } else {
-    senderReputation = "Suspicious";
+    senderReputation = "Trusted";
   }
+
+  // FIX 3: add a 10-second timeout so a slow/cold backend doesn't hang forever
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
 
   fetch("https://sortify-backend-hwf9d0exgqdub9cn.canadacentral-01.azurewebsites.net/classify", {
     method: "POST",
@@ -199,8 +210,10 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
       text: emailText || "",
       attachment: hasAttachment ? "Yes" : "No"
     }),
+    signal: controller.signal
   })
     .then(async (res) => {
+      clearTimeout(timeout);
       if (!res.ok) {
         const body = await res.text();
         throw new Error(body || `HTTP ${res.status}`);
@@ -209,6 +222,31 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
     })
     .then((data) => {
       const label = String(data.label || "unknown").toLowerCase();
+      showResult({
+        label,
+        sender: senderReputation,
+        links: hasLinks ? "Present" : "Absent",
+        attachment: hasAttachment ? "Present" : "Absent"
+      });
+      setStatus("Classification complete.");
+    })
+    .catch((err) => {
+      clearTimeout(timeout);
+      console.error("Backend error:", err);
+      setStatus("Backend unavailable — using local analysis.");
+
+      // FIX 2: local heuristic fallback so UI always shows a result
+      const text = emailText.toLowerCase();
+      const urgentWords = [
+        "urgent", "immediately", "suspended", "verify", "confirm",
+        "click", "24 hours", "account", "password", "login", "security alert"
+      ];
+      const urgencyScore = urgentWords.filter(w => text.includes(w)).length;
+
+      let label = "ham";
+      if (hasLinks && urgencyScore >= 3) label = "phishing";
+      else if (hasLinks && urgencyScore >= 1) label = "spam";
+      else if (urgencyScore >= 2) label = "spam";
 
       showResult({
         label,
@@ -216,11 +254,5 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
         links: hasLinks ? "Present" : "Absent",
         attachment: hasAttachment ? "Present" : "Absent"
       });
-
-      setStatus("Classification complete.");
-    })
-    .catch((err) => {
-      console.error("Backend error:", err);
-      setStatus("Error contacting backend.");
     });
 }
