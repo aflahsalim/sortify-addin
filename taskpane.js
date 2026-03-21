@@ -192,7 +192,7 @@ function classifyEmail(emailText, hasAttachment, hasLinks, item) {
     senderReputation = "Suspicious";
   }
 
-  fetch("https://sortify-backend-hwf9d0exgqdub9cn.canadacentral-01.azurewebsites.net/predict", {
+  fetch("https://sortify-backend-hwf9d0exgqdub9cn.canadacentral-01.azurewebsites.net/classify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
