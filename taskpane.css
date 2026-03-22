@@ -1,206 +1,226 @@
-/* ── Google Font ─────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 
-/* ── Reset & base ────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:    #00ff88;      /* primary accent */
+  --green-dim:#00cc66;      /* darker green */
+  --green-bg: rgba(0,255,136,0.07);
+  --green-bd: rgba(0,255,136,0.2);
+  --amber:    #fbbf24;
+  --red:      #f87171;
+  --cyan:     #22d3ee;
+  --glass:    rgba(255,255,255,0.04);
+  --border:   rgba(255,255,255,0.08);
+  --text:     rgba(255,255,255,0.9);
+  --muted:    rgba(255,255,255,0.35);
+}
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: #08080f;        /* deep dark background */
-  color: rgba(255,255,255,0.9);
+  background: #050508;
+  color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ── Animated background blobs ───────────────── */
+/* ── Subtle green grid bg ───────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Animated green blob ────────────────────── */
 .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.2;
-  animation: drift 10s ease-in-out infinite alternate;
+  filter: blur(90px);
+  opacity: 0.12;
+  animation: drift 12s ease-in-out infinite alternate;
 }
-.orb-1 { width: 200px; height: 200px; background: #6d28d9; top: -60px; left: -60px; }
-.orb-2 { width: 160px; height: 160px; background: #0e7490; bottom: 20%; right: -40px; animation-delay: -5s; }
-.orb-3 { width: 130px; height: 130px; background: #9d174d; bottom: 5%; left: 25%; animation-delay: -3s; }
-@keyframes drift {
-  from { transform: translate(0, 0); }
-  to   { transform: translate(15px, 20px); }
-}
+.orb-1 { width: 220px; height: 220px; background: #00ff88; top: -60px; left: -40px; }
+.orb-2 { width: 160px; height: 160px; background: #00cc66; bottom: 20%; right: -40px; animation-delay: -6s; }
+.orb-3 { width: 120px; height: 120px; background: #00ff88; bottom: 5%; left: 20%; animation-delay: -3s; }
+@keyframes drift { from { transform: translate(0,0); } to { transform: translate(14px, 18px); } }
 
-/* ── Glass card (reusable) ───────────────────── */
+/* ── Glass card ─────────────────────────────── */
 .glass {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--glass);
+  border: 1px solid var(--border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
-/* ── Main container ──────────────────────────── */
+/* ── Container ──────────────────────────────── */
 .container {
   position: relative;
   z-index: 1;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* ── Header ──────────────────────────────────── */
+/* ── Header ─────────────────────────────────── */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 9px 12px;
 }
-.logo { display: flex; align-items: center; gap: 8px; }
-.logo-image { width: 22px; height: 22px; object-fit: contain; }
-.logo-text { font-size: 15px; font-weight: 600; }
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: 0.04em;
+}
+.logo svg { flex-shrink: 0; }
 
-/* Small pill showing scan status */
+/* Status pill */
 .status-pill {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
-  padding: 3px 10px;
+  padding: 2px 9px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.4);
-  transition: all 0.3s ease;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: all 0.3s;
 }
-.status-pill.done   { color: #34d399; border-color: rgba(52,211,153,0.3);  background: rgba(52,211,153,0.08); }
-.status-pill.warn   { color: #fbbf24; border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.08); }
-.status-pill.danger { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); }
+.status-pill.done   { color: var(--green); border-color: var(--green-bd); background: var(--green-bg); }
+.status-pill.warn   { color: var(--amber); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); }
+.status-pill.danger { color: var(--red);   border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
 
-/* ── Gauge card ──────────────────────────────── */
+/* ── Gauge card ─────────────────────────────── */
 .gauge-card {
-  padding: 16px 16px 10px;
+  padding: 14px 12px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* green glow border that matches risk level */
+  border-color: var(--gauge-color, var(--border));
+  transition: border-color 0.6s;
 }
-.gauge-svg { width: 100%; max-width: 200px; }
+.gauge-svg { width: 100%; max-width: 180px; }
 
-/* Risk label (big text under gauge) */
 .risk-label {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   margin-top: 2px;
+  color: var(--gauge-color, var(--text));
+  transition: color 0.4s;
 }
-
-/* Coloured pill under risk label */
 .risk-badge {
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 3px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.4);
-  transition: all 0.4s ease;
-  letter-spacing: 0.05em;
-}
-.risk-badge.safe   { color: #34d399; border-color: rgba(52,211,153,0.3);  background: rgba(52,211,153,0.08); }
-.risk-badge.info   { color: #22d3ee; border-color: rgba(34,211,238,0.3);  background: rgba(34,211,238,0.08); }
-.risk-badge.warn   { color: #fbbf24; border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.08); }
-.risk-badge.danger { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); }
-
-/* ── Analysis detail rows ────────────────────── */
-.details-card { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-
-.detail-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Small icon box */
-.detail-icon {
-  width: 28px; height: 28px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.4);
-  flex-shrink: 0;
-}
-.detail-icon svg { width: 13px; height: 13px; }
-
-.detail-text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
-.detail-label {
+  margin-top: 5px;
   font-size: 10px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.35);
-  text-transform: uppercase;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--muted);
+  transition: all 0.4s;
   letter-spacing: 0.06em;
 }
+/* Each risk level gets its own colour */
+.risk-badge.safe    { color: var(--green); border-color: var(--green-bd);           background: var(--green-bg); }
+.risk-badge.info    { color: var(--cyan);  border-color: rgba(34,211,238,0.25);      background: rgba(34,211,238,0.07); }
+.risk-badge.warn    { color: var(--amber); border-color: rgba(251,191,36,0.25);      background: rgba(251,191,36,0.07); }
+.risk-badge.danger  { color: var(--red);   border-color: rgba(248,113,113,0.25);     background: rgba(248,113,113,0.07); }
+
+/* ── Detail rows ────────────────────────────── */
+.details-card { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+.detail-row { display: flex; align-items: center; gap: 9px; }
+
+.detail-icon {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.detail-icon svg { width: 12px; height: 12px; }
+
+.detail-text { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.detail-label {
+  font-size: 9px; font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
 .detail-value {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.85);
+  font-size: 11px; font-weight: 500;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* Coloured dot on right side of each row */
+/* Coloured dot */
 .dot {
-  width: 7px; height: 7px;
+  width: 6px; height: 6px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.15);
+  background: var(--border);
   flex-shrink: 0;
   transition: background 0.3s, box-shadow 0.3s;
 }
-.dot.safe   { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.5); }
-.dot.warn   { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.5); }
-.dot.danger { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+.dot.safe   { background: var(--green); box-shadow: 0 0 5px rgba(0,255,136,0.5); }
+.dot.warn   { background: var(--amber); box-shadow: 0 0 5px rgba(251,191,36,0.5); }
+.dot.danger { background: var(--red);   box-shadow: 0 0 5px rgba(248,113,113,0.5); }
 
-/* ── Report button ───────────────────────────── */
+/* ── Report button ──────────────────────────── */
 .report-btn {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(167,139,250,0.3);
-  background: rgba(167,139,250,0.07);
-  color: #a78bfa;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px;
+  border: 1px solid var(--green-bd);
+  background: var(--green-bg);
+  color: var(--green);
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px; font-weight: 500;
   cursor: pointer;
+  border-radius: 12px;
   transition: all 0.2s;
-  border-radius: 14px;
+  letter-spacing: 0.02em;
 }
-.report-btn:hover    { background: rgba(167,139,250,0.14); }
+.report-btn:hover    { background: rgba(0,255,136,0.12); border-color: rgba(0,255,136,0.4); }
 .report-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── Confirm overlay ─────────────────────────── */
+/* ── Confirm overlay ────────────────────────── */
 .confirm-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
   backdrop-filter: blur(4px);
   display: flex; align-items: center; justify-content: center;
-  z-index: 100;
-  padding: 16px;
+  z-index: 100; padding: 14px;
 }
 .confirm-overlay.hidden { display: none; }
-
-.confirm-modal { padding: 22px; max-width: 260px; width: 100%; }
-.confirm-text  { font-size: 13px; line-height: 1.6; text-align: center; margin-bottom: 16px; color: rgba(255,255,255,0.85); }
-
+.confirm-modal { padding: 20px; max-width: 240px; width: 100%; }
+.confirm-text  { font-size: 12px; line-height: 1.6; text-align: center; margin-bottom: 14px; color: var(--text); }
 .confirm-actions { display: flex; gap: 8px; }
 .btn-cancel, .btn-confirm {
-  flex: 1; padding: 9px;
-  border-radius: 9px;
+  flex: 1; padding: 8px;
+  border-radius: 8px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 500;
+  font-size: 12px; font-weight: 500;
   cursor: pointer; border: 1px solid transparent;
   transition: all 0.2s;
 }
-.btn-cancel  { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
-.btn-cancel:hover  { background: rgba(255,255,255,0.1); }
-.btn-confirm { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.35); color: #a78bfa; }
-.btn-confirm:hover { background: rgba(167,139,250,0.22); }
+.btn-cancel  { background: var(--glass); border-color: var(--border); color: var(--muted); }
+.btn-cancel:hover  { background: rgba(255,255,255,0.08); }
+.btn-confirm { background: var(--green-bg); border-color: var(--green-bd); color: var(--green); }
+.btn-confirm:hover { background: rgba(0,255,136,0.14); }
