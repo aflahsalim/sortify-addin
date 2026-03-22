@@ -1,63 +1,178 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Sortify</title>
 
-  <!-- Office.js must load first -->
+  <!-- Office.js must load first, always -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
-  <!-- Updated paths (root-level now) -->
-  <link rel="stylesheet" href="taskpane.css" />
+  <link rel="stylesheet" href="taskpane.css"/>
   <script defer src="taskpane.js"></script>
 </head>
-
 <body>
+
+  <!-- Animated background blobs (styled in CSS) -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
   <div class="container">
 
-    <section class="card gauge-card">
-      <svg id="gauge-svg" viewBox="0 0 200 100" class="gauge-svg" aria-label="Risk gauge">
-        <path d="M25,90 A75,75 0 0,1 175,90"
-              stroke="rgba(255,255,255,0.1)"
-              stroke-width="16" fill="none" stroke-linecap="butt" />
+    <!-- ── Header ── -->
+    <header class="glass header">
+      <div class="logo">
+        <img
+          src="https://aflahsalim.github.io/sortify-addin/icons/sortify_logo.png"
+          alt="Sortify"
+          class="logo-image"
+        />
+        <span class="logo-text">Sortify</span>
+      </div>
+      <!-- Status pill updates dynamically from JS -->
+      <div id="status" class="status-pill">Scanning...</div>
+    </header>
 
-        <path id="risk-arc"
-              d="M25,90 A75,75 0 0,1 175,90"
-              stroke="#28a745"
-              stroke-width="16" fill="none"
-              stroke-linecap="butt"
-              stroke-dasharray="235"
-              stroke-dashoffset="235" />
+    <!-- ── Gauge card ── -->
+    <div class="glass gauge-card">
+      <svg class="gauge-svg" viewBox="0 0 200 110" aria-label="Risk gauge">
+        <defs>
+          <!-- Gradient along the arc: cyan → purple → red -->
+          <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#22d3ee"/>
+            <stop offset="50%"  stop-color="#a78bfa"/>
+            <stop offset="100%" stop-color="#f87171"/>
+          </linearGradient>
+        </defs>
 
-        <line id="needle"
-              x1="100" y1="90" x2="100" y2="25"
-              stroke="#e6e6e6" stroke-width="2"
-              transform="rotate(-90 100 90)" />
+        <!-- Background track (faint) -->
+        <path
+          d="M20 100 A80 80 0 0 1 180 100"
+          fill="none"
+          stroke="rgba(255,255,255,0.07)"
+          stroke-width="10"
+          stroke-linecap="round"
+        />
+
+        <!-- Active arc — JS animates stroke-dashoffset -->
+        <path
+          id="risk-arc"
+          d="M20 100 A80 80 0 0 1 180 100"
+          fill="none"
+          stroke="url(#arc-grad)"
+          stroke-width="10"
+          stroke-linecap="round"
+          stroke-dasharray="251"
+          stroke-dashoffset="251"
+          style="transition: stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);"
+        />
+
+        <!-- Needle — JS rotates via transform -->
+        <line
+          id="needle"
+          x1="100" y1="100"
+          x2="100" y2="28"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity="0.85"
+          style="transform-origin: 100px 100px; transform: rotate(-90deg); transition: transform 0.9s cubic-bezier(.4,0,.2,1);"
+        />
+        <circle cx="100" cy="100" r="4" fill="white" opacity="0.85"/>
       </svg>
 
-      <div class="result-label" id="score-label">--</div>
-      <div class="risk-badge" id="result-button">--</div>
-    </section>
-
-    <section class="card details-card">
-      <div class="details-section">
-        <div class="details-heading">Analysis Details</div>
-        <ul class="details-list">
-          <li><span>🧾 Sender Reputation:</span><span id="sender">--</span></li>
-          <li><span>🔗 Hyperlink Assessment:</span><span id="links">--</span></li>
-          <li><span>📎 File Assessment:</span><span id="attachment">--</span></li>
-          <li><span>⚠️ Urgency Level:</span><span id="urgency">--</span></li>
-        </ul>
-      </div>
-    </section>
-
-    <div class="logo-section">
-      <!-- UPDATED LOGO PATH -->
-      <img src="https://aflahsalim.github.io/sortify-addin/icons/sortify_logo.png"
-           alt="Sortify Logo"
-           class="logo-image" />
+      <!-- These IDs match what taskpane.js writes to -->
+      <div id="score-label" class="risk-label">—</div>
+      <div id="result-button" class="risk-badge">—</div>
     </div>
-  </div>
+
+    <!-- ── Analysis details ── -->
+    <div class="glass details-card">
+
+      <!-- Sender reputation row -->
+      <div class="detail-row">
+        <div class="detail-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="detail-text">
+          <span class="detail-label">Sender</span>
+          <span id="sender" class="detail-value">—</span>
+        </div>
+        <div id="sender-dot" class="dot"></div>
+      </div>
+
+      <!-- Auth headers row (SPF/DKIM/DMARC) -->
+      <div class="detail-row">
+        <div class="detail-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="detail-text">
+          <span class="detail-label">Auth (SPF / DKIM)</span>
+          <span id="links" class="detail-value">—</span>
+        </div>
+        <div id="links-dot" class="dot"></div>
+      </div>
+
+      <!-- File assessment row -->
+      <div class="detail-row">
+        <div class="detail-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+            <polyline points="13 2 13 9 20 9"/>
+          </svg>
+        </div>
+        <div class="detail-text">
+          <span class="detail-label">Attachments</span>
+          <span id="attachment" class="detail-value">—</span>
+        </div>
+        <div id="attachment-dot" class="dot"></div>
+      </div>
+
+      <!-- Urgency signals row -->
+      <div class="detail-row">
+        <div class="detail-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div class="detail-text">
+          <span class="detail-label">Urgency</span>
+          <span id="urgency" class="detail-value">—</span>
+        </div>
+        <div id="urgency-dot" class="dot"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Send to Sortify button ── -->
+    <button id="report-btn" class="report-btn" onclick="reportEmail()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.56 3.44 2 2 0 0 1 3.53 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.44 16z"/>
+      </svg>
+      Send to Sortify team
+    </button>
+
+    <!-- ── Confirm modal (hidden by default) ── -->
+    <div id="confirm-overlay" class="confirm-overlay hidden">
+      <div class="glass confirm-modal">
+        <p class="confirm-text">Log this email to the Sortify admin dashboard and flag it for review?</p>
+        <div class="confirm-actions">
+          <button class="btn-cancel"  onclick="closeConfirm()">Cancel</button>
+          <button class="btn-confirm" onclick="confirmReport()">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
 </body>
 </html>
