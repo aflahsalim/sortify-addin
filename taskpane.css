@@ -1,160 +1,206 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* ── Google Font ─────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 
-:root {
-  --safe: #28a745;
-  --medium: #fd7e14;
-  --support: #00bfff;
-  --spam: #dc3545;
-  --bg: #000000;
-  --text: #e9eef6;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: Segoe UI, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 13px;
-  overflow: hidden;
-}
+/* ── Reset & base ────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: #08080f;        /* deep dark background */
+  color: rgba(255,255,255,0.9);
+  min-height: 100vh;
 }
 
+/* ── Animated background blobs ───────────────── */
+.bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+  animation: drift 10s ease-in-out infinite alternate;
+}
+.orb-1 { width: 200px; height: 200px; background: #6d28d9; top: -60px; left: -60px; }
+.orb-2 { width: 160px; height: 160px; background: #0e7490; bottom: 20%; right: -40px; animation-delay: -5s; }
+.orb-3 { width: 130px; height: 130px; background: #9d174d; bottom: 5%; left: 25%; animation-delay: -3s; }
+@keyframes drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(15px, 20px); }
+}
+
+/* ── Glass card (reusable) ───────────────────── */
+.glass {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 14px;
+}
+
+/* ── Main container ──────────────────────────── */
 .container {
-  width: 100%;
-  max-width: 328px;
-  padding: 20px;
+  position: relative;
+  z-index: 1;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
-.card {
-  width: 100%;
-  background: #111;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+/* ── Header ──────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
 }
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo-image { width: 22px; height: 22px; object-fit: contain; }
+.logo-text { font-size: 15px; font-weight: 600; }
 
+/* Small pill showing scan status */
+.status-pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  transition: all 0.3s ease;
+}
+.status-pill.done   { color: #34d399; border-color: rgba(52,211,153,0.3);  background: rgba(52,211,153,0.08); }
+.status-pill.warn   { color: #fbbf24; border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.08); }
+.status-pill.danger { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); }
+
+/* ── Gauge card ──────────────────────────────── */
 .gauge-card {
+  padding: 16px 16px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
 }
+.gauge-svg { width: 100%; max-width: 200px; }
 
-.gauge-svg {
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: auto;
-  margin-bottom: 12px;
-}
-
-.details-card {
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  gap: 14px;
-}
-
-.details-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.details-heading {
-  font-size: 13px;
+/* Risk label (big text under gauge) */
+.risk-label {
+  font-size: 18px;
   font-weight: 600;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: #e9eef6;
-  margin: 0 0 8px 0; /* ✅ adds bottom spacing */
+  letter-spacing: 0.08em;
+  margin-top: 2px;
 }
 
-.details-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.details-list li {
-  display: flex;
-  flex-direction: column;
-  font-size: 13px;
-  padding: 0;
-  border: none;
-  background: none;
-  line-height: 1.5;
-}
-
-.details-list li span:first-child {
-  font-weight: 500;
-  color: #ccc;
-  margin-bottom: 4px;
-}
-
-.details-list li span:last-child {
-  font-weight: 600;
-  color: #e9eef6;
-  word-break: break-word;
-}
-
-.result-label {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 4px 0 10px 0; /* ✅ extra bottom spacing */
-  letter-spacing: 0.5px;
-}
-
+/* Coloured pill under risk label */
 .risk-badge {
-  display: inline-block;
-  padding: 6px 16px;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 14px;
   border-radius: 20px;
-  font-weight: 600;
-  font-size: 12px;
-  color: #000;
-  background: #ffdd57;
-  box-shadow: 0 0 6px rgba(0,0,0,0.2);
-  margin-top: 4px;
-  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.4);
+  transition: all 0.4s ease;
+  letter-spacing: 0.05em;
 }
+.risk-badge.safe   { color: #34d399; border-color: rgba(52,211,153,0.3);  background: rgba(52,211,153,0.08); }
+.risk-badge.info   { color: #22d3ee; border-color: rgba(34,211,238,0.3);  background: rgba(34,211,238,0.08); }
+.risk-badge.warn   { color: #fbbf24; border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.08); }
+.risk-badge.danger { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); }
 
-#needle {
-  transition: transform 0.8s ease-in-out;
-}
+/* ── Analysis detail rows ────────────────────── */
+.details-card { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
 
-#risk-arc {
-  transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.3s ease;
-  stroke-width: 16;
-}
-
-.logo-section {
+.detail-row {
   display: flex;
-  justify-content: center;
-  margin-top: 16px;
-  padding-bottom: 8px;
+  align-items: center;
+  gap: 10px;
 }
 
-.logo-image {
-  width: 120px;
-  height: auto;
-  opacity: 0.9;
+/* Small icon box */
+.detail-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.4);
+  flex-shrink: 0;
 }
+.detail-icon svg { width: 13px; height: 13px; }
+
+.detail-text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.detail-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.detail-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Coloured dot on right side of each row */
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.dot.safe   { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.5); }
+.dot.warn   { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.5); }
+.dot.danger { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+
+/* ── Report button ───────────────────────────── */
+.report-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(167,139,250,0.3);
+  background: rgba(167,139,250,0.07);
+  color: #a78bfa;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 14px;
+}
+.report-btn:hover    { background: rgba(167,139,250,0.14); }
+.report-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Confirm overlay ─────────────────────────── */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.confirm-overlay.hidden { display: none; }
+
+.confirm-modal { padding: 22px; max-width: 260px; width: 100%; }
+.confirm-text  { font-size: 13px; line-height: 1.6; text-align: center; margin-bottom: 16px; color: rgba(255,255,255,0.85); }
+
+.confirm-actions { display: flex; gap: 8px; }
+.btn-cancel, .btn-confirm {
+  flex: 1; padding: 9px;
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.btn-cancel  { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+.btn-cancel:hover  { background: rgba(255,255,255,0.1); }
+.btn-confirm { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.35); color: #a78bfa; }
+.btn-confirm:hover { background: rgba(167,139,250,0.22); }
