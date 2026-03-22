@@ -22,14 +22,14 @@ Office.onReady(() => {
   waitForDOM(() => {
 
     // Try immediately if email already selected
-    if (Office.context.mailbox.item) {
+    if (Office.context?.mailbox?.item) {
       startClassification();
     } else {
       setStatus("Click an email to scan", "");
     }
 
     // Re-run every time user clicks a different email
-    Office.context.mailbox.addHandlerAsync(
+    Office.context?.mailbox?.addHandlerAsync(
       Office.EventType.ItemChanged,
       () => {
         if (Office.context.mailbox.item) {
