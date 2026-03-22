@@ -4,16 +4,12 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Sortify</title>
-
-  <!-- Office.js must load first, always -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-
   <link rel="stylesheet" href="taskpane.css"/>
   <script src="taskpane.js"></script>
 </head>
 <body>
 
-  <!-- Animated background blobs (styled in CSS) -->
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -22,77 +18,60 @@
 
   <div class="container">
 
-    <!-- ── Header ── -->
+    <!-- Header: logo icon + "Sortify" text once, status pill -->
     <header class="glass header">
       <div class="logo">
-        <img
-          src="https://aflahsalim.github.io/sortify-addin/icons/sortify_logo.png"
-          alt="Sortify"
-          class="logo-image"
-        />
-        <span class="logo-text">Sortify</span>
+        <!-- Simple S shield icon — no text duplication -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"
+                fill="none" stroke="#00ff88" stroke-width="1.5" stroke-linejoin="round"/>
+          <text x="12" y="15.5" text-anchor="middle"
+                font-family="DM Sans, sans-serif" font-size="7" font-weight="600"
+                fill="#00ff88">S</text>
+        </svg>
+        Sortify
       </div>
-      <!-- Status pill updates dynamically from JS -->
       <div id="status" class="status-pill">Scanning...</div>
     </header>
 
-    <!-- ── Gauge card ── -->
-    <div class="glass gauge-card">
-      <svg class="gauge-svg" viewBox="0 0 200 110" aria-label="Risk gauge">
+    <!-- Gauge -->
+    <div class="glass gauge-card" id="gauge-card">
+      <svg class="gauge-svg" viewBox="0 0 180 100">
         <defs>
-          <!-- Gradient along the arc: cyan → purple → red -->
+          <!-- Default gradient — JS overrides stroke colour per risk level -->
           <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stop-color="#22d3ee"/>
-            <stop offset="50%"  stop-color="#a78bfa"/>
-            <stop offset="100%" stop-color="#f87171"/>
+            <stop id="grad-start" offset="0%"   stop-color="#00ff88"/>
+            <stop id="grad-end"   offset="100%" stop-color="#00cc66"/>
           </linearGradient>
         </defs>
-
-        <!-- Background track (faint) -->
-        <path
-          d="M20 100 A80 80 0 0 1 180 100"
-          fill="none"
-          stroke="rgba(255,255,255,0.07)"
-          stroke-width="10"
-          stroke-linecap="round"
-        />
-
+        <!-- Track -->
+        <path d="M18 90 A72 72 0 0 1 162 90"
+              fill="none" stroke="rgba(255,255,255,0.06)"
+              stroke-width="9" stroke-linecap="round"/>
         <!-- Active arc — JS animates stroke-dashoffset -->
-        <path
-          id="risk-arc"
-          d="M20 100 A80 80 0 0 1 180 100"
-          fill="none"
-          stroke="url(#arc-grad)"
-          stroke-width="10"
-          stroke-linecap="round"
-          stroke-dasharray="251"
-          stroke-dashoffset="251"
-          style="transition: stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);"
-        />
-
-        <!-- Needle — JS rotates via transform -->
-        <line
-          id="needle"
-          x1="100" y1="100"
-          x2="100" y2="28"
-          stroke="white"
-          stroke-width="2"
-          stroke-linecap="round"
-          opacity="0.85"
-          style="transform-origin: 100px 100px; transform: rotate(-90deg); transition: transform 0.9s cubic-bezier(.4,0,.2,1);"
-        />
-        <circle cx="100" cy="100" r="4" fill="white" opacity="0.85"/>
+        <path id="risk-arc"
+              d="M18 90 A72 72 0 0 1 162 90"
+              fill="none" stroke="url(#arc-grad)"
+              stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="226" stroke-dashoffset="226"
+              style="transition: stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1);"/>
+        <!-- Needle -->
+        <line id="needle"
+              x1="90" y1="90" x2="90" y2="26"
+              stroke="white" stroke-width="1.5" stroke-linecap="round"
+              opacity="0.8"
+              style="transform-origin:90px 90px; transform:rotate(-90deg);
+                     transition: transform 0.8s cubic-bezier(.4,0,.2,1);"/>
+        <circle cx="90" cy="90" r="3.5" fill="white" opacity="0.8"/>
       </svg>
 
-      <!-- These IDs match what taskpane.js writes to -->
       <div id="score-label" class="risk-label">—</div>
       <div id="result-button" class="risk-badge">—</div>
     </div>
 
-    <!-- ── Analysis details ── -->
+    <!-- Detail rows -->
     <div class="glass details-card">
 
-      <!-- Sender reputation row -->
       <div class="detail-row">
         <div class="detail-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -107,7 +86,6 @@
         <div id="sender-dot" class="dot"></div>
       </div>
 
-      <!-- Auth headers row (SPF/DKIM/DMARC) -->
       <div class="detail-row">
         <div class="detail-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -121,7 +99,6 @@
         <div id="links-dot" class="dot"></div>
       </div>
 
-      <!-- File assessment row -->
       <div class="detail-row">
         <div class="detail-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -136,7 +113,6 @@
         <div id="attachment-dot" class="dot"></div>
       </div>
 
-      <!-- Urgency signals row -->
       <div class="detail-row">
         <div class="detail-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -154,18 +130,19 @@
 
     </div>
 
-    <!-- ── Send to Sortify button ── -->
+    <!-- Report button -->
     <button id="report-btn" class="report-btn" onclick="reportEmail()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.56 3.44 2 2 0 0 1 3.53 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.44 16z"/>
       </svg>
       Send to Sortify team
     </button>
 
-    <!-- ── Confirm modal (hidden by default) ── -->
+    <!-- Confirm modal -->
     <div id="confirm-overlay" class="confirm-overlay hidden">
       <div class="glass confirm-modal">
-        <p class="confirm-text">Log this email to the Sortify admin dashboard and flag it for review?</p>
+        <p class="confirm-text">Log this email to the Sortify dashboard and flag for review?</p>
         <div class="confirm-actions">
           <button class="btn-cancel"  onclick="closeConfirm()">Cancel</button>
           <button class="btn-confirm" onclick="confirmReport()">Confirm</button>
@@ -173,6 +150,6 @@
       </div>
     </div>
 
-  </div><!-- /container -->
+  </div>
 </body>
 </html>
