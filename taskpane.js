@@ -7,12 +7,12 @@ const URGENCY_PHRASES = [
   "unusual activity","security alert","update your password"
 ];
 
-// Gauge colours per risk level — arc gradient changes with the result
+// Gauge arc colours per risk level
 const RISK_COLORS = {
-  ham:      { start: "#00ff88", end: "#00cc66" },  // green
-  support:  { start: "#22d3ee", end: "#0891b2" },  // cyan
-  spam:     { start: "#fbbf24", end: "#d97706" },  // amber
-  phishing: { start: "#f87171", end: "#dc2626" },  // red
+  ham:      { start: "#00ff88", end: "#00cc66" },
+  support:  { start: "#22d3ee", end: "#0891b2" },
+  spam:     { start: "#fbbf24", end: "#d97706" },
+  phishing: { start: "#f87171", end: "#dc2626" },
 };
 
 let currentScanData = null;
@@ -58,7 +58,6 @@ function resetUI() {
   if (badge) { badge.textContent = "—"; badge.className = "risk-badge"; }
   const btn = document.getElementById("report-btn");
   if (btn) { btn.disabled = false; btn.textContent = "Send to Sortify team"; }
-  // Reset arc gradient back to green
   setArcColor("ham");
   currentScanData = null;
 }
@@ -109,45 +108,11 @@ function processEmail(item, body) {
   if (matched.length >= 3)      { urgencyLabel = matched.length + " signals — High"; urgencyRisk = "danger"; }
   else if (matched.length >= 1) { urgencyLabel = '"' + matched[0] + '"';             urgencyRisk = "warn"; }
 
-  // 4. Auth headers — fire and forget, updates row when done
-  // Timeout after 3s so it doesn't hang forever
-  let authDone = false;
-  const authTimeout = setTimeout(() => {
-    if (!authDone) {
-      authDone = true;
-      setField("links", "Unavailable", "links-dot", "warn");
-      if (currentScanData) currentScanData.auth_result = "Unavailable";
-    }
-  }, 3000);
-
-  try {
-    item.internetHeaders?.getAsync(["Authentication-Results"], (r) => {
-      if (authDone) return;   // already timed out
-      authDone = true;
-      clearTimeout(authTimeout);
-      let authLabel = "Unavailable", authRisk = "warn";
-      if (r.status === Office.AsyncResultStatus.Succeeded) {
-        const h = (r.value?.["Authentication-Results"] || "").toLowerCase();
-        const spf  = h.includes("spf=pass");
-        const dkim = h.includes("dkim=pass");
-        const n    = [spf, dkim].filter(Boolean).length;
-        if (n === 2)      { authLabel = "SPF + DKIM pass"; authRisk = "safe"; }
-        else if (n === 1) { authLabel = "Partial pass";    authRisk = "warn"; }
-        else if (h)       { authLabel = "Auth failed";     authRisk = "danger"; }
-      }
-      setField("links", authLabel, "links-dot", authRisk);
-      if (currentScanData) currentScanData.auth_result = authLabel;
-    });
-  } catch(e) {
-    clearTimeout(authTimeout);
-    setField("links", "Not supported", "links-dot", "warn");
-  }
-
-  // Update all rows immediately (auth updates async above)
-  setField("sender",     senderLabel,   "sender-dot",     senderRisk);
-  setField("links",      "Checking…",   "links-dot",      "warn");
-  setField("attachment", filesLabel,    "attachment-dot", filesRisk);
-  setField("urgency",    urgencyLabel,  "urgency-dot",    urgencyRisk);
+  // Update rows immediately with what we have
+  setField("sender",     senderLabel,  "sender-dot",     senderRisk);
+  setField("links",      "Checking…",  "links-dot",      "warn");
+  setField("attachment", filesLabel,   "attachment-dot", filesRisk);
+  setField("urgency",    urgencyLabel, "urgency-dot",    urgencyRisk);
 
   currentScanData = {
     sender: senderEmail, subject: item.subject || "",
@@ -157,7 +122,95 @@ function processEmail(item, body) {
     body_preview: body.substring(0, 300)
   };
 
+  // 4. Auth — try getAllInternetHeadersAsync first (better desktop support)
+  //    fall back to internetHeaders if not available
+  //    fall back to heuristic if neither works
+  checkAuth(item, senderEmail);
+
+  // Call ML backend in parallel
   callBackend(body, attachments.length > 0);
+}
+
+// ── Auth check — tries 3 methods ─────────────────────────────────
+function checkAuth(item, senderEmail) {
+
+  // Method 1: getAllInternetHeadersAsync (best support in Outlook Desktop)
+  if (typeof item.getAllInternetHeadersAsync === "function") {
+    const timer = setTimeout(() => {
+      // If it takes more than 4s, fall back to heuristic
+      applyHeuristicAuth(senderEmail);
+    }, 4000);
+
+    item.getAllInternetHeadersAsync((result) => {
+      clearTimeout(timer);
+      if (result.status === Office.AsyncResultStatus.Succeeded && result.value) {
+        parseAuthHeaders(result.value);
+      } else {
+        applyHeuristicAuth(senderEmail);
+      }
+    });
+
+  // Method 2: internetHeaders.getAsync (Outlook Web)
+  } else if (item.internetHeaders && typeof item.internetHeaders.getAsync === "function") {
+    const timer = setTimeout(() => applyHeuristicAuth(senderEmail), 4000);
+    item.internetHeaders.getAsync(["Authentication-Results"], (r) => {
+      clearTimeout(timer);
+      if (r.status === Office.AsyncResultStatus.Succeeded) {
+        const h = r.value?.["Authentication-Results"] || "";
+        parseAuthHeaders(h);
+      } else {
+        applyHeuristicAuth(senderEmail);
+      }
+    });
+
+  // Method 3: neither available — use heuristic
+  } else {
+    applyHeuristicAuth(senderEmail);
+  }
+}
+
+// Parse the raw Authentication-Results header string
+function parseAuthHeaders(rawHeaders) {
+  const h     = rawHeaders.toLowerCase();
+  const spf   = h.includes("spf=pass");
+  const dkim  = h.includes("dkim=pass");
+  const dmarc = h.includes("dmarc=pass");
+  const n     = [spf, dkim, dmarc].filter(Boolean).length;
+
+  let authLabel, authRisk;
+  if (n === 3)      { authLabel = "SPF · DKIM · DMARC ✓"; authRisk = "safe"; }
+  else if (n === 2) { authLabel = "2/3 checks pass";       authRisk = "safe"; }
+  else if (n === 1) { authLabel = "Partial — 1/3 pass";    authRisk = "warn"; }
+  else if (h.includes("spf=") || h.includes("dkim=")) {
+                      authLabel = "Auth failed";            authRisk = "danger"; }
+  else              { authLabel = "No auth data";           authRisk = "warn"; }
+
+  setField("links", authLabel, "links-dot", authRisk);
+  if (currentScanData) currentScanData.auth_result = authLabel;
+}
+
+// Heuristic fallback — guess based on sender domain
+// If no header APIs work, we at least show something meaningful
+function applyHeuristicAuth(senderEmail) {
+  const domain = senderEmail.split("@")[1] || "";
+  const freeDomains = ["gmail.com","yahoo.com","hotmail.com","outlook.com"];
+
+  let authLabel, authRisk;
+  if (!domain) {
+    authLabel = "No sender info";
+    authRisk  = "warn";
+  } else if (freeDomains.includes(domain.toLowerCase())) {
+    // Free domains usually have SPF — flag as partial
+    authLabel = "Free domain";
+    authRisk  = "warn";
+  } else {
+    // Corporate domain — assume passing unless we know otherwise
+    authLabel = "Headers inaccessible";
+    authRisk  = "warn";
+  }
+
+  setField("links", authLabel, "links-dot", authRisk);
+  if (currentScanData) currentScanData.auth_result = authLabel;
 }
 
 // ── Step 3: ML backend ────────────────────────────────────────────
@@ -193,7 +246,7 @@ function callBackend(bodyText, hasAttachment) {
   });
 }
 
-// ── Gauge + colour change ─────────────────────────────────────────
+// ── Gauge renderer ────────────────────────────────────────────────
 function renderGauge(label) {
   const map = {
     ham:      { angle: -90, fill: 0.0,  text: "SAFE",     cls: "safe",   status: "All clear",  sCls: "done"   },
@@ -203,18 +256,14 @@ function renderGauge(label) {
   };
   const c = map[label] || { angle: 0, fill: 0.5, text: "UNKNOWN", cls: "", status: "Scanned", sCls: "done" };
 
-  // Rotate needle
   const needle = document.getElementById("needle");
   if (needle) needle.style.transform = "rotate(" + c.angle + "deg)";
 
-  // Fill arc — total path length = 226
   const arc = document.getElementById("risk-arc");
   if (arc) arc.style.strokeDashoffset = 226 - c.fill * 226;
 
-  // Change arc gradient colour to match risk
   setArcColor(label);
 
-  // Labels
   const scoreLabel = document.getElementById("score-label");
   if (scoreLabel) {
     scoreLabel.textContent = c.text;
@@ -225,7 +274,6 @@ function renderGauge(label) {
   const badge = document.getElementById("result-button");
   if (badge) { badge.textContent = c.text; badge.className = "risk-badge " + c.cls; }
 
-  // Gauge card border glow
   const card = document.getElementById("gauge-card");
   if (card) {
     const col = RISK_COLORS[label];
@@ -236,7 +284,6 @@ function renderGauge(label) {
   if (currentScanData) currentScanData.label = label;
 }
 
-// Update the SVG gradient stops to match the risk colour
 function setArcColor(label) {
   const col = RISK_COLORS[label] || RISK_COLORS.ham;
   const s = document.getElementById("grad-start");
@@ -271,12 +318,10 @@ function closeConfirm() {
 function confirmReport() {
   closeConfirm();
   const btn = document.getElementById("report-btn");
-  btn.disabled    = true;
-  btn.textContent = "Sending...";
+  btn.disabled = true; btn.textContent = "Sending...";
   fetch(BACKEND + "/report", {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(Object.assign({}, currentScanData, { reported: true }))
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({}, currentScanData, { reported: true }))
   })
   .then(() => { btn.textContent = "✓ Reported"; })
   .catch(() => { btn.textContent = "Failed — try again"; btn.disabled = false; });
@@ -286,8 +331,7 @@ function confirmReport() {
 function logScan(label) {
   if (!currentScanData) return;
   fetch(BACKEND + "/log-scan", {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(Object.assign({}, currentScanData, { label }))
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({}, currentScanData, { label }))
   }).catch(() => {});
 }
