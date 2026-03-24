@@ -9,126 +9,160 @@
   <script src="taskpane.js"></script>
 </head>
 <body>
+<div class="container">
 
-  <div class="bg-orbs">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
-
-  <div class="container">
-
-    <!-- Top status bar — no logo here (already shown in ribbon) -->
-    <div class="glass status-bar">
-      <div id="status" class="status-pill">Scanning...</div>
-      <span id="scan-time" class="scan-time"></span>
-    </div>
-
-    <!-- Gauge — fills remaining space -->
-    <div class="glass gauge-card" id="gauge-card">
-      <svg class="gauge-svg" viewBox="0 0 200 110">
-        <defs>
-          <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop id="grad-start" offset="0%"   stop-color="#00e87a"/>
-            <stop id="grad-end"   offset="100%" stop-color="#00b85f"/>
-          </linearGradient>
-        </defs>
-        <!-- Track -->
-        <path d="M20 100 A80 80 0 0 1 180 100"
-              fill="none" stroke="rgba(255,255,255,0.06)"
-              stroke-width="10" stroke-linecap="round"/>
-        <!-- Active arc -->
-        <path id="risk-arc"
-              d="M20 100 A80 80 0 0 1 180 100"
-              fill="none" stroke="url(#arc-grad)"
-              stroke-width="10" stroke-linecap="round"
-              stroke-dasharray="251" stroke-dashoffset="251"
-              style="transition: stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);"/>
-        <!-- Needle -->
-        <line id="needle"
-              x1="100" y1="100" x2="100" y2="28"
-              stroke="white" stroke-width="2" stroke-linecap="round"
-              opacity="0.85"
-              style="transform-origin:100px 100px; transform:rotate(-90deg);
-                     transition: transform 0.9s cubic-bezier(.4,0,.2,1);"/>
-        <circle cx="100" cy="100" r="4" fill="white" opacity="0.85"/>
-      </svg>
-      <div id="score-label" class="risk-label">—</div>
-      <div id="result-button" class="risk-badge">—</div>
-    </div>
-
-    <!-- Check rows — plain English, user-friendly -->
-    <div class="checks-card">
-
-      <!-- Row 1: Trust — combines sender + auth into one simple verdict -->
-      <div class="check-row" id="row-trust">
-        <div class="check-icon">🔍</div>
-        <div class="check-body">
-          <div class="check-label">Sender trust</div>
-          <div id="sender" class="check-value">—</div>
-        </div>
-      </div>
-
-      <!-- Row 2: Links — safe browsing result -->
-      <div class="check-row" id="row-links">
-        <div class="check-icon">🔗</div>
-        <div class="check-body">
-          <div class="check-label">Links</div>
-          <div id="links" class="check-value">—</div>
-        </div>
-      </div>
-
-      <!-- Row 3: Urgency — how aggressive the language is -->
-      <div class="check-row" id="row-urgency">
-        <div class="check-icon">⚡</div>
-        <div class="check-body">
-          <div class="check-label">Pressure tactics</div>
-          <div id="urgency" class="check-value">—</div>
-        </div>
-      </div>
-
-      <!-- Row 4: Files — attachment risk -->
-      <div class="check-row" id="row-files">
-        <div class="check-icon">📎</div>
-        <div class="check-body">
-          <div class="check-label">Attachments</div>
-          <div id="attachment" class="check-value">—</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Report button -->
-    <button id="report-btn" class="report-btn" onclick="reportEmail()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5">
-        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.56 3.44 2 2 0 0 1 3.53 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.44 16z"/>
-      </svg>
-      Report to Sortify
-    </button>
-
-    <!-- Footer logo — subtle, at the bottom -->
-    <div class="footer-logo">
-      <svg viewBox="0 0 24 24" fill="none">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"
-              stroke="#00e87a" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+              stroke="#22c55e" stroke-width="1.5" stroke-linejoin="round" fill="rgba(34,197,94,0.1)"/>
         <text x="12" y="15.5" text-anchor="middle"
               font-family="DM Sans,sans-serif" font-size="7" font-weight="700"
-              fill="#00e87a">S</text>
+              fill="#22c55e">S</text>
       </svg>
-      <span>Sortify</span>
+      <div>
+        <div class="header-title">Sortify</div>
+        <div class="header-sub">Security Scan</div>
+      </div>
+    </div>
+    <div id="status" class="status-pill">Scanning...</div>
+  </div>
+
+  <!-- Score card with gauge + colour bar -->
+  <div class="score-card" id="score-card">
+
+    <!-- Semicircle gauge with score number in the middle -->
+    <svg class="gauge-svg" viewBox="0 0 200 120">
+      <defs>
+        <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop id="grad-start" offset="0%"   stop-color="#22c55e"/>
+          <stop id="grad-end"   offset="100%" stop-color="#16a34a"/>
+        </linearGradient>
+      </defs>
+      <!-- Track -->
+      <path d="M20 105 A80 80 0 0 1 180 105"
+            fill="none" stroke="rgba(255,255,255,0.06)"
+            stroke-width="12" stroke-linecap="round"/>
+      <!-- Active arc -->
+      <path id="risk-arc"
+            d="M20 105 A80 80 0 0 1 180 105"
+            fill="none" stroke="url(#arc-grad)"
+            stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="251" stroke-dashoffset="251"
+            style="transition: stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);"/>
+      <!-- Needle -->
+      <line id="needle"
+            x1="100" y1="105" x2="100" y2="32"
+            stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"
+            style="transform-origin:100px 105px; transform:rotate(-90deg);
+                   transition: transform 0.9s cubic-bezier(.4,0,.2,1);"/>
+      <circle cx="100" cy="105" r="4" fill="white" opacity="0.7"/>
+      <!-- Score number in centre -->
+      <text id="score-number" x="100" y="90"
+            text-anchor="middle" dominant-baseline="central"
+            font-family="DM Sans,sans-serif" font-size="28" font-weight="700"
+            fill="#22c55e">—</text>
+    </svg>
+
+    <!-- Score label -->
+    <div class="score-title">RISK SCORE</div>
+
+    <!-- Colour bar with sliding dot -->
+    <div class="color-bar" style="width:80%;max-width:160px;">
+      <div class="color-bar-dot" id="bar-dot"></div>
     </div>
 
-    <!-- Confirm modal -->
-    <div id="confirm-overlay" class="confirm-overlay hidden">
-      <div class="glass confirm-modal">
-        <p class="confirm-text">Flag this email and send it to the Sortify security team for review?</p>
-        <div class="confirm-actions">
-          <button class="btn-cancel"  onclick="closeConfirm()">Cancel</button>
-          <button class="btn-confirm" onclick="confirmReport()">Report it</button>
+    <!-- Verdict text -->
+    <div id="verdict" class="verdict" style="color:var(--muted);">Analysing...</div>
+
+    <!-- Hidden element JS still writes to for compatibility -->
+    <div id="score-label"  style="display:none;"></div>
+    <div id="result-button" style="display:none;"></div>
+  </div>
+
+  <!-- 2x2 info cards -->
+  <div class="cards-grid">
+
+    <!-- Sender trust -->
+    <div class="info-card" id="card-sender">
+      <div class="card-header">
+        <div class="card-title-row">
+          <span class="card-icon">🔍</span>
+          <span class="card-title">Sender</span>
         </div>
+        <div class="card-dot" id="sender-dot"></div>
       </div>
+      <div id="sender-body" class="card-body">Checking sender...</div>
+      <div id="sender" class="card-result neutral">—</div>
+    </div>
+
+    <!-- Link security -->
+    <div class="info-card" id="card-links">
+      <div class="card-header">
+        <div class="card-title-row">
+          <span class="card-icon">🔗</span>
+          <span class="card-title">Links</span>
+        </div>
+        <div class="card-dot" id="links-dot"></div>
+      </div>
+      <div id="links-body" class="card-body">Checking links...</div>
+      <div id="links" class="card-result neutral">—</div>
+    </div>
+
+    <!-- Attachments -->
+    <div class="info-card" id="card-attach">
+      <div class="card-header">
+        <div class="card-title-row">
+          <span class="card-icon">📎</span>
+          <span class="card-title">Attachments</span>
+        </div>
+        <div class="card-dot" id="attachment-dot"></div>
+      </div>
+      <div id="attach-body" class="card-body">Checking files...</div>
+      <div id="attachment" class="card-result neutral">—</div>
+    </div>
+
+    <!-- Behaviour -->
+    <div class="info-card" id="card-urgency">
+      <div class="card-header">
+        <div class="card-title-row">
+          <span class="card-icon">⚡</span>
+          <span class="card-title">Behaviour</span>
+        </div>
+        <div class="card-dot" id="urgency-dot"></div>
+      </div>
+      <div id="urgency-body" class="card-body">Checking language...</div>
+      <div id="urgency" class="card-result neutral">—</div>
     </div>
 
   </div>
+
+  <!-- Mark as Suspicious -->
+  <button id="report-btn" class="suspicious-btn" onclick="reportEmail()">
+    ⚑ &nbsp;Mark as Suspicious
+  </button>
+
+  <!-- Footer logo -->
+  <div class="footer-logo">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"
+            stroke="#22c55e" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+    <span>Sortify</span>
+  </div>
+
+  <!-- Confirm modal -->
+  <div id="confirm-overlay" class="confirm-overlay hidden">
+    <div class="confirm-modal">
+      <p class="confirm-text">Flag this email as suspicious and send to the Sortify security team for review?</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel"  onclick="closeConfirm()">Cancel</button>
+        <button class="btn-confirm" onclick="confirmReport()">Report it</button>
+      </div>
+    </div>
+  </div>
+
+</div>
 </body>
 </html>
