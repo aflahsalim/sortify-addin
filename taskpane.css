@@ -3,92 +3,72 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --green:    #00ff88;      /* primary accent */
-  --green-dim:#00cc66;      /* darker green */
-  --green-bg: rgba(0,255,136,0.07);
-  --green-bd: rgba(0,255,136,0.2);
-  --amber:    #fbbf24;
-  --red:      #f87171;
-  --cyan:     #22d3ee;
-  --glass:    rgba(255,255,255,0.04);
-  --border:   rgba(255,255,255,0.08);
-  --text:     rgba(255,255,255,0.9);
-  --muted:    rgba(255,255,255,0.35);
+  --green:     #00e87a;
+  --green-dim: #00b85f;
+  --green-bg:  rgba(0,232,122,0.07);
+  --green-bd:  rgba(0,232,122,0.2);
+  --amber:     #f59e0b;
+  --red:       #ef4444;
+  --cyan:      #06b6d4;
+  --glass:     rgba(255,255,255,0.04);
+  --glass2:    rgba(255,255,255,0.07);
+  --border:    rgba(255,255,255,0.08);
+  --text:      rgba(255,255,255,0.92);
+  --muted:     rgba(255,255,255,0.38);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden; /* no scrollbar — fits the pane */
 }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: #050508;
+  background: #060609;
   color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ── Subtle green grid bg ───────────────────── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
+  /* subtle grid */
   background-image:
-    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  pointer-events: none;
-  z-index: 0;
+    linear-gradient(rgba(0,232,122,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,232,122,0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-/* ── Animated green blob ────────────────────── */
-.bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.12;
-  animation: drift 12s ease-in-out infinite alternate;
-}
-.orb-1 { width: 220px; height: 220px; background: #00ff88; top: -60px; left: -40px; }
-.orb-2 { width: 160px; height: 160px; background: #00cc66; bottom: 20%; right: -40px; animation-delay: -6s; }
-.orb-3 { width: 120px; height: 120px; background: #00ff88; bottom: 5%; left: 20%; animation-delay: -3s; }
-@keyframes drift { from { transform: translate(0,0); } to { transform: translate(14px, 18px); } }
+/* Green glow blobs */
+.bg-orbs { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.1; animation: drift 14s ease-in-out infinite alternate; }
+.orb-1 { width: 200px; height: 200px; background: #00e87a; top: -50px; left: -30px; }
+.orb-2 { width: 140px; height: 140px; background: #00b85f; bottom: 15%; right: -30px; animation-delay: -7s; }
+@keyframes drift { from { transform: translate(0,0); } to { transform: translate(12px,16px); } }
 
-/* ── Glass card ─────────────────────────────── */
+/* Glass utility */
 .glass {
   background: var(--glass);
   border: 1px solid var(--border);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 11px;
 }
 
-/* ── Container ──────────────────────────────── */
+/* ── Full-height flex layout ─────────────────── */
 .container {
   position: relative;
   z-index: 1;
-  padding: 10px;
+  height: 100vh;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
-/* ── Header ─────────────────────────────────── */
-.header {
+/* ── Status bar at top ──────────────────────── */
+.status-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 7px 11px;
+  flex-shrink: 0;
 }
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--green);
-  letter-spacing: 0.04em;
-}
-.logo svg { flex-shrink: 0; }
 
-/* Status pill */
 .status-pill {
   font-size: 10px;
   font-weight: 500;
@@ -100,127 +80,162 @@ body::before {
   transition: all 0.3s;
 }
 .status-pill.done   { color: var(--green); border-color: var(--green-bd); background: var(--green-bg); }
-.status-pill.warn   { color: var(--amber); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); }
-.status-pill.danger { color: var(--red);   border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
+.status-pill.warn   { color: var(--amber); border-color: rgba(245,158,11,0.28); background: rgba(245,158,11,0.07); }
+.status-pill.danger { color: var(--red);   border-color: rgba(239,68,68,0.28);  background: rgba(239,68,68,0.07); }
 
-/* ── Gauge card ─────────────────────────────── */
+/* scan time */
+.scan-time { font-size: 9px; color: var(--muted); }
+
+/* ── Gauge — fills available space ──────────── */
 .gauge-card {
-  padding: 14px 12px 8px;
+  flex: 1;          /* takes remaining space */
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* green glow border that matches risk level */
-  border-color: var(--gauge-color, var(--border));
-  transition: border-color 0.6s;
+  justify-content: center;
+  padding: 10px 8px 6px;
+  transition: border-color 0.5s;
+  min-height: 0;
 }
-.gauge-svg { width: 100%; max-width: 180px; }
+.gauge-svg {
+  width: 100%;
+  max-width: 200px;
+  flex-shrink: 0;
+}
 
 .risk-label {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   margin-top: 2px;
-  color: var(--gauge-color, var(--text));
   transition: color 0.4s;
 }
 .risk-badge {
-  margin-top: 5px;
+  margin-top: 4px;
   font-size: 10px;
   font-weight: 600;
-  padding: 2px 12px;
+  padding: 2px 13px;
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--glass);
   color: var(--muted);
   transition: all 0.4s;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
-/* Each risk level gets its own colour */
-.risk-badge.safe    { color: var(--green); border-color: var(--green-bd);           background: var(--green-bg); }
-.risk-badge.info    { color: var(--cyan);  border-color: rgba(34,211,238,0.25);      background: rgba(34,211,238,0.07); }
-.risk-badge.warn    { color: var(--amber); border-color: rgba(251,191,36,0.25);      background: rgba(251,191,36,0.07); }
-.risk-badge.danger  { color: var(--red);   border-color: rgba(248,113,113,0.25);     background: rgba(248,113,113,0.07); }
+.risk-badge.safe   { color: var(--green); border-color: var(--green-bd);           background: var(--green-bg); }
+.risk-badge.info   { color: var(--cyan);  border-color: rgba(6,182,212,0.25);       background: rgba(6,182,212,0.07); }
+.risk-badge.warn   { color: var(--amber); border-color: rgba(245,158,11,0.25);      background: rgba(245,158,11,0.07); }
+.risk-badge.danger { color: var(--red);   border-color: rgba(239,68,68,0.25);       background: rgba(239,68,68,0.07); }
 
-/* ── Detail rows ────────────────────────────── */
-.details-card { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-
-.detail-row { display: flex; align-items: center; gap: 9px; }
-
-.detail-icon {
-  width: 26px; height: 26px;
-  border-radius: 7px;
-  background: var(--glass);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--muted);
+/* ── Check rows ─────────────────────────────── */
+.checks-card {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   flex-shrink: 0;
 }
-.detail-icon svg { width: 12px; height: 12px; }
 
-.detail-text { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.detail-label {
-  font-size: 9px; font-weight: 500;
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  border-radius: 8px;
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+/* row glow matches its status */
+.check-row.safe-row   { border-color: rgba(0,232,122,0.15); }
+.check-row.warn-row   { border-color: rgba(245,158,11,0.15); }
+.check-row.danger-row { border-color: rgba(239,68,68,0.15); }
+
+.check-icon {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  background: var(--glass);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;    /* emoji icon */
+}
+
+.check-body { flex: 1; min-width: 0; }
+.check-label {
+  font-size: 9px;
+  font-weight: 500;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.07em;
+  line-height: 1;
 }
-.detail-value {
-  font-size: 11px; font-weight: 500;
+.check-value {
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
 }
-
-/* Coloured dot */
-.dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--border);
-  flex-shrink: 0;
-  transition: background 0.3s, box-shadow 0.3s;
-}
-.dot.safe   { background: var(--green); box-shadow: 0 0 5px rgba(0,255,136,0.5); }
-.dot.warn   { background: var(--amber); box-shadow: 0 0 5px rgba(251,191,36,0.5); }
-.dot.danger { background: var(--red);   box-shadow: 0 0 5px rgba(248,113,113,0.5); }
+/* value colour per status */
+.check-value.safe   { color: var(--green); }
+.check-value.warn   { color: var(--amber); }
+.check-value.danger { color: var(--red); }
 
 /* ── Report button ──────────────────────────── */
 .report-btn {
   width: 100%;
   display: flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 10px;
+  padding: 9px;
   border: 1px solid var(--green-bd);
   background: var(--green-bg);
   color: var(--green);
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500;
+  font-size: 11px; font-weight: 600;
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 11px;
   transition: all 0.2s;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
 }
-.report-btn:hover    { background: rgba(0,255,136,0.12); border-color: rgba(0,255,136,0.4); }
+.report-btn:hover    { background: rgba(0,232,122,0.13); border-color: rgba(0,232,122,0.4); }
 .report-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Footer logo ────────────────────────────── */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 0 2px;
+  flex-shrink: 0;
+  opacity: 0.3;
+}
+.footer-logo svg { width: 13px; height: 13px; }
+.footer-logo span { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--green); }
 
 /* ── Confirm overlay ────────────────────────── */
 .confirm-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   z-index: 100; padding: 14px;
 }
 .confirm-overlay.hidden { display: none; }
-.confirm-modal { padding: 20px; max-width: 240px; width: 100%; }
-.confirm-text  { font-size: 12px; line-height: 1.6; text-align: center; margin-bottom: 14px; color: var(--text); }
+.confirm-modal { padding: 20px; max-width: 230px; width: 100%; }
+.confirm-text  { font-size: 12px; line-height: 1.6; text-align: center; margin-bottom: 14px; }
 .confirm-actions { display: flex; gap: 8px; }
 .btn-cancel, .btn-confirm {
   flex: 1; padding: 8px;
   border-radius: 8px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500;
+  font-size: 11px; font-weight: 600;
   cursor: pointer; border: 1px solid transparent;
   transition: all 0.2s;
 }
-.btn-cancel  { background: var(--glass); border-color: var(--border); color: var(--muted); }
-.btn-cancel:hover  { background: rgba(255,255,255,0.08); }
+.btn-cancel  { background: var(--glass2); border-color: var(--border); color: var(--muted); }
+.btn-cancel:hover  { background: rgba(255,255,255,0.1); }
 .btn-confirm { background: var(--green-bg); border-color: var(--green-bd); color: var(--green); }
-.btn-confirm:hover { background: rgba(0,255,136,0.14); }
+.btn-confirm:hover { background: rgba(0,232,122,0.15); }
