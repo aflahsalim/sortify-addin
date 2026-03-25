@@ -10,41 +10,56 @@
 </head>
 <body>
 <div class="wrap">
-  
-  <!-- ── Score section ── -->
-  <div class="score-section">
 
-    <!-- Semicircle gauge with big number inside -->
+  <!-- Status pill centred at top -->
+  <div id="status" class="status-pill">Scanning...</div>
+
+  <!-- Score section -->
+  <div class="score-section">
     <div class="gauge-wrap">
-      <svg class="gauge-svg" viewBox="0 0 200 115">
+      <svg class="gauge-svg" viewBox="0 0 200 110">
         <defs>
           <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
             <stop id="gs" offset="0%"   stop-color="#22c55e"/>
             <stop id="ge" offset="100%" stop-color="#16a34a"/>
           </linearGradient>
         </defs>
-        <!-- Track -->
-        <path d="M22 105 A78 78 0 0 1 178 105"
-              fill="none" stroke="rgba(255,255,255,0.07)"
-              stroke-width="13" stroke-linecap="round"/>
-        <!-- Active arc -->
+
+        <!-- Track (faint background arc) -->
+        <path d="M18 100 A82 82 0 0 1 182 100"
+              fill="none"
+              stroke="rgba(255,255,255,0.07)"
+              stroke-width="12"
+              stroke-linecap="round"/>
+
+        <!--
+          Active arc.
+          Path length of "M18 100 A82 82 0 0 1 182 100" ≈ 257px.
+          stroke-dasharray = 257 (full length).
+          stroke-dashoffset is set by JS:
+            offset = 257 - (score/100) * 257
+          So score 5  → offset = 257 - 12.85  = 244  (tiny sliver)
+          So score 94 → offset = 257 - 241.6  = 15   (nearly full)
+          JS uses: arc.style.strokeDashoffset = 257 - (RISK_SCORES[label]/100)*257
+        -->
         <path id="risk-arc"
-              d="M22 105 A78 78 0 0 1 178 105"
-              fill="none" stroke="url(#arc-grad)"
-              stroke-width="13" stroke-linecap="round"
-              stroke-dasharray="245" stroke-dashoffset="245"
-              style="transition:stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);"/>
-        <!-- Needle -->
-        <line id="needle"
-              x1="100" y1="105" x2="100" y2="34"
-              stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"
-              style="transform-origin:100px 105px;transform:rotate(-90deg);
-                     transition:transform 0.9s cubic-bezier(.4,0,.2,1);"/>
-        <circle cx="100" cy="105" r="4" fill="rgba(255,255,255,0.7)"/>
-        <!-- Big score number -->
-        <text id="score-number" x="100" y="86"
-              text-anchor="middle" dominant-baseline="central"
-              font-family="Inter,sans-serif" font-size="34" font-weight="700"
+              d="M18 100 A82 82 0 0 1 182 100"
+              fill="none"
+              stroke="url(#arc-grad)"
+              stroke-width="12"
+              stroke-linecap="round"
+              stroke-dasharray="257"
+              stroke-dashoffset="257"
+              style="transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);"/>
+
+        <!-- Score number in centre — no needle -->
+        <text id="score-number"
+              x="100" y="82"
+              text-anchor="middle"
+              dominant-baseline="central"
+              font-family="Inter,sans-serif"
+              font-size="36"
+              font-weight="700"
               fill="#22c55e">—</text>
       </svg>
     </div>
@@ -57,7 +72,7 @@
 
     <div class="score-title">RISK SCORE</div>
 
-    <!-- Segmented colour bar (5 blocks, active ones light up) -->
+    <!-- Segmented colour bar -->
     <div class="seg-bar">
       <div class="seg seg-1" id="seg1"></div>
       <div class="seg seg-2" id="seg2"></div>
@@ -68,12 +83,12 @@
 
     <div id="verdict" class="verdict">Analysing...</div>
 
-    <!-- Hidden compat elements -->
+    <!-- Hidden compat -->
     <div id="score-label"   style="display:none;"></div>
     <div id="result-button" style="display:none;"></div>
   </div>
 
-  <!-- ── 2×2 card grid ── -->
+  <!-- 2×2 card grid -->
   <div class="grid">
 
     <!-- Sender -->
@@ -89,12 +104,15 @@
           <span class="card-title">Sender</span>
         </div>
         <div class="card-tick" id="tick-sender">
-          <svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 10 10" fill="none">
+            <polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
       </div>
       <div id="sender-l1" class="card-line1">—</div>
       <div id="sender-l2" class="card-line2"></div>
-      <div id="sender" class="card-result neutral">—</div>
+      <div id="sender"    class="card-result neutral">—</div>
     </div>
 
     <!-- Link security -->
@@ -110,15 +128,18 @@
           <span class="card-title">Link security</span>
         </div>
         <div class="card-tick" id="tick-links">
-          <svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 10 10" fill="none">
+            <polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
       </div>
       <div id="links-l1" class="card-line1">—</div>
       <div id="links-l2" class="card-line2"></div>
-      <div id="links" class="card-result neutral">—</div>
+      <div id="links"    class="card-result neutral">—</div>
     </div>
 
-    <!-- Attachment check -->
+    <!-- Attachments -->
     <div class="info-card" id="card-attach">
       <div class="card-top">
         <div class="card-left">
@@ -130,15 +151,18 @@
           <span class="card-title">Attachments</span>
         </div>
         <div class="card-tick" id="tick-attach">
-          <svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 10 10" fill="none">
+            <polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
       </div>
-      <div id="attach-l1" class="card-line1">—</div>
-      <div id="attach-l2" class="card-line2"></div>
+      <div id="attach-l1"  class="card-line1">—</div>
+      <div id="attach-l2"  class="card-line2"></div>
       <div id="attachment" class="card-result neutral">—</div>
     </div>
 
-    <!-- Behavioural analysis -->
+    <!-- Behaviour -->
     <div class="info-card" id="card-urgency">
       <div class="card-top">
         <div class="card-left">
@@ -150,24 +174,34 @@
           <span class="card-title">Behaviour</span>
         </div>
         <div class="card-tick" id="tick-urgency">
-          <svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 10 10" fill="none">
+            <polyline points="2,5 4,7.5 8,3" stroke="#94a3b8" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
       </div>
       <div id="urgency-l1" class="card-line1">—</div>
       <div id="urgency-l2" class="card-line2"></div>
-      <div id="urgency" class="card-result neutral">—</div>
+      <div id="urgency"    class="card-result neutral">—</div>
     </div>
 
   </div>
 
-  <!-- ── Buttons ── -->
-  <div class="btn-area">
-    <button id="report-btn" class="btn-suspicious" onclick="reportEmail()">
-      Mark as Suspicious
-    </button>
+  <!-- Mark as Suspicious -->
+  <button id="report-btn" class="btn-suspicious" onclick="reportEmail()">
+    Mark as Suspicious
+  </button>
+
+  <!-- Footer -->
+  <div class="footer">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"
+            stroke="#22c55e" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+    <span>Sortify</span>
   </div>
 
-  <!-- ── Confirm modal ── -->
+  <!-- Confirm modal -->
   <div id="overlay" class="overlay hidden">
     <div class="modal">
       <p>Flag this email as suspicious and send to the Sortify security team?</p>
