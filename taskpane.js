@@ -1,33 +1,31 @@
-// ── Config ────────────────────────────────────────────────────────
 const BACKEND = "https://sortify-backend-hwf9d0exgqdub9cn.canadacentral-01.azurewebsites.net";
 const RISKY_EXT = ["exe","bat","vbs","js","msi","ps1","cmd","scr","zip","rar","docm","xlsm"];
 const URGENCY_PHRASES = [
-  "urgent","immediately","suspended","verify","confirm your",
-  "click now","24 hours","48 hours","act now","account locked",
-  "unusual activity","security alert","update your password",
-  "will be terminated","will be suspended","limited time"
+  "urgent","immediately","suspended","verify","confirm your","click now",
+  "24 hours","48 hours","act now","account locked","unusual activity",
+  "security alert","update your password","will be terminated","limited time"
 ];
 
-// Risk score (0–100) per label — shown as the big number
-const RISK_SCORES = { ham: 5, support: 20, spam: 72, phishing: 95 };
+// Risk score number shown in gauge centre
+const RISK_SCORES = { ham: 5, support: 22, spam: 71, phishing: 94 };
 
-// Arc gradient colours per risk
-const RISK_COLORS = {
-  ham:      { start: "#22c55e", end: "#16a34a" },
-  support:  { start: "#06b6d4", end: "#0891b2" },
-  spam:     { start: "#f59e0b", end: "#d97706" },
-  phishing: { start: "#ef4444", end: "#dc2626" },
+// How many of the 5 colour bar segments to light up
+const SEG_COUNTS = { ham: 1, support: 2, spam: 4, phishing: 5 };
+
+// Arc gradient colours
+const ARC_COLORS = {
+  ham:      { s: "#22c55e", e: "#16a34a" },
+  support:  { s: "#06b6d4", e: "#0891b2" },
+  spam:     { s: "#f59e0b", e: "#d97706" },
+  phishing: { s: "#ef4444", e: "#dc2626" },
 };
 
-// Colour bar dot position (%) per label
-const BAR_POSITIONS = { ham: 4, support: 18, spam: 70, phishing: 95 };
-
-// Verdict text shown under the bar
+// Verdict text + colour
 const VERDICTS = {
-  ham:      { text: "Safe — Full Check Passed",  color: "#22c55e" },
-  support:  { text: "Low Risk — Support Email",  color: "#06b6d4" },
-  spam:     { text: "Suspicious — Possible Spam",color: "#f59e0b" },
-  phishing: { text: "High Risk — Likely Phishing",color: "#ef4444" },
+  ham:      { t: "Safe — Full Check Passed",   c: "#22c55e" },
+  support:  { t: "Low Risk — Support Email",   c: "#06b6d4" },
+  spam:     { t: "Suspicious — Possible Spam", c: "#f59e0b" },
+  phishing: { t: "High Risk — Likely Phishing",c: "#ef4444" },
 };
 
 let currentScanData = null;
@@ -35,11 +33,8 @@ let currentScanData = null;
 // ── Entry point ───────────────────────────────────────────────────
 Office.onReady(() => {
   waitForDOM(() => {
-    if (Office.context?.mailbox?.item) {
-      startClassification();
-    } else {
-      setStatus("Open an email to scan", "");
-    }
+    if (Office.context?.mailbox?.item) startClassification();
+    else setStatus("Open an email to scan", "");
     Office.context?.mailbox?.addHandlerAsync(
       Office.EventType.ItemChanged,
       () => { resetUI(); startClassification(); }
@@ -56,48 +51,56 @@ function waitForDOM(cb) {
 function resetUI() {
   setStatus("Scanning...", "");
 
-  // Reset gauge
+  // Gauge
   const arc = document.getElementById("risk-arc");
-  if (arc) arc.style.strokeDashoffset = "251";
+  if (arc) arc.style.strokeDashoffset = "245";
   const needle = document.getElementById("needle");
   if (needle) needle.style.transform = "rotate(-90deg)";
   const num = document.getElementById("score-number");
   if (num) { num.textContent = "—"; num.setAttribute("fill","#22c55e"); }
-  setBarDot(0);
-  const verdict = document.getElementById("verdict");
-  if (verdict) { verdict.textContent = "Analysing..."; verdict.style.color = "var(--muted)"; }
 
-  // Reset cards
-  ["sender","links","attachment","urgency"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = "—"; el.className = "card-result neutral"; }
-  });
-  ["sender-dot","links-dot","attachment-dot","urgency-dot"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.className = "card-dot";
-  });
-  ["card-sender","card-links","card-attach","card-urgency"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.className = "info-card";
-  });
-  setCardBody("sender-body",  "Checking sender...");
-  setCardBody("links-body",   "Checking links...");
-  setCardBody("attach-body",  "Checking files...");
-  setCardBody("urgency-body", "Checking language...");
+  // Colour bar
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById("seg" + i);
+    if (s) s.classList.remove("active");
+  }
 
-  // Reset score card border
+  // Verdict
+  const vd = document.getElementById("verdict");
+  if (vd) { vd.textContent = "Analysing..."; vd.style.color = "var(--muted)"; }
+
+  // Cards
+  resetCard("card-sender",  "tick-sender",  "sender",     "sender-l1",  "—", "sender-l2",  "");
+  resetCard("card-links",   "tick-links",   "links",      "links-l1",   "—", "links-l2",   "");
+  resetCard("card-attach",  "tick-attach",  "attachment", "attach-l1",  "—", "attach-l2",  "");
+  resetCard("card-urgency", "tick-urgency", "urgency",    "urgency-l1", "—", "urgency-l2", "");
+
+  // Score card border
   const sc = document.getElementById("score-card");
   if (sc) sc.style.borderColor = "";
 
-  // Reset button
+  // Button
   const btn = document.getElementById("report-btn");
-  if (btn) { btn.disabled = false; btn.innerHTML = "⚑ &nbsp;Mark as Suspicious"; }
+  if (btn) { btn.disabled = false; btn.textContent = "Mark as Suspicious"; }
 
   setArcColor("ham");
   currentScanData = null;
 }
 
-// ── Step 1: read body ─────────────────────────────────────────────
+function resetCard(cardId, tickId, valId, l1Id, l1, l2Id, l2) {
+  const card = document.getElementById(cardId);
+  if (card) card.className = "info-card";
+  const tick = document.getElementById(tickId);
+  if (tick) { tick.className = "card-tick"; tick.querySelector("polyline").setAttribute("stroke","#94a3b8"); }
+  const val = document.getElementById(valId);
+  if (val) { val.textContent = "—"; val.className = "card-result neutral"; }
+  const e1 = document.getElementById(l1Id);
+  if (e1) e1.textContent = l1;
+  const e2 = document.getElementById(l2Id);
+  if (e2) e2.textContent = l2;
+}
+
+// ── Read email ────────────────────────────────────────────────────
 function startClassification() {
   const item = Office.context?.mailbox?.item;
   if (!item) return setStatus("Open an email to scan", "");
@@ -109,7 +112,7 @@ function startClassification() {
   });
 }
 
-// ── Step 2: all checks ────────────────────────────────────────────
+// ── Process all checks ────────────────────────────────────────────
 function processEmail(item, body) {
 
   // Sender
@@ -118,270 +121,232 @@ function processEmail(item, body) {
   const domain    = senderEmail.split("@")[1] || "";
   const freeDomains = ["gmail.com","yahoo.com","hotmail.com","outlook.com","live.com"];
   const isFree    = freeDomains.includes(domain.toLowerCase());
+  const senderName = (() => { try { return item?.from?.emailAddress?.displayName || ""; } catch(e) { return ""; }})();
 
   // Attachments
   const attachments = Array.isArray(item.attachments) ? item.attachments : [];
-  let filesResult, filesBody, filesRisk = "safe";
+  let aL1, aL2, aResult, aRisk = "safe";
   if (attachments.length === 0) {
-    filesResult = "No attachments";
-    filesBody   = "No files attached";
+    aL1 = "No files attached"; aL2 = ""; aResult = "No threats found";
   } else {
-    const risky = attachments.find(a =>
-      RISKY_EXT.includes((a.name || "").split(".").pop().toLowerCase())
-    );
+    const risky = attachments.find(a => RISKY_EXT.includes((a.name || "").split(".").pop().toLowerCase()));
     if (risky) {
-      filesResult = "Risky file type";
-      filesBody   = risky.name + " — executable/macro file";
-      filesRisk   = "danger";
+      aL1 = "1 attachment: " + risky.name; aL2 = "Executable/macro file type"; aResult = "Risky file detected"; aRisk = "danger";
     } else {
-      filesResult = "No threats found";
-      filesBody   = attachments.length + " attachment(s) — safe type";
+      aL1 = attachments.length + " attachment(s)"; aL2 = "File type check passed"; aResult = "No threats found";
     }
   }
 
   // Urgency / behaviour
   const bodyLower = body.toLowerCase();
   const matched   = URGENCY_PHRASES.filter(p => bodyLower.includes(p));
-  let urgencyResult, urgencyBody, urgencyRisk = "safe";
+  let uL1, uL2, uResult, uRisk = "safe";
   if (matched.length >= 3) {
-    urgencyResult = "High pressure tactics";
-    urgencyBody   = matched.length + " phishing signals detected";
-    urgencyRisk   = "danger";
+    uL1 = matched.length + " phishing signals found"; uL2 = "Urgency & threat language"; uResult = "High pressure tactics"; uRisk = "danger";
   } else if (matched.length >= 1) {
-    urgencyResult = "Mild pressure language";
-    urgencyBody   = '"' + matched[0] + '" and similar phrases';
-    urgencyRisk   = "warn";
+    uL1 = "Mild pressure language"; uL2 = '"' + matched[0] + '"'; uResult = "Low pressure detected"; uRisk = "warn";
   } else {
-    urgencyResult = "Zero phishing tactics";
-    urgencyBody   = "No urgent or threatening language";
+    uL1 = "Zero phishing tactics"; uL2 = "No urgent language detected"; uResult = "Behaviour looks normal";
   }
 
   // Links
   const urls = (body.match(/(https?:\/\/[^\s]+)/gi) || []);
-  let linksResult, linksBody, linksRisk = "safe";
+  let lL1, lL2, lResult, lRisk = "safe";
   if (urls.length === 0) {
-    linksResult = "No links found";
-    linksBody   = "No external URLs in email";
+    lL1 = "No links found"; lL2 = "Email contains no URLs"; lResult = "Safe";
   } else {
-    linksResult = urls.length + " link(s) found";
-    linksBody   = "Analysed against risk model";
-    linksRisk   = "warn";
+    lL1 = urls.length + " link(s) found"; lL2 = "Analysed against risk model"; lResult = urls.length + " link(s)"; lRisk = "warn";
   }
 
   // Update cards immediately
-  setCard("sender",     "—",           "sender-dot",     "",         "sender-body", "Checking sender...",    "card-sender",  "");
-  setCard("links",      linksResult,   "links-dot",      linksRisk,  "links-body",  linksBody,               "card-links",   linksRisk);
-  setCard("attachment", filesResult,   "attachment-dot", filesRisk,  "attach-body", filesBody,               "card-attach",  filesRisk);
-  setCard("urgency",    urgencyResult, "urgency-dot",    urgencyRisk,"urgency-body",urgencyBody,              "card-urgency", urgencyRisk);
+  updateCard("card-links",   "tick-links",   "links",      "links-l1",   lL1, "links-l2",   lL2, lResult,  lRisk);
+  updateCard("card-attach",  "tick-attach",  "attachment", "attach-l1",  aL1, "attach-l2",  aL2, aResult,  aRisk);
+  updateCard("card-urgency", "tick-urgency", "urgency",    "urgency-l1", uL1, "urgency-l2", uL2, uResult,  uRisk);
+  // Sender card shows "Checking..." until auth resolves
+  updateCard("card-sender", "tick-sender", "sender", "sender-l1", senderName || senderEmail, "sender-l2", "Verifying...", "Checking...", "");
 
   currentScanData = {
-    sender: senderEmail, subject: item.subject || "",
-    label: "unknown",    sender_risk: isFree ? "warn" : "safe",
-    auth_result: "pending", files_result: filesResult,
-    urgency_result: urgencyResult, attachment_count: attachments.length,
-    body_preview: body.substring(0, 300)
+    sender: senderEmail, subject: item.subject || "", label: "unknown",
+    sender_risk: isFree ? "warn" : "safe", auth_result: "pending",
+    files_result: aResult, urgency_result: uResult,
+    attachment_count: attachments.length, body_preview: body.substring(0, 300)
   };
 
-  // Auth check updates sender card
-  checkAuth(item, senderEmail, isFree, domain);
-
-  // ML backend
+  checkAuth(item, senderEmail, isFree, domain, senderName);
   callBackend(body, attachments.length > 0);
 }
 
 // ── Auth check ────────────────────────────────────────────────────
-function checkAuth(item, senderEmail, isFree, domain) {
+function checkAuth(item, senderEmail, isFree, domain, senderName) {
+  const display = senderName || senderEmail;
+
   if (typeof item.getAllInternetHeadersAsync === "function") {
-    const timer = setTimeout(() => applyTrustFallback(isFree, domain, senderEmail), 4000);
-    item.getAllInternetHeadersAsync((result) => {
-      clearTimeout(timer);
-      if (result.status === Office.AsyncResultStatus.Succeeded && result.value) {
-        parseTrust(result.value, isFree, domain, senderEmail);
-      } else {
-        applyTrustFallback(isFree, domain, senderEmail);
-      }
+    const t = setTimeout(() => fallbackTrust(isFree, domain, display), 4000);
+    item.getAllInternetHeadersAsync((r) => {
+      clearTimeout(t);
+      r.status === Office.AsyncResultStatus.Succeeded && r.value
+        ? parseTrust(r.value, isFree, domain, display)
+        : fallbackTrust(isFree, domain, display);
     });
   } else if (item.internetHeaders?.getAsync) {
-    const timer = setTimeout(() => applyTrustFallback(isFree, domain, senderEmail), 4000);
+    const t = setTimeout(() => fallbackTrust(isFree, domain, display), 4000);
     item.internetHeaders.getAsync(["Authentication-Results"], (r) => {
-      clearTimeout(timer);
-      if (r.status === Office.AsyncResultStatus.Succeeded) {
-        parseTrust(r.value?.["Authentication-Results"] || "", isFree, domain, senderEmail);
-      } else {
-        applyTrustFallback(isFree, domain, senderEmail);
-      }
+      clearTimeout(t);
+      r.status === Office.AsyncResultStatus.Succeeded
+        ? parseTrust(r.value?.["Authentication-Results"] || "", isFree, domain, display)
+        : fallbackTrust(isFree, domain, display);
     });
   } else {
-    applyTrustFallback(isFree, domain, senderEmail);
+    fallbackTrust(isFree, domain, display);
   }
 }
 
-function parseTrust(rawHeaders, isFree, domain, senderEmail) {
-  const h    = rawHeaders.toLowerCase();
-  const spf  = h.includes("spf=pass");
-  const dkim = h.includes("dkim=pass");
-  const dmarc= h.includes("dmarc=pass");
-  const n    = [spf, dkim, dmarc].filter(Boolean).length;
-
-  let result, body, risk;
-  if (n === 3 && !isFree)     { result = "Verified ✓";         body = "Verified by DMARC/SPF/DKIM";   risk = "safe"; }
-  else if (n >= 2 && !isFree) { result = "Mostly verified";     body = n + "/3 checks passed";          risk = "safe"; }
-  else if (n >= 1)            { result = "Partially verified";  body = n + "/3 auth checks passed";     risk = "warn"; }
-  else if (isFree)            { result = "Personal address";    body = "Free email — " + (domain || senderEmail); risk = "warn"; }
-  else                        { result = "Unverified";          body = "Could not verify sender";        risk = "warn"; }
-
-  setCard("sender", result, "sender-dot", risk, "sender-body", body, "card-sender", risk);
+function parseTrust(raw, isFree, domain, display) {
+  const h = raw.toLowerCase();
+  const n = [h.includes("spf=pass"), h.includes("dkim=pass"), h.includes("dmarc=pass")].filter(Boolean).length;
+  let l2, result, risk;
+  if (n === 3 && !isFree)     { l2 = "Verified by DMARC/SPF/DKIM"; result = "Sender Verified ✓"; risk = "safe"; }
+  else if (n >= 2 && !isFree) { l2 = n + "/3 auth checks passed";   result = "Mostly verified";   risk = "safe"; }
+  else if (n >= 1)            { l2 = n + "/3 auth checks passed";   result = "Partially verified"; risk = "warn"; }
+  else if (isFree)            { l2 = "Free email provider";         result = "Personal address";   risk = "warn"; }
+  else                        { l2 = "Auth headers unavailable";    result = "Unverified";          risk = "warn"; }
+  updateCard("card-sender","tick-sender","sender","sender-l1",display,"sender-l2",l2,result,risk);
   if (currentScanData) currentScanData.auth_result = result;
 }
 
-function applyTrustFallback(isFree, domain, senderEmail) {
-  let result, body, risk;
-  if (!domain)     { result = "No sender info";     body = "Sender address missing";               risk = "warn"; }
-  else if (isFree) { result = "Personal address";   body = "Free email — " + (domain || senderEmail); risk = "warn"; }
-  else             { result = "Domain: " + domain;  body = "Auth headers not accessible";           risk = "safe"; }
-  setCard("sender", result, "sender-dot", risk, "sender-body", body, "card-sender", risk);
+function fallbackTrust(isFree, domain, display) {
+  let l2, result, risk;
+  if (!domain)     { l2 = "Sender info missing";       result = "Unknown sender";    risk = "warn"; }
+  else if (isFree) { l2 = "Free email provider";       result = "Personal address";  risk = "warn"; }
+  else             { l2 = "From " + domain;            result = domain;              risk = "safe"; }
+  updateCard("card-sender","tick-sender","sender","sender-l1",display,"sender-l2",l2,result,risk);
   if (currentScanData) currentScanData.auth_result = result;
 }
 
-// ── ML backend ────────────────────────────────────────────────────
+// ── Backend ML call ───────────────────────────────────────────────
 function callBackend(bodyText, hasAttachment) {
-  const controller = new AbortController();
-  const timeout    = setTimeout(() => controller.abort(), 10000);
-
+  const ctrl = new AbortController();
+  const t    = setTimeout(() => ctrl.abort(), 10000);
   fetch(BACKEND + "/classify", {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({ text: bodyText, attachment: hasAttachment ? "Yes" : "No" }),
-    signal:  controller.signal
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({text: bodyText, attachment: hasAttachment ? "Yes" : "No"}),
+    signal: ctrl.signal
   })
-  .then(res => res.json())
-  .then(data => {
-    clearTimeout(timeout);
-    renderResult((data.label || "unknown").toLowerCase());
-    logScan((data.label || "unknown").toLowerCase());
-  })
+  .then(r => r.json())
+  .then(d => { clearTimeout(t); renderResult((d.label||"unknown").toLowerCase()); logScan((d.label||"unknown").toLowerCase()); })
   .catch(() => {
-    clearTimeout(timeout);
+    clearTimeout(t);
     const lower = bodyText.toLowerCase();
-    const uc    = URGENCY_PHRASES.filter(p => lower.includes(p)).length;
-    const hl    = /https?:\/\//i.test(bodyText);
-    let label   = "ham";
+    const uc = URGENCY_PHRASES.filter(p => lower.includes(p)).length;
+    const hl = /https?:\/\//i.test(bodyText);
+    let label = "ham";
     if (hl && uc >= 3) label = "phishing";
     else if (uc >= 2)  label = "spam";
     else if (hl && uc) label = "spam";
-    renderResult(label);
-    logScan(label);
+    renderResult(label); logScan(label);
   });
 }
 
 // ── Render final result ───────────────────────────────────────────
 function renderResult(label) {
-  const map = {
-    ham:      { angle: -90, fill: 0.0,  sCls: "done",   status: "All clear"   },
-    support:  { angle: -45, fill: 0.25, sCls: "done",   status: "Low risk"    },
-    spam:     { angle:  45, fill: 0.75, sCls: "warn",   status: "Suspicious"  },
-    phishing: { angle:  90, fill: 1.0,  sCls: "danger", status: "High risk"   },
-  };
-  const c = map[label] || { angle: 0, fill: 0.5, sCls: "done", status: "Scanned" };
+  const angles = { ham: -90, support: -45, spam: 45, phishing: 90 };
+  const fills  = { ham: 0.0, support: 0.25, spam: 0.75, phishing: 1.0 };
+  const sCls   = { ham: "done", support: "done", spam: "warn", phishing: "danger" };
+  const status = { ham: "All clear", support: "Low risk", spam: "Suspicious", phishing: "High risk" };
 
-  // Needle
   const needle = document.getElementById("needle");
-  if (needle) needle.style.transform = "rotate(" + c.angle + "deg)";
+  if (needle) needle.style.transform = "rotate(" + (angles[label]||0) + "deg)";
 
-  // Arc
   const arc = document.getElementById("risk-arc");
-  if (arc) arc.style.strokeDashoffset = 251 - c.fill * 251;
+  if (arc) arc.style.strokeDashoffset = 245 - (fills[label]||0.5) * 245;
 
-  // Arc colour
   setArcColor(label);
 
   // Score number
   const score = RISK_SCORES[label] || 50;
-  const col   = RISK_COLORS[label] || RISK_COLORS.ham;
+  const col   = ARC_COLORS[label]  || ARC_COLORS.ham;
   const num   = document.getElementById("score-number");
-  if (num) { num.textContent = score; num.setAttribute("fill", col.start); }
+  if (num) { num.textContent = score; num.setAttribute("fill", col.s); }
 
-  // Colour bar dot
-  setBarDot(BAR_POSITIONS[label] || 50);
+  // Colour bar segments
+  const segs = SEG_COUNTS[label] || 1;
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById("seg" + i);
+    if (s) { i <= segs ? s.classList.add("active") : s.classList.remove("active"); }
+  }
 
   // Verdict
   const vd = VERDICTS[label];
   const verdict = document.getElementById("verdict");
-  if (verdict && vd) { verdict.textContent = vd.text; verdict.style.color = vd.color; }
+  if (verdict && vd) { verdict.textContent = vd.t; verdict.style.color = vd.c; }
 
-  // Score card border glow
-  const sc = document.getElementById("score-card");
-  if (sc) sc.style.borderColor = col.start + "55";
-
-  setStatus(c.status, c.sCls);
+  setStatus(status[label] || "Scanned", sCls[label] || "done");
   if (currentScanData) currentScanData.label = label;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
-
+// ── UI helpers ────────────────────────────────────────────────────
 function setArcColor(label) {
-  const col = RISK_COLORS[label] || RISK_COLORS.ham;
-  const s = document.getElementById("grad-start");
-  const e = document.getElementById("grad-end");
-  if (s) s.setAttribute("stop-color", col.start);
-  if (e) e.setAttribute("stop-color", col.end);
+  const c = ARC_COLORS[label] || ARC_COLORS.ham;
+  const s = document.getElementById("gs"); if (s) s.setAttribute("stop-color", c.s);
+  const e = document.getElementById("ge"); if (e) e.setAttribute("stop-color", c.e);
 }
 
-function setBarDot(pct) {
-  const dot = document.getElementById("bar-dot");
-  if (dot) dot.style.left = Math.min(Math.max(pct, 1), 97) + "%";
-}
-
-// Update a full info card at once
-function setCard(valueId, value, dotId, risk, bodyId, bodyText, cardId, cardRisk) {
-  const el = document.getElementById(valueId);
-  if (el) { el.textContent = value || "—"; el.className = "card-result " + (risk || "neutral"); }
-  const dot = document.getElementById(dotId);
-  if (dot) dot.className = "card-dot " + (risk || "");
-  const bd = document.getElementById(bodyId);
-  if (bd) bd.textContent = bodyText || "";
+// Update a full card: border class, tick colour, two body lines, result value+class
+function updateCard(cardId, tickId, valId, l1Id, l1, l2Id, l2, result, risk) {
   const card = document.getElementById(cardId);
-  if (card) card.className = "info-card " + (cardRisk ? cardRisk + "-card" : "");
-}
+  if (card) card.className = "info-card" + (risk ? " c-" + risk : "");
 
-function setCardBody(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
+  const tick = document.getElementById(tickId);
+  if (tick) {
+    tick.className = "card-tick " + (risk || "");
+    const line = tick.querySelector("polyline");
+    if (line) {
+      const colors = { safe:"#22c55e", warn:"#fbbf24", danger:"#f87171" };
+      line.setAttribute("stroke", colors[risk] || "#94a3b8");
+    }
+  }
+
+  const e1 = document.getElementById(l1Id); if (e1) e1.textContent = l1 || "";
+  const e2 = document.getElementById(l2Id); if (e2) e2.textContent = l2 || "";
+
+  const val = document.getElementById(valId);
+  if (val) {
+    val.textContent = result || "—";
+    val.className = "card-result " + (risk || "neutral");
+  }
 }
 
 function setStatus(msg, cls) {
-  const pill = document.getElementById("status");
-  if (!pill) return;
-  pill.textContent = msg;
-  pill.className   = "status-pill " + (cls || "");
+  const p = document.getElementById("status");
+  if (!p) return;
+  p.textContent = msg;
+  p.className   = "status-pill " + (cls || "");
 }
 
-// ── Report button ─────────────────────────────────────────────────
+// ── Report ────────────────────────────────────────────────────────
 function reportEmail() {
   if (!currentScanData) return;
-  document.getElementById("confirm-overlay").classList.remove("hidden");
+  document.getElementById("overlay").classList.remove("hidden");
 }
 function closeConfirm() {
-  document.getElementById("confirm-overlay").classList.add("hidden");
+  document.getElementById("overlay").classList.add("hidden");
 }
 function confirmReport() {
   closeConfirm();
   const btn = document.getElementById("report-btn");
-  btn.disabled = true;
-  btn.innerHTML = "Sending...";
+  btn.disabled = true; btn.textContent = "Sending...";
   fetch(BACKEND + "/report", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.assign({}, currentScanData, { reported: true }))
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(Object.assign({}, currentScanData, {reported:true}))
   })
-  .then(() => { btn.innerHTML = "✓ Reported to Sortify"; })
-  .catch(() => { btn.innerHTML = "⚑ &nbsp;Mark as Suspicious"; btn.disabled = false; });
+  .then(() => { btn.textContent = "✓ Reported to Sortify"; })
+  .catch(() => { btn.textContent = "Mark as Suspicious"; btn.disabled = false; });
 }
 
-// ── Silent log ────────────────────────────────────────────────────
 function logScan(label) {
   if (!currentScanData) return;
   fetch(BACKEND + "/log-scan", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.assign({}, currentScanData, { label }))
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(Object.assign({}, currentScanData, {label}))
   }).catch(() => {});
 }
