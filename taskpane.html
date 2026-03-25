@@ -11,57 +11,74 @@
 <body>
   <div class="container">
 
-    <!-- Gauge -->
-    <section class="card gauge-card">
-      <svg id="gauge-svg" viewBox="0 0 200 110" class="gauge-svg" aria-label="Risk gauge">
-        <path d="M20,100 A80,80 0 0,1 180,100"
-              stroke="#1e1e1e" stroke-width="14" fill="none" stroke-linecap="round" />
-        <path id="risk-arc"
-              d="M20,100 A80,80 0 0,1 180,100"
-              stroke="#22c55e" stroke-width="14" fill="none"
-              stroke-linecap="round"
-              stroke-dasharray="251" stroke-dashoffset="251" />
-        <text id="score-label" x="100" y="94"
-              text-anchor="middle" class="gauge-score">--</text>
+    <!-- Gauge / Trust score -->
+    <section class="gauge-card">
+      <div class="gauge-header">
+        <span class="gauge-title">TRUST SCORE</span>
+        <span id="status-pill" class="status-pill">Scanning…</span>
+      </div>
+
+      <svg viewBox="0 0 200 110" class="gauge-svg" aria-label="Risk gauge">
+        <path
+          d="M20,100 A80,80 0 0,1 180,100"
+          class="gauge-bg"
+        />
+        <path
+          id="risk-arc"
+          d="M20,100 A80,80 0 0,1 180,100"
+          class="gauge-arc"
+        />
+        <text
+          id="score-number"
+          x="100"
+          y="88"
+          class="gauge-score"
+          text-anchor="middle"
+        >--</text>
       </svg>
-      <div class="risk-badge" id="result-button">Scanning…</div>
+
+      <div id="verdict" class="verdict-text">Analysing email…</div>
     </section>
 
-    <!-- Detail grid -->
+    <!-- Detail cards -->
     <section class="details-grid">
 
-      <div class="detail-card">
+      <div class="detail-card" id="card-sender">
         <div class="detail-icon">&#9786;</div>
         <div class="detail-info">
           <div class="detail-label">Sender</div>
           <div class="detail-value" id="sender">--</div>
+          <div class="detail-sub" id="sender-sub">Checking authentication…</div>
         </div>
         <div class="detail-dot" id="sender-dot"></div>
       </div>
 
-      <div class="detail-card">
+      <div class="detail-card" id="card-links">
         <div class="detail-icon">&#128279;</div>
         <div class="detail-info">
           <div class="detail-label">Link security</div>
           <div class="detail-value" id="links">--</div>
+          <div class="detail-sub" id="links-sub">No analysis yet</div>
         </div>
         <div class="detail-dot" id="links-dot"></div>
       </div>
 
-      <div class="detail-card">
+      <div class="detail-card" id="card-attachment">
         <div class="detail-icon">&#128206;</div>
         <div class="detail-info">
           <div class="detail-label">Attachments</div>
           <div class="detail-value" id="attachment">--</div>
+          <div class="detail-sub" id="attachment-sub">No analysis yet</div>
         </div>
         <div class="detail-dot" id="attachment-dot"></div>
       </div>
 
-      <div class="detail-card">
+      <div class="detail-card" id="card-urgency">
         <div class="detail-icon">&#9889;</div>
         <div class="detail-info">
           <div class="detail-label">Behaviour</div>
           <div class="detail-value" id="urgency">--</div>
+          <div class="detail-sub" id="urgency-sub">No analysis yet</div>
         </div>
         <div class="detail-dot" id="urgency-dot"></div>
       </div>
@@ -69,7 +86,7 @@
     </section>
 
     <!-- Action -->
-    <button class="action-btn" id="forward-btn">Mark as Suspicious</button>
+    <button class="action-btn" id="report-btn">Mark as Suspicious</button>
 
   </div>
 </body>
