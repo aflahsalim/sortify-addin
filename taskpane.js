@@ -1,5 +1,4 @@
 const BACKEND = "https://sortify-backend-hwf9d0exgqdub9cn.canadacentral-01.azurewebsites.net";
-
 const RISKY_EXT = ["exe","bat","vbs","js","msi","ps1","cmd","scr","zip","rar","docm","xlsm"];
 const URGENCY_PHRASES = [
   "urgent","immediately","suspended","verify","confirm your","click now",
@@ -7,29 +6,39 @@ const URGENCY_PHRASES = [
   "security alert","update your password","will be terminated","limited time"
 ];
 
-const RISK_SCORES = { ham: 95, support: 88, spam: 62, phishing: 21 };
-const VERDICTS = {
-  ham:      { text: "Safe — Full Check Passed",   color: "#22c55e", status: "safe" },
-  support:  { text: "Low Risk — Support Email",   color: "#06b6d4", status: "safe" },
-  spam:     { text: "Suspicious — Possible Spam", color: "#f59e0b", status: "warn" },
-  phishing: { text: "High Risk — Likely Phishing",color: "#ef4444", status: "danger" },
+// Risk score number shown in gauge centre
+const RISK_SCORES = { ham: 5, support: 22, spam: 71, phishing: 94 };
+
+// How many of the 5 colour bar segments to light up
+const SEG_COUNTS = { ham: 1, support: 2, spam: 4, phishing: 5 };
+
+// Arc gradient colours
+const ARC_COLORS = {
+  ham:      { s: "#22c55e", e: "#16a34a" },
+  support:  { s: "#06b6d4", e: "#0891b2" },
+  spam:     { s: "#f59e0b", e: "#d97706" },
+  phishing: { s: "#ef4444", e: "#dc2626" },
 };
 
-let currentScan = null;
+// Verdict text + colour
+const VERDICTS = {
+  ham:      { t: "Safe — Full Check Passed",   c: "#22c55e" },
+  support:  { t: "Low Risk — Support Email",   c: "#06b6d4" },
+  spam:     { t: "Suspicious — Possible Spam", c: "#f59e0b" },
+  phishing: { t: "High Risk — Likely Phishing",c: "#ef4444" },
+};
 
+let currentScanData = null;
+
+// ── Entry point ───────────────────────────────────────────────────
 Office.onReady(() => {
   waitForDOM(() => {
-    wireButton();
-    if (Office.context?.mailbox?.item) {
-      resetUI();
-      startClassification();
-      Office.context.mailbox.addHandlerAsync(
-        Office.EventType.ItemChanged,
-        () => { resetUI(); startClassification(); }
-      );
-    } else {
-      setStatus("Open an email to scan", "");
-    }
+    if (Office.context?.mailbox?.item) startClassification();
+    else setStatus("Open an email to scan", "");
+    Office.context?.mailbox?.addHandlerAsync(
+      Office.EventType.ItemChanged,
+      () => { resetUI(); startClassification(); }
+    );
   });
 });
 
@@ -38,207 +47,193 @@ function waitForDOM(cb) {
   else requestAnimationFrame(() => waitForDOM(cb));
 }
 
-function wireButton() {
-  const btn = document.getElementById("report-btn");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    if (!currentScan) return;
-    btn.disabled = true;
-    btn.textContent = "Reporting…";
-    fetch(BACKEND + "/report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.assign({}, currentScan, { reported: true }))
-    })
-    .then(() => { btn.textContent = "✓ Reported to Sortify"; })
-    .catch(() => { btn.disabled = false; btn.textContent = "Mark as Suspicious"; });
-  });
-}
-
+// ── Reset ─────────────────────────────────────────────────────────
 function resetUI() {
-  setStatus("Scanning…", "");
-  setGauge(0.0, "--", "#22c55e");
-  setVerdict("Analysing email…", "#f9fafb");
+  setStatus("Scanning...", "");
 
-  setCard("sender",     "--", "Checking authentication…", "");
-  setCard("links",      "--", "No analysis yet", "");
-  setCard("attachment", "--", "No analysis yet", "");
-  setCard("urgency",    "--", "No analysis yet", "");
+  // Gauge
+  const arc = document.getElementById("risk-arc");
+  if (arc) arc.style.strokeDashoffset = "245";
+  const needle = document.getElementById("needle");
+  if (needle) needle.style.transform = "rotate(-90deg)";
+  const num = document.getElementById("score-number");
+  if (num) { num.textContent = "—"; num.setAttribute("fill","#22c55e"); }
 
-  currentScan = null;
+  // Colour bar
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById("seg" + i);
+    if (s) s.classList.remove("active");
+  }
+
+  // Verdict
+  const vd = document.getElementById("verdict");
+  if (vd) { vd.textContent = "Analysing..."; vd.style.color = "var(--muted)"; }
+
+  // Cards
+  resetCard("card-sender",  "tick-sender",  "sender",     "sender-l1",  "—", "sender-l2",  "");
+  resetCard("card-links",   "tick-links",   "links",      "links-l1",   "—", "links-l2",   "");
+  resetCard("card-attach",  "tick-attach",  "attachment", "attach-l1",  "—", "attach-l2",  "");
+  resetCard("card-urgency", "tick-urgency", "urgency",    "urgency-l1", "—", "urgency-l2", "");
+
+  // Score card border
+  const sc = document.getElementById("score-card");
+  if (sc) sc.style.borderColor = "";
+
+  // Button
+  const btn = document.getElementById("report-btn");
+  if (btn) { btn.disabled = false; btn.textContent = "Mark as Suspicious"; }
+
+  setArcColor("ham");
+  currentScanData = null;
 }
 
+function resetCard(cardId, tickId, valId, l1Id, l1, l2Id, l2) {
+  const card = document.getElementById(cardId);
+  if (card) card.className = "info-card";
+  const tick = document.getElementById(tickId);
+  if (tick) { tick.className = "card-tick"; tick.querySelector("polyline").setAttribute("stroke","#94a3b8"); }
+  const val = document.getElementById(valId);
+  if (val) { val.textContent = "—"; val.className = "card-result neutral"; }
+  const e1 = document.getElementById(l1Id);
+  if (e1) e1.textContent = l1;
+  const e2 = document.getElementById(l2Id);
+  if (e2) e2.textContent = l2;
+}
+
+// ── Read email ────────────────────────────────────────────────────
 function startClassification() {
   const item = Office.context?.mailbox?.item;
   if (!item) return setStatus("Open an email to scan", "");
-
-  setStatus("Reading email…", "");
-  item.body.getAsync(Office.CoercionType.Text, (res) => {
-    if (res.status !== Office.AsyncResultStatus.Succeeded) {
+  setStatus("Scanning...", "");
+  item.body.getAsync(Office.CoercionType.Text, (result) => {
+    if (result.status !== Office.AsyncResultStatus.Succeeded)
       return setStatus("Could not read email", "warn");
-    }
-    const body = res.value || "";
-    processEmail(item, body);
+    processEmail(item, result.value || "");
   });
 }
 
+// ── Process all checks ────────────────────────────────────────────
 function processEmail(item, body) {
+
   // Sender
   let senderEmail = "";
-  let senderName = "";
-  try {
-    senderEmail = item?.from?.emailAddress?.address || "";
-    senderName  = item?.from?.emailAddress?.displayName || "";
-  } catch(e) {}
-  const domain = senderEmail.split("@")[1] || "";
+  try { senderEmail = item?.from?.emailAddress?.address || ""; } catch(e) {}
+  const domain    = senderEmail.split("@")[1] || "";
   const freeDomains = ["gmail.com","yahoo.com","hotmail.com","outlook.com","live.com"];
-  const isFree = freeDomains.includes(domain.toLowerCase());
-  const senderDisplay = senderName || senderEmail || "Unknown sender";
+  const isFree    = freeDomains.includes(domain.toLowerCase());
+  const senderName = (() => { try { return item?.from?.emailAddress?.displayName || ""; } catch(e) { return ""; }})();
 
   // Attachments
   const attachments = Array.isArray(item.attachments) ? item.attachments : [];
-  let aLabel = "No files attached";
-  let aSub   = "";
-  let aRisk  = "";
-  if (attachments.length > 0) {
-    const risky = attachments.find(a => {
-      const ext = (a.name || "").split(".").pop().toLowerCase();
-      return RISKY_EXT.includes(ext);
-    });
+  let aL1, aL2, aResult, aRisk = "safe";
+  if (attachments.length === 0) {
+    aL1 = "No files attached"; aL2 = ""; aResult = "No threats found";
+  } else {
+    const risky = attachments.find(a => RISKY_EXT.includes((a.name || "").split(".").pop().toLowerCase()));
     if (risky) {
-      aLabel = risky.name;
-      aSub   = "Executable / macro file type";
-      aRisk  = "danger";
+      aL1 = "1 attachment: " + risky.name; aL2 = "Executable/macro file type"; aResult = "Risky file detected"; aRisk = "danger";
     } else {
-      aLabel = attachments.length + " attachment(s)";
-      aSub   = "No risky file types detected";
-      aRisk  = "safe";
+      aL1 = attachments.length + " attachment(s)"; aL2 = "File type check passed"; aResult = "No threats found";
     }
   }
-  setCard("attachment", aLabel, aSub, aRisk);
+
+  // Urgency / behaviour
+  const bodyLower = body.toLowerCase();
+  const matched   = URGENCY_PHRASES.filter(p => bodyLower.includes(p));
+  let uL1, uL2, uResult, uRisk = "safe";
+  if (matched.length >= 3) {
+    uL1 = matched.length + " phishing signals found"; uL2 = "Urgency & threat language"; uResult = "High pressure tactics"; uRisk = "danger";
+  } else if (matched.length >= 1) {
+    uL1 = "Mild pressure language"; uL2 = '"' + matched[0] + '"'; uResult = "Low pressure detected"; uRisk = "warn";
+  } else {
+    uL1 = "Zero phishing tactics"; uL2 = "No urgent language detected"; uResult = "Behaviour looks normal";
+  }
 
   // Links
   const urls = (body.match(/(https?:\/\/[^\s]+)/gi) || []);
-  let lLabel = "No links found";
-  let lSub   = "Email contains no URLs";
-  let lRisk  = "";
-  if (urls.length > 0) {
-    lLabel = urls.length + " link(s)";
-    lSub   = "Links present in body";
-    lRisk  = "warn";
+  let lL1, lL2, lResult, lRisk = "safe";
+  if (urls.length === 0) {
+    lL1 = "No links found"; lL2 = "Email contains no URLs"; lResult = "Safe";
+  } else {
+    lL1 = urls.length + " link(s) found"; lL2 = "Analysed against risk model"; lResult = urls.length + " link(s)"; lRisk = "warn";
   }
-  setCard("links", lLabel, lSub, lRisk);
 
-  // Urgency / behaviour
-  const lower = body.toLowerCase();
-  const matched = URGENCY_PHRASES.filter(p => lower.includes(p));
-  let uLabel = "Normal behaviour";
-  let uSub   = "No phishing tactics detected";
-  let uRisk  = "";
-  if (matched.length >= 3) {
-    uLabel = "High pressure tactics";
-    uSub   = matched.length + " phishing signals found";
-    uRisk  = "danger";
-  } else if (matched.length >= 1) {
-    uLabel = "Mild pressure language";
-    uSub   = '"' + matched[0] + '" detected';
-    uRisk  = "warn";
-  }
-  setCard("urgency", uLabel, uSub, uRisk);
+  // Update cards immediately
+  updateCard("card-links",   "tick-links",   "links",      "links-l1",   lL1, "links-l2",   lL2, lResult,  lRisk);
+  updateCard("card-attach",  "tick-attach",  "attachment", "attach-l1",  aL1, "attach-l2",  aL2, aResult,  aRisk);
+  updateCard("card-urgency", "tick-urgency", "urgency",    "urgency-l1", uL1, "urgency-l2", uL2, uResult,  uRisk);
+  // Sender card shows "Checking..." until auth resolves
+  updateCard("card-sender", "tick-sender", "sender", "sender-l1", senderName || senderEmail, "sender-l2", "Verifying...", "Checking...", "");
 
-  // Sender card (auth will refine)
-  setCard("sender", senderDisplay, "Verifying domain & headers…", "");
-
-  currentScan = {
-    sender: senderEmail,
-    subject: item.subject || "",
-    domain,
-    attachment_count: attachments.length,
-    body_preview: body.substring(0, 300),
-    label: "unknown"
+  currentScanData = {
+    sender: senderEmail, subject: item.subject || "", label: "unknown",
+    sender_risk: isFree ? "warn" : "safe", auth_result: "pending",
+    files_result: aResult, urgency_result: uResult,
+    attachment_count: attachments.length, body_preview: body.substring(0, 300)
   };
 
-  checkAuth(item, senderDisplay, isFree, domain);
+  checkAuth(item, senderEmail, isFree, domain, senderName);
   callBackend(body, attachments.length > 0);
 }
 
-function checkAuth(item, display, isFree, domain) {
+// ── Auth check ────────────────────────────────────────────────────
+function checkAuth(item, senderEmail, isFree, domain, senderName) {
+  const display = senderName || senderEmail;
+
   if (typeof item.getAllInternetHeadersAsync === "function") {
-    const t = setTimeout(() => fallbackAuth(display, isFree, domain), 4000);
+    const t = setTimeout(() => fallbackTrust(isFree, domain, display), 4000);
     item.getAllInternetHeadersAsync((r) => {
       clearTimeout(t);
-      if (r.status === Office.AsyncResultStatus.Succeeded && r.value) {
-        parseAuth(r.value, display, isFree, domain);
-      } else {
-        fallbackAuth(display, isFree, domain);
-      }
+      r.status === Office.AsyncResultStatus.Succeeded && r.value
+        ? parseTrust(r.value, isFree, domain, display)
+        : fallbackTrust(isFree, domain, display);
+    });
+  } else if (item.internetHeaders?.getAsync) {
+    const t = setTimeout(() => fallbackTrust(isFree, domain, display), 4000);
+    item.internetHeaders.getAsync(["Authentication-Results"], (r) => {
+      clearTimeout(t);
+      r.status === Office.AsyncResultStatus.Succeeded
+        ? parseTrust(r.value?.["Authentication-Results"] || "", isFree, domain, display)
+        : fallbackTrust(isFree, domain, display);
     });
   } else {
-    fallbackAuth(display, isFree, domain);
+    fallbackTrust(isFree, domain, display);
   }
 }
 
-function parseAuth(raw, display, isFree, domain) {
+function parseTrust(raw, isFree, domain, display) {
   const h = raw.toLowerCase();
   const n = [h.includes("spf=pass"), h.includes("dkim=pass"), h.includes("dmarc=pass")].filter(Boolean).length;
-  let label, sub, risk;
-  if (n === 3 && !isFree) {
-    label = display;
-    sub   = "Verified by SPF / DKIM / DMARC";
-    risk  = "safe";
-  } else if (n >= 2 && !isFree) {
-    label = display;
-    sub   = n + "/3 auth checks passed";
-    risk  = "safe";
-  } else if (n >= 1) {
-    label = display;
-    sub   = n + "/3 auth checks passed";
-    risk  = "warn";
-  } else if (isFree) {
-    label = display;
-    sub   = "Free email provider";
-    risk  = "warn";
-  } else {
-    label = display;
-    sub   = "Unverified sender";
-    risk  = "warn";
-  }
-  setCard("sender", label, sub, risk);
+  let l2, result, risk;
+  if (n === 3 && !isFree)     { l2 = "Verified by DMARC/SPF/DKIM"; result = "Sender Verified ✓"; risk = "safe"; }
+  else if (n >= 2 && !isFree) { l2 = n + "/3 auth checks passed";   result = "Mostly verified";   risk = "safe"; }
+  else if (n >= 1)            { l2 = n + "/3 auth checks passed";   result = "Partially verified"; risk = "warn"; }
+  else if (isFree)            { l2 = "Free email provider";         result = "Personal address";   risk = "warn"; }
+  else                        { l2 = "Auth headers unavailable";    result = "Unverified";          risk = "warn"; }
+  updateCard("card-sender","tick-sender","sender","sender-l1",display,"sender-l2",l2,result,risk);
+  if (currentScanData) currentScanData.auth_result = result;
 }
 
-function fallbackAuth(display, isFree, domain) {
-  let sub, risk;
-  if (!domain) {
-    sub  = "Sender info missing";
-    risk = "warn";
-  } else if (isFree) {
-    sub  = "Free email provider";
-    risk = "warn";
-  } else {
-    sub  = "From " + domain;
-    risk = "safe";
-  }
-  setCard("sender", display, sub, risk);
+function fallbackTrust(isFree, domain, display) {
+  let l2, result, risk;
+  if (!domain)     { l2 = "Sender info missing";       result = "Unknown sender";    risk = "warn"; }
+  else if (isFree) { l2 = "Free email provider";       result = "Personal address";  risk = "warn"; }
+  else             { l2 = "From " + domain;            result = domain;              risk = "safe"; }
+  updateCard("card-sender","tick-sender","sender","sender-l1",display,"sender-l2",l2,result,risk);
+  if (currentScanData) currentScanData.auth_result = result;
 }
 
+// ── Backend ML call ───────────────────────────────────────────────
 function callBackend(bodyText, hasAttachment) {
-  setStatus("Classifying email…", "");
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 10000);
-
+  const t    = setTimeout(() => ctrl.abort(), 10000);
   fetch(BACKEND + "/classify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: bodyText, attachment: hasAttachment ? "Yes" : "No" }),
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({text: bodyText, attachment: hasAttachment ? "Yes" : "No"}),
     signal: ctrl.signal
   })
   .then(r => r.json())
-  .then(d => {
-    clearTimeout(t);
-    const label = String(d.label || "unknown").toLowerCase();
-    renderResult(label);
-    logScan(label);
-  })
+  .then(d => { clearTimeout(t); renderResult((d.label||"unknown").toLowerCase()); logScan((d.label||"unknown").toLowerCase()); })
   .catch(() => {
     clearTimeout(t);
     const lower = bodyText.toLowerCase();
@@ -248,73 +243,110 @@ function callBackend(bodyText, hasAttachment) {
     if (hl && uc >= 3) label = "phishing";
     else if (uc >= 2)  label = "spam";
     else if (hl && uc) label = "spam";
-    renderResult(label);
-    logScan(label);
+    renderResult(label); logScan(label);
   });
 }
 
+// ── Render final result ───────────────────────────────────────────
 function renderResult(label) {
-  const v = VERDICTS[label] || {
-    text: "Scanned — Unknown verdict",
-    color: "#e5e7eb",
-    status: ""
-  };
-  const score = RISK_SCORES[label] ?? 50;
-  const fill  = label === "phishing" ? 0.2 :
-                label === "spam"     ? 0.45 :
-                label === "support"  ? 0.78 :
-                0.9; // ham default
+  const angles = { ham: -90, support: -45, spam: 45, phishing: 90 };
+  const fills  = { ham: 0.0, support: 0.25, spam: 0.75, phishing: 1.0 };
+  const sCls   = { ham: "done", support: "done", spam: "warn", phishing: "danger" };
+  const status = { ham: "All clear", support: "Low risk", spam: "Suspicious", phishing: "High risk" };
 
-  setGauge(fill, score, v.color);
-  setVerdict(v.text, v.color);
-  setStatus(v.text.split("—")[0].trim(), v.status);
+  const needle = document.getElementById("needle");
+  if (needle) needle.style.transform = "rotate(" + (angles[label]||0) + "deg)";
 
-  if (currentScan) currentScan.label = label;
-}
-
-function setGauge(fillRatio, score, color) {
   const arc = document.getElementById("risk-arc");
-  if (arc) {
-    const total = 245;
-    arc.style.strokeDashoffset = total - fillRatio * total;
-    arc.style.stroke = color;
+  if (arc) arc.style.strokeDashoffset = 245 - (fills[label]||0.5) * 245;
+
+  setArcColor(label);
+
+  // Score number
+  const score = RISK_SCORES[label] || 50;
+  const col   = ARC_COLORS[label]  || ARC_COLORS.ham;
+  const num   = document.getElementById("score-number");
+  if (num) { num.textContent = score; num.setAttribute("fill", col.s); }
+
+  // Colour bar segments
+  const segs = SEG_COUNTS[label] || 1;
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById("seg" + i);
+    if (s) { i <= segs ? s.classList.add("active") : s.classList.remove("active"); }
   }
-  const num = document.getElementById("score-number");
-  if (num) num.textContent = typeof score === "number" ? score : "--";
+
+  // Verdict
+  const vd = VERDICTS[label];
+  const verdict = document.getElementById("verdict");
+  if (verdict && vd) { verdict.textContent = vd.t; verdict.style.color = vd.c; }
+
+  setStatus(status[label] || "Scanned", sCls[label] || "done");
+  if (currentScanData) currentScanData.label = label;
 }
 
-function setVerdict(text, color) {
-  const v = document.getElementById("verdict");
-  if (v) {
-    v.textContent = text;
-    v.style.color = color || "#f9fafb";
+// ── UI helpers ────────────────────────────────────────────────────
+function setArcColor(label) {
+  const c = ARC_COLORS[label] || ARC_COLORS.ham;
+  const s = document.getElementById("gs"); if (s) s.setAttribute("stop-color", c.s);
+  const e = document.getElementById("ge"); if (e) e.setAttribute("stop-color", c.e);
+}
+
+// Update a full card: border class, tick colour, two body lines, result value+class
+function updateCard(cardId, tickId, valId, l1Id, l1, l2Id, l2, result, risk) {
+  const card = document.getElementById(cardId);
+  if (card) card.className = "info-card" + (risk ? " c-" + risk : "");
+
+  const tick = document.getElementById(tickId);
+  if (tick) {
+    tick.className = "card-tick " + (risk || "");
+    const line = tick.querySelector("polyline");
+    if (line) {
+      const colors = { safe:"#22c55e", warn:"#fbbf24", danger:"#f87171" };
+      line.setAttribute("stroke", colors[risk] || "#94a3b8");
+    }
+  }
+
+  const e1 = document.getElementById(l1Id); if (e1) e1.textContent = l1 || "";
+  const e2 = document.getElementById(l2Id); if (e2) e2.textContent = l2 || "";
+
+  const val = document.getElementById(valId);
+  if (val) {
+    val.textContent = result || "—";
+    val.className = "card-result " + (risk || "neutral");
   }
 }
 
-function setStatus(text, cls) {
-  const pill = document.getElementById("status-pill");
-  if (!pill) return;
-  pill.textContent = text;
-  pill.className = "status-pill" + (cls ? " " + cls : "");
+function setStatus(msg, cls) {
+  const p = document.getElementById("status");
+  if (!p) return;
+  p.textContent = msg;
+  p.className   = "status-pill " + (cls || "");
 }
 
-function setCard(key, value, sub, risk) {
-  const valEl = document.getElementById(key);
-  const subEl = document.getElementById(key + "-sub");
-  const dotEl = document.getElementById(key + "-dot");
-  if (valEl) valEl.textContent = value || "--";
-  if (subEl) subEl.textContent = sub || "";
-  if (dotEl) {
-    dotEl.className = "detail-dot";
-    if (risk) dotEl.classList.add(risk);
-  }
+// ── Report ────────────────────────────────────────────────────────
+function reportEmail() {
+  if (!currentScanData) return;
+  document.getElementById("overlay").classList.remove("hidden");
+}
+function closeConfirm() {
+  document.getElementById("overlay").classList.add("hidden");
+}
+function confirmReport() {
+  closeConfirm();
+  const btn = document.getElementById("report-btn");
+  btn.disabled = true; btn.textContent = "Sending...";
+  fetch(BACKEND + "/report", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(Object.assign({}, currentScanData, {reported:true}))
+  })
+  .then(() => { btn.textContent = "✓ Reported to Sortify"; })
+  .catch(() => { btn.textContent = "Mark as Suspicious"; btn.disabled = false; });
 }
 
 function logScan(label) {
-  if (!currentScan) return;
+  if (!currentScanData) return;
   fetch(BACKEND + "/log-scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.assign({}, currentScan, { label }))
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(Object.assign({}, currentScanData, {label}))
   }).catch(() => {});
 }
