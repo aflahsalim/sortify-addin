@@ -1,18 +1,20 @@
-/* ── Reset & base ─────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
-  --bg:         #0a0a0a;
+  --bg:         #050505;
   --surface:    #111111;
   --surface-2:  #181818;
   --border:     #242424;
-  --text:       #f0f0f0;
-  --text-muted: #666666;
-  --text-dim:   #444444;
+  --text:       #f9fafb;
+  --text-muted: #9ca3af;
+  --text-dim:   #6b7280;
 
-  /* Status — used only for semantic meaning */
   --safe:       #22c55e;
-  --info:       #3b82f6;
+  --info:       #06b6d4;
   --warn:       #f59e0b;
   --danger:     #ef4444;
 
@@ -29,72 +31,110 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Layout ───────────────────────────────────────────────────────────────── */
-.container {
+body {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 16px 24px;
-  max-width: 360px;
-  margin: 0 auto;
+  align-items: stretch;
+  justify-content: center;
 }
 
-/* ── Gauge card ───────────────────────────────────────────────────────────── */
-.gauge-card {
+.container {
   width: 100%;
+  max-width: 360px;
+  padding: 18px 16px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Gauge card */
+.gauge-card {
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 18px 18px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 20px 20px;
+  gap: 8px;
+}
+
+.gauge-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.gauge-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.status-pill {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #020617;
+  color: var(--text-muted);
+}
+
+.status-pill.safe {
+  border-color: rgba(34,197,94,0.4);
+  color: var(--safe);
+}
+.status-pill.warn {
+  border-color: rgba(245,158,11,0.4);
+  color: var(--warn);
+}
+.status-pill.danger {
+  border-color: rgba(239,68,68,0.4);
+  color: var(--danger);
 }
 
 .gauge-svg {
-  width: 180px;
+  width: 190px;
   height: auto;
-  overflow: visible;
 }
 
-.gauge-score {
-  font-size: 32px;
-  font-weight: 700;
-  fill: var(--text);
-  font-family: -apple-system, "Segoe UI", sans-serif;
-  letter-spacing: -1px;
+.gauge-bg {
+  stroke: #1f2933;
+  stroke-width: 12;
+  fill: none;
+  stroke-linecap: round;
 }
 
-#risk-arc {
+.gauge-arc {
+  stroke: var(--safe);
+  stroke-width: 12;
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 245;
+  stroke-dashoffset: 245;
   transition: stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1),
               stroke 0.4s ease;
 }
 
-/* ── Badge ────────────────────────────────────────────────────────────────── */
-.risk-badge {
-  margin-top: 12px;
-  display: inline-block;
-  padding: 5px 18px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  transition: background 0.3s, color 0.3s, border-color 0.3s;
+.gauge-score {
+  font-size: 34px;
+  font-weight: 700;
+  fill: var(--text);
+  letter-spacing: -1px;
 }
 
-.risk-badge.safe   { background:#052015; color:var(--safe);   border-color:#0d3a20; }
-.risk-badge.info   { background:#031530; color:var(--info);   border-color:#0c2a5a; }
-.risk-badge.warn   { background:#201500; color:var(--warn);   border-color:#3d2800; }
-.risk-badge.danger { background:#200505; color:var(--danger); border-color:#3d0a0a; }
+.verdict-text {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
 
-/* ── Detail grid ──────────────────────────────────────────────────────────── */
+/* Detail cards */
 .details-grid {
-  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -102,82 +142,86 @@ html, body {
 
 .detail-card {
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px 12px 12px 14px;
+  border: 1px solid var(--border);
+  padding: 12px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: border-color 0.2s;
 }
 
-.detail-card:hover { border-color: #333; }
-
 .detail-icon {
-  font-size: 15px;
-  line-height: 1;
+  font-size: 18px;
   color: var(--text-dim);
   flex-shrink: 0;
 }
 
-.detail-info { flex: 1; min-width: 0; }
+.detail-info {
+  flex: 1;
+  min-width: 0;
+}
 
 .detail-label {
   font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 3px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
 }
 
 .detail-value {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Status dot */
-.detail-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--border);
-  flex-shrink: 0;
-  transition: background 0.3s;
+.detail-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.detail-dot.safe   { background: var(--safe);   }
-.detail-dot.info   { background: var(--info);   }
-.detail-dot.warn   { background: var(--warn);   }
+.detail-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #1f2933;
+  flex-shrink: 0;
+}
+
+.detail-dot.safe   { background: var(--safe); }
+.detail-dot.info   { background: var(--info); }
+.detail-dot.warn   { background: var(--warn); }
 .detail-dot.danger { background: var(--danger); }
 
-/* ── Action button ────────────────────────────────────────────────────────── */
+/* Button */
 .action-btn {
   width: 100%;
-  padding: 12px;
+  padding: 11px 12px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text-muted);
+  color: var(--text);
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .action-btn:hover {
   background: var(--surface-2);
-  color: var(--text);
-  border-color: #333;
+  border-color: #374151;
 }
 
-.action-btn.active {
-  background: #200505;
-  color: var(--danger);
-  border-color: #3d0a0a;
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
