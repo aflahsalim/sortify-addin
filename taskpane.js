@@ -11,7 +11,7 @@ const URGENCY_PHRASES = [
   "security alert","update your password","will be terminated","limited time"
 ];
 
-const RISK_SCORES = { ham: 5, support: 22, spam: 71, phishing: 94 };
+// ⭐ REMOVED FIXED SCORES — now dynamic
 const SEG_COUNTS = { ham: 1, support: 2, spam: 4, phishing: 5 };
 
 const ARC_COLORS = {
@@ -63,7 +63,7 @@ function resetUI() {
   if (arc) arc.style.strokeDashoffset = String(ARC_LEN);
 
   const num = document.getElementById("score-number");
-  if (num) { num.textContent = "—"; num.setAttribute("fill","#22c55e"); }
+  if (num) { num.textContent = "—"; num.setAttribute("fill","#ffffff"); }
 
   for (let i = 1; i <= 5; i++) {
     const s = document.getElementById("seg" + i);
@@ -127,11 +127,11 @@ function processEmail(item, body) {
   let senderEmail = "";
   try {
     if (item?.from?.emailAddress) {
-      senderEmail = item.from.emailAddress; // New Outlook + Web
+      senderEmail = item.from.emailAddress;
     } else if (item?.from?.emailAddress?.address) {
-      senderEmail = item.from.emailAddress.address; // Classic Outlook
+      senderEmail = item.from.emailAddress.address;
     } else if (item?.sender?.emailAddress) {
-      senderEmail = item.sender.emailAddress; // Shared mailbox
+      senderEmail = item.sender.emailAddress;
     } else if (typeof item?.from === "string") {
       senderEmail = item.from;
     } else if (typeof item?.sender === "string") {
@@ -141,20 +141,12 @@ function processEmail(item, body) {
     senderEmail = "";
   }
 
-  // Subject
   const subject = item?.subject || "";
-
-  // Attachments
   const atts = Array.isArray(item.attachments) ? item.attachments : [];
-
-  // Urgency
   const lower = body.toLowerCase();
   const matched = URGENCY_PHRASES.filter(p => lower.includes(p));
-
-  // Links
   const urls = (body.match(/(https?:\/\/[^\s]+)/gi) || []);
 
-  // Update UI cards
   updateCard("card-links","tick-links","links","links-l1",
     urls.length ? urls.length+" link(s)" : "No links found",
     "links-l2", urls.length ? "Analysed" : "Email contains no URLs",
@@ -182,7 +174,6 @@ function processEmail(item, body) {
     "Checking...", ""
   );
 
-  // ⭐ FULL currentScanData (needed for reporting)
   currentScanData = {
     sender: senderEmail,
     subject: subject,
@@ -232,11 +223,12 @@ function callBackend(bodyText, hasAttachment, senderEmail, subject) {
     .then(r => r.json())
     .then(d => {
       const label = (d.label || "unknown").toLowerCase();
-      renderResult(label);
+      const backendScore = d.score || 0; // ⭐ REAL ML SCORE
+      renderResult(label, backendScore);
       logScan(label, senderEmail, subject, bodyText);
     })
     .catch(() => {
-      renderResult("ham");
+      renderResult("ham", 0.10);
       logScan("ham", senderEmail, subject, bodyText);
     });
 }
@@ -298,25 +290,37 @@ window.confirmReport = confirmReport;
 //  RENDER RESULT + HELPERS
 // =========================
 
-function renderResult(label) {
-  const score = RISK_SCORES[label] || 50;
+function renderResult(label, backendScore = null) {
+
+  // ⭐ REAL SCORE (0–100)
+  const score = backendScore !== null
+    ? Math.round(backendScore * 100)
+    : 50;
+
   const col = ARC_COLORS[label] || ARC_COLORS.ham;
   const vd = VERDICTS[label] || { t: "Scanned", c: "#94a3b8" };
   const segs = SEG_COUNTS[label] || 1;
 
+  // Arc animation
   const arc = document.getElementById("risk-arc");
   if (arc) arc.style.strokeDashoffset = (ARC_LEN - (score/100)*ARC_LEN).toFixed(1);
 
   setArcColor(label);
 
+  // ⭐ SCORE NUMBER ALWAYS WHITE
   const num = document.getElementById("score-number");
-  if (num) { num.textContent = score; num.setAttribute("fill", col.s); }
+  if (num) {
+    num.textContent = score;
+    num.setAttribute("fill", "#ffffff");
+  }
 
+  // Segments
   for (let i = 1; i <= 5; i++) {
     const s = document.getElementById("seg" + i);
     if (s) { i <= segs ? s.classList.add("active") : s.classList.remove("active"); }
   }
 
+  // Verdict
   const verdict = document.getElementById("verdict");
   if (verdict) { verdict.textContent = vd.t; verdict.style.color = vd.c; }
 
