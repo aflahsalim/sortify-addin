@@ -239,6 +239,7 @@ function logScan(label, senderEmail, subject, bodyText) {
 // ───────────────────────────────────────────────────────────────
 // REPORT EMAIL (UPDATED)
 // ───────────────────────────────────────────────────────────────
+
 function reportEmail() {
   const overlay = document.getElementById("overlay");
   if (!overlay) return;
@@ -277,7 +278,7 @@ function confirmReport() {
     });
 }
 
-// ensure functions are callable from HTML onclick=""
+// Make sure HTML onclick="" can call these
 window.reportEmail = reportEmail;
 window.closeConfirm = closeConfirm;
 window.confirmReport = confirmReport;
