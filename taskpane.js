@@ -240,28 +240,47 @@ function logScan(label, senderEmail, subject, bodyText) {
 // REPORT EMAIL (UPDATED)
 // ───────────────────────────────────────────────────────────────
 function reportEmail() {
-  if (!currentScanData) return;
-  document.getElementById("overlay").classList.remove("hidden");
+  const overlay = document.getElementById("overlay");
+  if (!overlay) return;
+  overlay.classList.remove("hidden");
 }
 
 function closeConfirm() {
-  document.getElementById("overlay").classList.add("hidden");
+  const overlay = document.getElementById("overlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
 }
 
 function confirmReport() {
-  closeConfirm();
+  const overlay = document.getElementById("overlay");
+  if (overlay) overlay.classList.add("hidden");
+
   const btn = document.getElementById("report-btn");
-  btn.disabled = true;
-  btn.textContent = "Sending...";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+  }
 
   fetch(BACKEND + "/log-scan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.assign({}, currentScanData, { reported: true }))
+    body: JSON.stringify(Object.assign({}, currentScanData || {}, { reported: true }))
   })
-  .then(() => { btn.textContent = "✓ Reported to Sortify"; })
-  .catch(() => { btn.textContent = "Mark as Suspicious"; btn.disabled = false; });
+    .then(() => {
+      if (btn) btn.textContent = "✓ Reported to Sortify";
+    })
+    .catch(() => {
+      if (btn) {
+        btn.textContent = "Mark as Suspicious";
+        btn.disabled = false;
+      }
+    });
 }
+
+// ensure functions are callable from HTML onclick=""
+window.reportEmail = reportEmail;
+window.closeConfirm = closeConfirm;
+window.confirmReport = confirmReport;
 
 // ───────────────────────────────────────────────────────────────
 // RENDER RESULT
