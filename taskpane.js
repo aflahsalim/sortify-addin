@@ -11,7 +11,6 @@ const URGENCY_PHRASES = [
   "security alert","update your password","will be terminated","limited time"
 ];
 
-// ⭐ REMOVED FIXED SCORES — now dynamic
 const SEG_COUNTS = { ham: 1, support: 2, spam: 4, phishing: 5 };
 
 const ARC_COLORS = {
@@ -123,23 +122,14 @@ function startClassification() {
 
 function processEmail(item, body) {
 
-  // ⭐ UNIVERSAL SENDER EXTRACTION (New Outlook FIX)
   let senderEmail = "";
   try {
-    if (item?.from?.emailAddress) {
-      senderEmail = item.from.emailAddress;
-    } else if (item?.from?.emailAddress?.address) {
-      senderEmail = item.from.emailAddress.address;
-    } else if (item?.sender?.emailAddress) {
-      senderEmail = item.sender.emailAddress;
-    } else if (typeof item?.from === "string") {
-      senderEmail = item.from;
-    } else if (typeof item?.sender === "string") {
-      senderEmail = item.sender;
-    }
-  } catch (e) {
-    senderEmail = "";
-  }
+    if (item?.from?.emailAddress) senderEmail = item.from.emailAddress;
+    else if (item?.from?.emailAddress?.address) senderEmail = item.from.emailAddress.address;
+    else if (item?.sender?.emailAddress) senderEmail = item.sender.emailAddress;
+    else if (typeof item?.from === "string") senderEmail = item.from;
+    else if (typeof item?.sender === "string") senderEmail = item.sender;
+  } catch (e) { senderEmail = ""; }
 
   const subject = item?.subject || "";
   const atts = Array.isArray(item.attachments) ? item.attachments : [];
@@ -223,14 +213,28 @@ function callBackend(bodyText, hasAttachment, senderEmail, subject) {
     .then(r => r.json())
     .then(d => {
       const label = (d.label || "unknown").toLowerCase();
-      const backendScore = d.score || 0; // ⭐ REAL ML SCORE
-      renderResult(label, backendScore);
+      const backendScore = d.score || 0;
+      const riskScore = computeRisk(label, backendScore);
+      renderResult(label, riskScore);
       logScan(label, senderEmail, subject, bodyText);
     })
     .catch(() => {
-      renderResult("ham", 0.10);
+      renderResult("ham", 10);
       logScan("ham", senderEmail, subject, bodyText);
     });
+}
+
+
+// =========================
+//  RISK SCORE TRANSFORM
+// =========================
+
+function computeRisk(label, backendScore) {
+  if (label === "phishing") return Math.round(80 + backendScore * 20);
+  if (label === "spam")     return Math.round(50 + backendScore * 30);
+  if (label === "support")  return Math.round(20 + backendScore * 20);
+  if (label === "ham")      return Math.round(5  + backendScore * 10);
+  return 50;
 }
 
 
@@ -287,40 +291,31 @@ window.confirmReport = confirmReport;
 
 
 // =========================
-//  RENDER RESULT + HELPERS
+//  RENDER RESULT
 // =========================
 
-function renderResult(label, backendScore = null) {
-
-  // ⭐ REAL SCORE (0–100)
-  const score = backendScore !== null
-    ? Math.round(backendScore * 100)
-    : 50;
+function renderResult(label, score) {
 
   const col = ARC_COLORS[label] || ARC_COLORS.ham;
   const vd = VERDICTS[label] || { t: "Scanned", c: "#94a3b8" };
   const segs = SEG_COUNTS[label] || 1;
 
-  // Arc animation
   const arc = document.getElementById("risk-arc");
   if (arc) arc.style.strokeDashoffset = (ARC_LEN - (score/100)*ARC_LEN).toFixed(1);
 
   setArcColor(label);
 
-  // ⭐ SCORE NUMBER ALWAYS WHITE
   const num = document.getElementById("score-number");
   if (num) {
     num.textContent = score;
     num.setAttribute("fill", "#ffffff");
   }
 
-  // Segments
   for (let i = 1; i <= 5; i++) {
     const s = document.getElementById("seg" + i);
     if (s) { i <= segs ? s.classList.add("active") : s.classList.remove("active"); }
   }
 
-  // Verdict
   const verdict = document.getElementById("verdict");
   if (verdict) { verdict.textContent = vd.t; verdict.style.color = vd.c; }
 
