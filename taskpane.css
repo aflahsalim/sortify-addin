@@ -73,6 +73,11 @@ body {
   text-transform: uppercase;
 }
 
+#score-number {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
 /* Segmented colour bar */
 .seg-bar {
   display: flex;
