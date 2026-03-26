@@ -65,10 +65,10 @@ function resetUI() {
   const vd = document.getElementById("verdict");
   if (vd) { vd.textContent = "Analysing..."; vd.style.color = "var(--muted)"; }
 
-  resetCard("card-sender",  "tick-sender",  "sender",     "sender-l1",  "—", "sender-l2",  "");
-  resetCard("card-links",   "tick-links",   "links",      "links-l1",   "—", "links-l2",   "");
-  resetCard("card-attach",  "tick-attach",  "attachment", "attach-l1",  "—", "attach-l2",  "");
-  resetCard("card-urgency", "tick-urgency", "urgency",    "urgency-l1", "—", "urgency-l2", "");
+  resetCard("card-sender","tick-sender","sender","sender-l1","—","sender-l2","");
+  resetCard("card-links","tick-links","links","links-l1","—","links-l2","");
+  resetCard("card-attach","tick-attach","attachment","attach-l1","—","attach-l2","");
+  resetCard("card-urgency","tick-urgency","urgency","urgency-l1","—","urgency-l2","");
 
   const btn = document.getElementById("report-btn");
   if (btn) { btn.disabled = false; btn.textContent = "Mark as Suspicious"; }
@@ -156,11 +156,19 @@ function processEmail(item, body) {
     "Checking...", ""
   );
 
+  // ⭐ FULL currentScanData restored (fixes report popup)
   currentScanData = {
     sender: senderEmail,
     subject: subject,
-    body_preview: body.substring(0, 300),
-    label: "unknown"
+    label: "unknown",
+
+    sender_risk: "pending",
+    auth_result: "pending",
+    files_result: atts.length ? "Attachments found" : "No threats found",
+    urgency_result: matched.length ? "Urgency detected" : "Normal behaviour",
+    attachment_count: atts.length,
+
+    body_preview: body.substring(0, 300)
   };
 
   checkAuth(item, senderEmail);
@@ -226,6 +234,33 @@ function logScan(label, senderEmail, subject, bodyText) {
       body_preview: bodyText.substring(0, 300)
     })
   }).catch(() => {});
+}
+
+// ───────────────────────────────────────────────────────────────
+// REPORT EMAIL (UPDATED)
+// ───────────────────────────────────────────────────────────────
+function reportEmail() {
+  if (!currentScanData) return;
+  document.getElementById("overlay").classList.remove("hidden");
+}
+
+function closeConfirm() {
+  document.getElementById("overlay").classList.add("hidden");
+}
+
+function confirmReport() {
+  closeConfirm();
+  const btn = document.getElementById("report-btn");
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+
+  fetch(BACKEND + "/log-scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(Object.assign({}, currentScanData, { reported: true }))
+  })
+  .then(() => { btn.textContent = "✓ Reported to Sortify"; })
+  .catch(() => { btn.textContent = "Mark as Suspicious"; btn.disabled = false; });
 }
 
 // ───────────────────────────────────────────────────────────────
